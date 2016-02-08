@@ -69,7 +69,7 @@ public class MessageFormatTest
         assertSerializes( new FailureMessage( Status.General.UnknownFailure, "Err" ) );
         assertSerializes( new IgnoredMessage() );
         assertSerializes( new ResetMessage() );
-        assertSerializes( new InitMessage( "MyClient/1.0" ) );
+        assertSerializes( new InitMessage( "MyClient/1.0", "anonymous" ) );
     }
 
     @Test

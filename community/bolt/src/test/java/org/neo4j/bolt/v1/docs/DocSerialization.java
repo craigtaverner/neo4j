@@ -165,7 +165,7 @@ public class DocSerialization
                                 (String) meta.get( "code" ) ), (String) meta.get( "message" ) );
                         break;
                     case "INIT":
-                        writer.handleInitMessage( (String) args.get( 0 ) );
+                        writer.handleInitMessage( (String) args.get( 0 ), (String) args.get( 1 ) );
                         break;
                     case "RESET":
                         writer.handleResetMessage();

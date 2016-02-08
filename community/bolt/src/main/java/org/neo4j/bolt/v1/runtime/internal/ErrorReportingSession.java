@@ -53,7 +53,7 @@ public class ErrorReportingSession implements Session
     }
 
     @Override
-    public <A> void init( String clientName, A attachment, Callback<Void,A> callback )
+    public <A> void init( String clientName, String credentials, A attachment, Callback<Void,A> callback )
     {
         reportError( attachment, callback );
     }

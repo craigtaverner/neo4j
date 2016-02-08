@@ -47,7 +47,12 @@ public class Messages
 
     public static Message init( String clientName )
     {
-        return new InitMessage( clientName );
+        return new InitMessage( clientName, "anonymous" );
+    }
+
+    public static Message init( String clientName, String credentials )
+    {
+        return new InitMessage( clientName, credentials );
     }
 
     public static Message pullAll()

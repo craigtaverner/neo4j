@@ -86,8 +86,8 @@ public class StateMachineErrorTest
     private SessionStateMachine newIdleMachine()
     {
         SessionStateMachine machine = new SessionStateMachine( new UsageData(), db, txBridge, runner, NullLogService
-                .getInstance() );
-        machine.init( "FunClient", null, Session.Callback.NO_OP );
+                .getInstance(), mock(org.apache.shiro.mgt.SecurityManager.class) );
+        machine.init( "FunClient", "", null, Session.Callback.NO_OP );
         return machine;
     }
 
@@ -176,7 +176,7 @@ public class StateMachineErrorTest
         assertThat( machine.state(), equalTo( SessionStateMachine.State.ERROR ) );
         assertThat( pulling.next(), SessionMatchers.ignored() );
 
-        machine.init( "", null, initializing );
+        machine.init( "", "", null, initializing );
         assertThat( machine.state(), equalTo( SessionStateMachine.State.ERROR ) );
         assertThat( initializing.next(), SessionMatchers.ignored() );
 
@@ -216,7 +216,7 @@ public class StateMachineErrorTest
         // Given
         RecordingCallback messages = new RecordingCallback();
         SessionStateMachine machine = new SessionStateMachine( new UsageData(), db, txBridge, runner, NullLogService
-                .getInstance() );
+                .getInstance(), mock(org.apache.shiro.mgt.SecurityManager.class) );
 
         // When
         machine.run( "RETURN 1", null, null, messages );

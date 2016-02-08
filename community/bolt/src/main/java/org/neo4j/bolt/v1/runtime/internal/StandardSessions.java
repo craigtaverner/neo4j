@@ -19,6 +19,7 @@
  */
 package org.neo4j.bolt.v1.runtime.internal;
 
+import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.neo4j.bolt.v1.runtime.Session;
 import org.neo4j.bolt.v1.runtime.Sessions;
 import org.neo4j.kernel.GraphDatabaseAPI;
@@ -39,6 +40,7 @@ public class StandardSessions extends LifecycleAdapter implements Sessions
     private final LifeSupport life = new LifeSupport();
     private final UsageData usageData;
     private final LogService logging;
+    private org.apache.shiro.mgt.SecurityManager securityManager;
 
     private CypherStatementRunner statementRunner;
     private ThreadToStatementContextBridge txBridge;
@@ -50,6 +52,7 @@ public class StandardSessions extends LifecycleAdapter implements Sessions
         this.logging = logging;
         // TODO: Introduce a clean SPI rather than use GDS
         this.txBridge = gds.getDependencyResolver().resolveDependency( ThreadToStatementContextBridge.class );
+        securityManager = new IniSecurityManagerFactory( "classpath:shiro.ini" ).getInstance();
     }
 
     @Override
@@ -81,6 +84,6 @@ public class StandardSessions extends LifecycleAdapter implements Sessions
     @Override
     public Session newSession( boolean isEncrypted )
     {
-        return new SessionStateMachine( usageData, gds, txBridge, statementRunner, logging );
+        return new SessionStateMachine( usageData, gds, txBridge, statementRunner, logging, securityManager );
     }
 }

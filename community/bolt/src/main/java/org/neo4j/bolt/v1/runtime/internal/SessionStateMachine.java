@@ -25,9 +25,7 @@ import java.util.UUID;
 import org.neo4j.bolt.v1.runtime.Session;
 import org.neo4j.bolt.v1.runtime.spi.RecordStream;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.TopLevelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.impl.logging.LogService;
@@ -36,6 +34,10 @@ import org.neo4j.bolt.v1.runtime.StatementMetadata;
 import org.neo4j.bolt.v1.runtime.spi.StatementRunner;
 import org.neo4j.udc.UsageData;
 import org.neo4j.udc.UsageDataKeys;
+
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 
 /**
  * State-machine based implementation of {@link Session}. With this approach,
@@ -412,6 +414,8 @@ public class SessionStateMachine implements Session, SessionState
     private final ErrorReporter errorReporter;
     private final Log log;
     private final String id;
+    private final org.apache.shiro.mgt.SecurityManager securityManager;
+    private Subject user;
 
     /** A re-usable statement metadata instance that always represents the currently running statement */
     private final StatementMetadata currentStatementMetadata = new StatementMetadata()
@@ -451,7 +455,7 @@ public class SessionStateMachine implements Session, SessionState
     // Note: We shouldn't depend on GDB like this, I think. Better to define an SPI that we can shape into a spec
     // for exactly the kind of underlying support the state machine needs.
     public SessionStateMachine( UsageData usageData, GraphDatabaseService db, ThreadToStatementContextBridge txBridge,
-                                StatementRunner engine, LogService logging )
+            StatementRunner engine, LogService logging, SecurityManager securityManager )
     {
         this.usageData = usageData;
         this.db = db;
@@ -460,6 +464,8 @@ public class SessionStateMachine implements Session, SessionState
         this.errorReporter = new ErrorReporter( logging, this.usageData );
         this.log = logging.getInternalLog( getClass() );
         this.id = UUID.randomUUID().toString();
+        this.securityManager = securityManager;
+        this.user = new Subject.Builder(securityManager).buildSubject();
     }
 
     @Override
@@ -469,14 +475,45 @@ public class SessionStateMachine implements Session, SessionState
     }
 
     @Override
-    public <A> void init( String clientName, A attachment, Callback<Void,A> callback )
+    public <A> void init( String clientName, String credentials, A attachment, Callback<Void,A> callback )
     {
         before( attachment, callback );
         try
         {
+            login(credentials);
             state = state.init( this, clientName );
         }
         finally { after(); }
+    }
+
+    private void login( String credentials )
+    {
+        if ( credentials.equalsIgnoreCase( "anonymous" ) || credentials.equalsIgnoreCase( "" ) )
+        {
+
+        }
+        else
+        {
+            String[] fields = credentials.split( "\\/" );
+            String authType = fields[0];
+            String[] tokens = (fields.length > 1) ? fields[1].split( "\\:" ) : new String[]{};
+            if ( authType.equalsIgnoreCase( "login" ) )
+            {
+                try
+                {
+                    UsernamePasswordToken token = new UsernamePasswordToken( tokens[0], tokens[1] );
+                    user = securityManager.login( user, token );
+                }
+                catch ( Exception e )
+                {
+                    error( new Neo4jError( Status.Request.Invalid, "Failed to authenticate: " + e.getMessage(), e ) );
+                }
+            }
+            else
+            {
+                error( new Neo4jError( Status.Request.Invalid, "Invalid authentication type: " + authType, null ) );
+            }
+        }
     }
 
     @Override
@@ -486,7 +523,14 @@ public class SessionStateMachine implements Session, SessionState
         before( attachment, callback );
         try
         {
-            state = state.runStatement( this, statement, params );
+            if ( user.isAuthenticated() )
+            {
+                state = state.runStatement( this, statement, params );
+            }
+            else
+            {
+                error( new Neo4jError( Status.Request.Invalid, "Not authenticated", null ) );
+            }
         }
         finally { after(); }
     }
