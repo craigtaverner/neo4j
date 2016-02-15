@@ -19,12 +19,15 @@
  */
 package org.neo4j.cypher.javacompat.internal;
 
+import java.net.URL;
+
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.security.URLAccessValidationError;
 import org.neo4j.kernel.GraphDatabaseAPI;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.AccessMode;
@@ -73,6 +76,12 @@ public class GraphDatabaseCypherService implements GraphDatabaseQueryService
     public Transaction beginTx()
     {
         return graph.beginTx();
+    }
+
+    @Override
+    public URL validateURLAccess( URL url ) throws URLAccessValidationError
+    {
+        return graph.validateURLAccess( url );
     }
 
     @Override

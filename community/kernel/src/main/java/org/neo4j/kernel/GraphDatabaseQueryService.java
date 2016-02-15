@@ -19,11 +19,14 @@
  */
 package org.neo4j.kernel;
 
+import java.net.URL;
+
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.security.URLAccessValidationError;
 
 /*
  * This is a trimmed down version of GraphDatabaseService and GraphDatabaseAPI, limited to a subset of functions needed
@@ -31,11 +34,12 @@ import org.neo4j.graphdb.Transaction;
  */
 public interface GraphDatabaseQueryService
 {
-    public DependencyResolver getDependencyResolver();
-    public Node createNode();
-    public Node createNode( Label... labels );
-    public Node getNodeById(long id);
-    public Relationship getRelationshipById(long id);
-    public Transaction beginTx();
-    public GraphDatabaseAPI getGraphDatabaseService();
+    DependencyResolver getDependencyResolver();
+    Node createNode();
+    Node createNode( Label... labels );
+    Node getNodeById(long id);
+    Relationship getRelationshipById(long id);
+    Transaction beginTx();
+    URL validateURLAccess( URL url ) throws URLAccessValidationError;
+    GraphDatabaseAPI getGraphDatabaseService();
 }
