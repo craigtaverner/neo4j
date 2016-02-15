@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.neo4j.bolt.v1.runtime.Session;
 import org.neo4j.bolt.v1.runtime.spi.RecordStream;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.api.AccessMode;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
@@ -484,6 +485,29 @@ public class SessionStateMachine implements Session, SessionState
             state = state.init( this, clientName );
         }
         finally { after(); }
+    }
+
+    private AccessMode getUserAccess( )
+    {
+        if ( user.isAuthenticated() )
+        {
+            if ( user.hasRole( "schema" ) )
+            {
+                return AccessMode.FULL;
+            }
+            else if ( user.hasRole( "write" ) )
+            {
+                return AccessMode.WRITE;
+            }
+            else
+            {
+                return AccessMode.READ;
+            }
+        }
+        else
+        {
+            return AccessMode.NONE;
+        }
     }
 
     private void login( String credentials )

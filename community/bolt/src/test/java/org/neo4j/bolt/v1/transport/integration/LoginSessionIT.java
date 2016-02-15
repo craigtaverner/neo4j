@@ -131,7 +131,7 @@ public class LoginSessionIT
         // Then
         assertThat( client, eventuallyRecieves( new byte[]{0, 0, 0, 1} ) );
         assertThat( client, eventuallyRecieves(
-                msgFailure( Status.Request.Invalid, "Failed to authenticate: The credentials provided for account " +
+                msgFailure( Status.Request.Invalid, "Failed to authenticate: Submitted credentials for token " +
                                                     "[org.apache.shiro.authc.UsernamePasswordToken - neo4j, " +
                                                     "rememberMe=false] did not match the expected credentials." ),
                 msgFailure( Status.Request.Invalid, "Not authenticated" ) ) );
