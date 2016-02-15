@@ -19,8 +19,8 @@
  */
 package org.neo4j.cypher.internal
 
-import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.cypher.ExecutionEngine
+import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.logging.{NullLogProvider, LogProvider}
 
 /**
@@ -28,7 +28,7 @@ import org.neo4j.logging.{NullLogProvider, LogProvider}
  * API to REST server
  *
  */
-class ServerExecutionEngine(graph: GraphDatabaseService, logProvider: LogProvider = NullLogProvider.getInstance)
+class ServerExecutionEngine(graph: GraphDatabaseQueryService, logProvider: LogProvider = NullLogProvider.getInstance)
   extends ExecutionEngine(graph, logProvider) {
 
   def isPeriodicCommit(query: String) = parseQuery(query).isPeriodicCommit

@@ -35,7 +35,8 @@ import org.neo4j.cypher.internal.compiler.v3_0.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_0.ast.SignedDecimalIntegerLiteral
 import org.neo4j.cypher.internal.frontend.v3_0.symbols
 import org.neo4j.cypher.internal.frontend.v3_0.test_helpers.CypherFunSuite
-import org.neo4j.kernel.GraphDatabaseAPI
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
+import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.kernel.api._
 import org.neo4j.kernel.impl.core.{NodeManager, NodeProxy}
 import org.neo4j.test.TestGraphDatabaseFactory
@@ -93,7 +94,7 @@ class CompiledProfilingTest extends CypherFunSuite with CodeGenSugar {
 
   test("should profile hash join") {
     //given
-    val graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase().asInstanceOf[GraphDatabaseAPI]
+    val graphDb = new GraphDatabaseCypherService(new TestGraphDatabaseFactory().newImpermanentDatabase())
     val tx = graphDb.beginTx()
     graphDb.createNode()
     graphDb.createNode()

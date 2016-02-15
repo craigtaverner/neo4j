@@ -21,8 +21,10 @@ package org.neo4j.cypher.docgen
 
 import org.neo4j.cypher.internal.RewindableExecutionResult
 import org.neo4j.cypher.internal.compiler.v3_0.executionplan.InternalExecutionResult
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb.index.Index
 import org.junit.Test
+import org.neo4j.kernel.GraphDatabaseQueryService
 import scala.collection.JavaConverters._
 import java.io.{StringWriter, File, PrintWriter}
 import org.neo4j.graphdb._
@@ -30,12 +32,10 @@ import org.neo4j.visualization.asciidoc.AsciidocHelper
 import org.neo4j.cypher.javacompat.GraphImpl
 import org.neo4j.cypher._
 import export.{DatabaseSubGraph, SubGraphExporter}
-import org.neo4j.test.{ImpermanentGraphDatabase, TestGraphDatabaseFactory, GraphDescription}
+import org.neo4j.test.{TestGraphDatabaseFactory, GraphDescription}
 import org.scalatest.Assertions
 import org.neo4j.test.AsciiDocGenerator
 import org.neo4j.test.GraphDatabaseServiceCleaner.cleanDatabaseContent
-import org.neo4j.kernel.GraphDatabaseAPI
-import org.neo4j.tooling.GlobalGraphOperations
 import org.neo4j.cypher.internal.compiler.v3_0.prettifier.Prettifier
 
 /*
@@ -43,7 +43,7 @@ Use this base class for tests that are more flowing text with queries intersecte
  */
 abstract class ArticleTest extends Assertions with DocumentationHelper {
 
-  var db: GraphDatabaseAPI = null
+  var db: GraphDatabaseQueryService = null
   implicit var engine: ExecutionEngine = null
   var nodes: Map[String, Long] = null
   var nodeIndex: Index[Node] = null
@@ -123,9 +123,9 @@ abstract class ArticleTest extends Assertions with DocumentationHelper {
     if (emptyGraph) {
       val db = new TestGraphDatabaseFactory().
         newImpermanentDatabaseBuilder().
-        newGraphDatabase().asInstanceOf[GraphDatabaseAPI]
+        newGraphDatabase()
       try {
-        val engine = new ExecutionEngine(db)
+        val engine = new ExecutionEngine(new GraphDatabaseCypherService(db))
         val result = executeQuery(query)(engine)
         testAssertions(result)
         result.dumpToString()
@@ -146,7 +146,7 @@ abstract class ArticleTest extends Assertions with DocumentationHelper {
       val create = if (!empty) {
         db.inTx {
           val out = new StringWriter()
-          new SubGraphExporter(DatabaseSubGraph.from(db)).export(new PrintWriter(out))
+          new SubGraphExporter(DatabaseSubGraph.from(db.getGraphDatabaseService)).export(new PrintWriter(out))
           out.toString
         }
       } else "match n-[r?]->() delete n, r;"
@@ -220,9 +220,9 @@ abstract class ArticleTest extends Assertions with DocumentationHelper {
 
   private def init() = {
     dir = createDir(section)
-    db = new TestGraphDatabaseFactory().
+    db = new GraphDatabaseCypherService(new TestGraphDatabaseFactory().
       newImpermanentDatabaseBuilder().
-      newGraphDatabase().asInstanceOf[GraphDatabaseAPI]
+      newGraphDatabase())
 
     cleanDatabaseContent( db.asInstanceOf[GraphDatabaseService] )
 
@@ -232,7 +232,7 @@ abstract class ArticleTest extends Assertions with DocumentationHelper {
       val g = new GraphImpl(graphDescription.toArray[String])
       val description = GraphDescription.create(g)
 
-      nodes = description.create(db).asScala.map {
+      nodes = description.create(db.getGraphDatabaseService).asScala.map {
         case (name, node) => name -> node.getId
       }.toMap
 

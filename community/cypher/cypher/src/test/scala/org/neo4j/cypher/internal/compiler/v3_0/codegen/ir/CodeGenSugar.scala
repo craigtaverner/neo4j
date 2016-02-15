@@ -27,14 +27,14 @@ import org.neo4j.cypher.internal.compiler.v3_0.executionplan.ExecutionPlanBuilde
 import org.neo4j.cypher.internal.compiler.v3_0.executionplan._
 import org.neo4j.cypher.internal.compiler.v3_0.planDescription.{Id, InternalPlanDescription}
 import org.neo4j.cypher.internal.compiler.v3_0.planner.logical.plans.LogicalPlan
-import org.neo4j.cypher.internal.compiler.v3_0.spi.{GraphStatistics, InternalResultRow, InternalResultVisitor, PlanContext, QueryContext}
+import org.neo4j.cypher.internal.compiler.v3_0.spi._
 import org.neo4j.cypher.internal.compiler.v3_0.{CostBasedPlannerName, ExecutionMode, NormalMode, TaskCloser}
 import org.neo4j.cypher.internal.frontend.v3_0.SemanticTable
 import org.neo4j.cypher.internal.spi.v3_0.TransactionBoundQueryContext.IndexSearchMonitor
 import org.neo4j.cypher.internal.spi.v3_0.{GeneratedQueryStructure, TransactionBoundQueryContext}
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.helpers.Clock
-import org.neo4j.kernel.GraphDatabaseAPI
+import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.kernel.api.Statement
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge
 import org.scalatest.mock.MockitoSugar
@@ -52,7 +52,7 @@ trait CodeGenSugar extends MockitoSugar {
   }
 
   def compileAndExecute(plan: LogicalPlan,
-                        graphDb: GraphDatabaseAPI,
+                        graphDb: GraphDatabaseQueryService,
                         mode: ExecutionMode = NormalMode,
                         params: Map[String, AnyRef] = Map.empty,
                         taskCloser: TaskCloser = new TaskCloser) = {
@@ -60,7 +60,7 @@ trait CodeGenSugar extends MockitoSugar {
   }
 
   def executeCompiled(plan: CompiledPlan,
-                      graphDb: GraphDatabaseAPI,
+                      graphDb: GraphDatabaseQueryService,
                       mode: ExecutionMode = NormalMode,
                       params: Map[String, AnyRef] = Map.empty,
                       taskCloser: TaskCloser = new TaskCloser): InternalExecutionResult = {

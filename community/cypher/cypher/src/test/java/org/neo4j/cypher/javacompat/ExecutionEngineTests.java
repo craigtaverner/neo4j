@@ -24,6 +24,8 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
+
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService;
 import org.neo4j.test.DatabaseRule;
 import org.neo4j.test.ImpermanentDatabaseRule;
 
@@ -38,7 +40,7 @@ public class ExecutionEngineTests
     @Test
     public void shouldConvertListsAndMapsWhenPassingFromScalaToJava() throws Exception
     {
-        ExecutionEngine executionEngine = new ExecutionEngine( database.getGraphDatabaseService() );
+        ExecutionEngine executionEngine = new ExecutionEngine( new GraphDatabaseCypherService(database.getGraphDatabaseService()) );
 
         ExecutionResult result = executionEngine.execute( "RETURN { key : 'Value' , " +
                 "collectionKey: [{ inner: 'Map1' }, { inner: 'Map2' }]}" );

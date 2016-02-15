@@ -28,10 +28,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.neo4j.cypher.javacompat.ExecutionResult;
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Pair;
+import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.test.EmbeddedDatabaseRule;
 
 import static java.lang.String.format;
@@ -52,6 +54,7 @@ public class ManyMergesStressTest
     public void shouldWorkFine() throws IOException
     {
         GraphDatabaseService db = dbRule.getGraphDatabaseService();
+        GraphDatabaseQueryService mad = new GraphDatabaseCypherService( db );
 
         Label person = Label.label( "Person" );
 
@@ -79,7 +82,7 @@ public class ManyMergesStressTest
             tx.success();
         }
 
-        org.neo4j.cypher.javacompat.ExecutionEngine engine = new org.neo4j.cypher.javacompat.ExecutionEngine( db );
+        org.neo4j.cypher.javacompat.ExecutionEngine engine = new org.neo4j.cypher.javacompat.ExecutionEngine( mad );
 
         for( int count = 0; count < TRIES; count++ )
         {

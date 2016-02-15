@@ -42,7 +42,7 @@ import org.neo4j.graphalgo.impl.path.ShortestPath.ShortestPathPredicate
 import org.neo4j.graphdb.RelationshipType._
 import org.neo4j.graphdb._
 import org.neo4j.graphdb.traversal.{Evaluators, TraversalDescription, Uniqueness}
-import org.neo4j.kernel.GraphDatabaseAPI
+import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.kernel.api._
 import org.neo4j.kernel.api.constraints.{NodePropertyExistenceConstraint, RelationshipPropertyExistenceConstraint, UniquenessConstraint}
 import org.neo4j.kernel.api.exceptions.ProcedureException
@@ -56,7 +56,7 @@ import org.neo4j.graphdb.security.URLAccessValidationError
 import scala.collection.Iterator
 import scala.collection.JavaConverters._
 
-final class TransactionBoundQueryContext(graph: GraphDatabaseAPI,
+final class TransactionBoundQueryContext(graph: GraphDatabaseQueryService,
                                          var tx: Transaction,
                                          val isTopLevelTx: Boolean,
                                          initialStatement: Statement)(implicit indexSearchMonitor: IndexSearchMonitor)
@@ -349,13 +349,14 @@ final class TransactionBoundQueryContext(graph: GraphDatabaseAPI,
       case e: NotFoundException => throw new EntityNotFoundException(s"Node with id $id", e)
     }
 
-    override def all: Iterator[Node] = graph.getAllNodes.iterator().asScala
+    override def all: Iterator[Node] =
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().nodesGetAll())(getById)
 
     override def indexGet(name: String, key: String, value: Any): Iterator[Node] =
-      graph.index.forNodes(name).get(key, value).iterator().asScala
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().nodeLegacyIndexGet(name, key, value))(getById)
 
     override def indexQuery(name: String, query: Any): Iterator[Node] =
-      graph.index.forNodes(name).query(query).iterator().asScala
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().nodeLegacyIndexQuery(name, query))(getById)
 
     override def isDeleted(n: Node): Boolean =
       kernelStatement.hasTxStateWithChanges && kernelStatement.txState().nodeIsDeletedInThisTx(n.getId)
@@ -395,13 +396,15 @@ final class TransactionBoundQueryContext(graph: GraphDatabaseAPI,
       case e: NotFoundException => throw new EntityNotFoundException(s"Relationship with id $id", e)
     }
 
-    override def all: Iterator[Relationship] = graph.getAllRelationships.iterator().asScala
+    override def all: Iterator[Relationship] = {
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().relationshipsGetAll())(getById)
+    }
 
     override def indexGet(name: String, key: String, value: Any): Iterator[Relationship] =
-      graph.index.forRelationships(name).get(key, value).iterator().asScala
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().relationshipLegacyIndexGet(name, key, value, -1, -1))(getById)
 
     override def indexQuery(name: String, query: Any): Iterator[Relationship] =
-      graph.index.forRelationships(name).query(query).iterator().asScala
+      JavaConversionSupport.mapToScalaENFXSafe(_statement.readOperations().relationshipLegacyIndexQuery(name, query, -1, -1))(getById)
 
     override def isDeleted(r: Relationship): Boolean =
       kernelStatement.hasTxStateWithChanges && kernelStatement.txState().relationshipIsDeletedInThisTx(r.getId)
@@ -478,7 +481,7 @@ final class TransactionBoundQueryContext(graph: GraphDatabaseAPI,
     _statement.schemaWriteOperations().constraintDrop(new RelationshipPropertyExistenceConstraint(relTypeId, propertyKeyId))
 
   override def getImportURL(url: URL): Either[String,URL] = graph match {
-    case db: GraphDatabaseAPI =>
+    case db: GraphDatabaseQueryService =>
       try {
         Right(db.validateURLAccess(url))
       } catch {
@@ -514,7 +517,7 @@ final class TransactionBoundQueryContext(graph: GraphDatabaseAPI,
       case (Some(min), Some(max)) => Evaluators.includingDepths(min, max)
     }
 
-    val baseTraversalDescription: TraversalDescription = graph.traversalDescription()
+    val baseTraversalDescription: TraversalDescription = graph.getGraphDatabaseService.traversalDescription()
       .evaluator(depthEval)
       .uniqueness(Uniqueness.RELATIONSHIP_PATH)
 

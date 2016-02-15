@@ -24,16 +24,18 @@ import java.nio.charset.StandardCharsets
 import org.neo4j.cypher.internal.RewindableExecutionResult
 import org.neo4j.cypher.internal.compiler.v3_0.executionplan.InternalExecutionResult
 import org.neo4j.cypher.internal.compiler.v3_0.prettifier.Prettifier
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb.index.Index
 import org.junit.Test
+import org.neo4j.kernel.GraphDatabaseQueryService
+import org.neo4j.kernel.api.AccessMode
 import scala.collection.JavaConverters._
 import java.io.{ File, FileOutputStream, OutputStreamWriter, PrintWriter, Writer }
 import org.neo4j.graphdb._
-import org.neo4j.kernel.GraphDatabaseAPI
 import org.neo4j.visualization.asciidoc.AsciidocHelper
 import org.neo4j.cypher.javacompat.GraphImpl
 import org.neo4j.cypher._
-import org.neo4j.test.{GraphDatabaseServiceCleaner, ImpermanentGraphDatabase, TestGraphDatabaseFactory,
+import org.neo4j.test.{GraphDatabaseServiceCleaner, TestGraphDatabaseFactory,
 GraphDescription}
 import org.scalatest.Assertions
 import org.junit.Before
@@ -45,7 +47,7 @@ Use this base class for refcard tests
  */
 abstract class RefcardTest extends Assertions with DocumentationHelper with GraphIcing {
 
-  var db: GraphDatabaseAPI = null
+  var db: GraphDatabaseQueryService = null
   implicit var engine: ExecutionEngine = null
   var nodes: Map[String, Long] = null
   var nodeIndex: Index[Node] = null
@@ -223,9 +225,9 @@ abstract class RefcardTest extends Assertions with DocumentationHelper with Grap
     dir = createDir(section)
     allQueriesWriter = new OutputStreamWriter(new FileOutputStream(new File("target/all-queries.asciidoc"), true),
       StandardCharsets.UTF_8)
-    db = newTestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase().asInstanceOf[GraphDatabaseAPI]
+    db = new GraphDatabaseCypherService(newTestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase())
 
-    GraphDatabaseServiceCleaner.cleanDatabaseContent(db)
+    GraphDatabaseServiceCleaner.cleanDatabaseContent(db.getGraphDatabaseService)
 
     db.inTx {
       nodeIndex = db.index().forNodes("nodeIndexName")
@@ -233,7 +235,7 @@ abstract class RefcardTest extends Assertions with DocumentationHelper with Grap
       val g = new GraphImpl(graphDescription.toArray[String])
       val description = GraphDescription.create(g)
 
-      nodes = description.create(db).asScala.map {
+      nodes = description.create(db.getGraphDatabaseService).asScala.map {
         case (name, node) => name -> node.getId
       }.toMap
 

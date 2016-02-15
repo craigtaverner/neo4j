@@ -19,6 +19,8 @@
  */
 package org.neo4j.cypher
 
+import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
+import org.neo4j.kernel.api.AccessMode
 import org.neo4j.kernel.api.exceptions.schema.{NoSuchIndexException, DropIndexFailureException}
 import java.util.concurrent.TimeUnit
 import java.io.{FileOutputStream, File}
@@ -96,7 +98,7 @@ class IndexOpAcceptanceTest extends ExecutionEngineFunSuite with QueryStatistics
   private def createDbWithFailedIndex: GraphDatabaseService = {
     new File("target/test-data/impermanent-db").deleteAll()
     var graph = new TestGraphDatabaseFactory().newEmbeddedDatabase("target/test-data/impermanent-db")
-    eengine = new ExecutionEngine(graph)
+    eengine = new ExecutionEngine(new GraphDatabaseCypherService(graph))
     execute("CREATE INDEX ON :Person(name)")
     execute("create (:Person {name:42})")
     val tx = graph.beginTx()
@@ -113,7 +115,7 @@ class IndexOpAcceptanceTest extends ExecutionEngineFunSuite with QueryStatistics
     stream.close()
 
     graph = new TestGraphDatabaseFactory().newEmbeddedDatabase("target/test-data/impermanent-db")
-    eengine = new ExecutionEngine(graph)
+    eengine = new ExecutionEngine(new GraphDatabaseCypherService(graph))
     graph
   }
 }
