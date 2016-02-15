@@ -25,7 +25,6 @@ import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
 import org.neo4j.graphdb.{Node, RelationshipType}
 import org.neo4j.kernel.GraphDatabaseQueryService
-import org.neo4j.kernel.api.AccessMode
 
 import scala.util.Random
 

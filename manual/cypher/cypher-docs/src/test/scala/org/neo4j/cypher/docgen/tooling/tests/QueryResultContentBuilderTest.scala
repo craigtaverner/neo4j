@@ -24,7 +24,6 @@ import org.neo4j.cypher.docgen.tooling._
 import org.neo4j.cypher.internal.RewindableExecutionResult
 import org.neo4j.cypher.internal.frontend.v3_0.test_helpers.CypherFunSuite
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
-import org.neo4j.kernel.api.AccessMode
 import org.neo4j.test.TestGraphDatabaseFactory
 
 class QueryResultContentBuilderTest extends CypherFunSuite {

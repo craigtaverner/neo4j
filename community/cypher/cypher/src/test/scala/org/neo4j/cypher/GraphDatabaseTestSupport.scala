@@ -29,7 +29,7 @@ import org.neo4j.cypher.internal.spi.v3_0.TransactionBoundQueryContext.IndexSear
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb._
 import org.neo4j.graphdb.config.Setting
-import org.neo4j.kernel.api.{AccessMode, DataWriteOperations, KernelAPI}
+import org.neo4j.kernel.api.{DataWriteOperations, KernelAPI}
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge
 import org.neo4j.kernel.{GraphDatabaseQueryService, monitoring}
 import org.neo4j.test.TestGraphDatabaseFactory

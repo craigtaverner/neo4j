@@ -26,7 +26,6 @@ import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.Result.{ResultRow, ResultVisitor}
 import org.neo4j.graphdb.factory.GraphDatabaseSettings
 import org.neo4j.kernel.GraphDatabaseQueryService
-import org.neo4j.kernel.api.AccessMode
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge
 import org.neo4j.test.TestGraphDatabaseFactory
 

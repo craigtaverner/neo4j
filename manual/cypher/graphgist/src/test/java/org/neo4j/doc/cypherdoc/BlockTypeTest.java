@@ -42,7 +42,6 @@ import org.neo4j.cypher.javacompat.internal.DocsExecutionEngine;
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.kernel.GraphDatabaseQueryService;
-import org.neo4j.kernel.api.AccessMode;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;

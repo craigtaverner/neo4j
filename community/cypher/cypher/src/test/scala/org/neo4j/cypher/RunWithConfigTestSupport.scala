@@ -22,7 +22,6 @@ package org.neo4j.cypher
 import java.util
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb.config.Setting
-import org.neo4j.kernel.api.AccessMode
 import org.neo4j.test.TestGraphDatabaseFactory
 
 import scala.collection.JavaConverters._

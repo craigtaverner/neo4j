@@ -34,7 +34,6 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.mockfs.EphemeralFileSystemAbstraction;
 import org.neo4j.kernel.GraphDatabaseQueryService;
-import org.neo4j.kernel.api.AccessMode;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 /**

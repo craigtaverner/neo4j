@@ -28,7 +28,6 @@ import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphdb.index.Index
 import org.junit.Test
 import org.neo4j.kernel.GraphDatabaseQueryService
-import org.neo4j.kernel.api.AccessMode
 import scala.collection.JavaConverters._
 import java.io.{ File, FileOutputStream, OutputStreamWriter, PrintWriter, Writer }
 import org.neo4j.graphdb._
