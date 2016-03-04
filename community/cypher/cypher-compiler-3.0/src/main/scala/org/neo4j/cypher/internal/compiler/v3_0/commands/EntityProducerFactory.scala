@@ -139,8 +139,10 @@ class EntityProducerFactory extends GraphElementPropertyFunctions {
 
     case (planContext, startItem @ SchemaIndex(variable, labelName, propertyName, AnyIndex, valueExp)) =>
 
+      println(s"\t\tGetting index: $variable:$labelName($propertyName)")
       val indexGetter = planContext.getIndexRule(labelName, propertyName)
 
+      println(s"\t\tFound index: $indexGetter")
       val index = indexGetter getOrElse
         (throw new IndexHintException(variable, labelName, propertyName, "No such index found."))
 

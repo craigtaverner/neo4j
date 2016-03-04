@@ -123,6 +123,8 @@ object exceptionHandlerFor3_0 extends MapToPublicExceptions[CypherException] {
     }
     catch {
       case e: InternalCypherException =>
+        println("\n\n\t\tUNEXPECTED EXCEPTION: " + e)
+        e.printStackTrace()
         f(e)
         throw e.mapToPublic(exceptionHandlerFor3_0)
       case e: Throwable =>
@@ -172,12 +174,16 @@ trait CompatibilityFor3_0 {
       def isPeriodicCommit = preparedQueryForV_3_0.map(_.isPeriodicCommit).getOrElse(false)
 
       def plan(transactionalContext: ExtendedTransactionalContext, tracer: CompilationPhaseTracer): (ExecutionPlan, Map[String, Any]) = exceptionHandlerFor3_0.runSafely {
+        println("\t\tGetting plan context ....")
         val planContext = new ExceptionTranslatingPlanContext(new TransactionBoundPlanContext(transactionalContext))
+        println("\t\tPreparing query ....")
         val (planImpl, extractedParameters) = compiler.planPreparedQuery(preparedQueryForV_3_0.get, planContext, tracer)
 
+        println("\t\tLogging warnings ....")
         // Log notifications/warnings from planning
         planImpl.notifications.foreach(notificationLogger += _)
 
+        println("\t\tReturning results ....")
         (new ExecutionPlanWrapper(planImpl), extractedParameters)
       }
 
