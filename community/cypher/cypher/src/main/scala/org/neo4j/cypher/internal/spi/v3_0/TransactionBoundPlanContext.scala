@@ -46,7 +46,11 @@ class TransactionBoundPlanContext(tc: ExtendedTransactionalContext)
     val labelId = tc.statement.readOperations().labelGetForName(labelName)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
-    getOnlineIndex(tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, propertyKeyId))
+    var foundIndex = tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, propertyKeyId)
+    println("\t\t\tFound index: " + foundIndex)
+    var onlineIndex = getOnlineIndex(foundIndex)
+    println("\t\t\tOnline index: " + onlineIndex)
+    onlineIndex
   }
 
   def hasIndexRule(labelName: String): Boolean = {

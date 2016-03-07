@@ -124,7 +124,7 @@ object exceptionHandlerFor3_0 extends MapToPublicExceptions[CypherException] {
     catch {
       case e: InternalCypherException =>
         println("\n\n\t\tUNEXPECTED EXCEPTION: " + e)
-        e.printStackTrace()
+        e.printStackTrace(System.out)
         f(e)
         throw e.mapToPublic(exceptionHandlerFor3_0)
       case e: Throwable =>
