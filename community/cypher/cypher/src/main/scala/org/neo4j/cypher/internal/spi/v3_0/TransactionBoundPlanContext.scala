@@ -73,11 +73,13 @@ class TransactionBoundPlanContext(tc: ExtendedTransactionalContext)
   private def evalOrNone[T](f: => Option[T]): Option[T] =
     try { f } catch { case _: SchemaKernelException => None }
 
-  private def getOnlineIndex(descriptor: IndexDescriptor): Option[IndexDescriptor] =
+  private def getOnlineIndex(descriptor: IndexDescriptor): Option[IndexDescriptor] = {
+    println("\t\t\tIndex state: " + tc.statement.readOperations().indexGetState(descriptor))
     tc.statement.readOperations().indexGetState(descriptor) match {
       case InternalIndexState.ONLINE => Some(descriptor)
-      case _                         => None
+      case _ => None
     }
+  }
 
   def getUniquenessConstraint(labelName: String, propertyKey: String): Option[UniquenessConstraint] = try {
     val labelId = tc.statement.readOperations().labelGetForName(labelName)
