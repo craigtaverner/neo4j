@@ -345,17 +345,17 @@ public class LdapAuthenticationIT extends AbstractLdapTestUnit
         restartNeo4jServerWithOverriddenSettings( settings -> {
             settings.put( SecuritySettings.ldap_server, "ec2-176-34-79-113.eu-west-1.compute.amazonaws.com:389" );
             settings.put( SecuritySettings.ldap_user_dn_template, "CN={0},CN=Users,DC=neo4j,DC=com" );
-            settings.put( SecuritySettings.ldap_auth_mechanism, "DIGEST-MD5" );
-            settings.put( SecuritySettings.ldap_authorization_use_system_account, "true" );
-            settings.put( SecuritySettings.ldap_system_username, "Administrator");
-            settings.put( SecuritySettings.ldap_system_password, "{MD5}77098e5e5b25691e7db92df41bf1c367");
+//            settings.put( SecuritySettings.ldap_authorization_use_system_account, "true" );
+//            settings.put( SecuritySettings.ldap_system_username, "Administrator");
+//            settings.put( SecuritySettings.ldap_system_password, "{MD5}77098e5e5b25691e7db92df41bf1c367");
             settings.put( SecuritySettings.ldap_authorization_user_search_base, "DC=neo4j,DC=com" );
+            settings.put( SecuritySettings.ldap_authorization_user_search_filter, "(&(objectClass=*)(CN={0},CN=Users,DC=neo4j,DC=com)" );
             settings.put( SecuritySettings.ldap_authorization_group_to_role_mapping,
                     "Neo4j Read Only=reader;Neo4j Read-Write=publisher;Neo4j Schema Manager=architect;Neo4j Administrator=admin" );
         } );
 
         // When
-        assertAuth( "Craig Taverner", "{MD5}06fe24135ca4f69190da7aff7d3083fb" );
+        assertAuth( "Craig Taverner", "S0uthAfrica" );
 
         // When
         client.send( TransportTestUtil.chunk(
