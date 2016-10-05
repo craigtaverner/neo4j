@@ -71,41 +71,51 @@ public class SecuritySettings
             derivedSetting( "dbms.security.auth_providers", active_realm,
                     ( r ) -> Arrays.asList( r ), STRING_LIST );
 
+    @Internal
+    public static Setting<List<String>> active_authentication_realms =
+            derivedSetting( "dbms.security.authentication_providers", active_realms,
+                    ( r ) -> r, STRING_LIST );
+
+    @Internal
+    public static Setting<List<String>> active_authorization_realms =
+            derivedSetting( "dbms.security.authorization_providers", active_realms,
+                    ( r ) -> r, STRING_LIST );
+
     @Description( "Enable authentication via native authentication provider." )
     @Internal
     public static final Setting<Boolean> native_authentication_enabled =
-            derivedSetting( "dbms.security.auth_providers.native.authentication_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.native.authentication_enabled", active_authentication_realms,
                     ( providers ) -> providers.contains( NATIVE_REALM_NAME ), BOOLEAN );
 
     @Description( "Enable authorization via native authorization provider." )
     @Internal
     public static final Setting<Boolean> native_authorization_enabled =
-            derivedSetting( "dbms.security.auth_providers.native.authorization_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.native.authorization_enabled", active_authorization_realms,
                     ( providers ) -> providers.contains( NATIVE_REALM_NAME ), BOOLEAN );
 
     @Description( "Enable authentication via settings configurable LDAP authentication provider." )
     @Internal
     public static final Setting<Boolean> ldap_authentication_enabled =
-            derivedSetting( "dbms.security.auth_providers.ldap.authentication_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.ldap.authentication_enabled", active_authentication_realms,
                     ( providers ) -> providers.contains( LDAP_REALM_NAME ), BOOLEAN );
 
     @Description( "Enable authorization via settings configurable LDAP authorization provider." )
     @Internal
     public static final Setting<Boolean> ldap_authorization_enabled =
-            derivedSetting( "dbms.security.auth_providers.ldap.authorization_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.ldap.authorization_enabled", active_authorization_realms,
                     ( providers ) -> providers.contains( LDAP_REALM_NAME ), BOOLEAN );
 
     @Description( "Enable authentication via plugin authentication providers." )
     @Internal
     public static final Setting<Boolean> plugin_authentication_enabled =
-            derivedSetting( "dbms.security.auth_providers.plugin.authentication_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.plugin.authentication_enabled", active_authentication_realms,
                     ( providers ) -> providers.stream().anyMatch( ( r ) -> r.startsWith( PLUGIN_REALM_NAME_PREFIX ) ),
                     BOOLEAN );
 
     @Description( "Enable authorization via plugin authorization providers." )
     @Internal
     public static final Setting<Boolean> plugin_authorization_enabled =
-            derivedSetting( "dbms.security.auth_providers.plugin.authorization_enabled", active_realms,
+            derivedSetting( "dbms.security.auth_providers.plugin.authorization_enabled", active_authorization_realms,
                     ( providers ) -> providers.stream().anyMatch( ( r ) -> r.startsWith( PLUGIN_REALM_NAME_PREFIX ) ),
                     BOOLEAN );
 

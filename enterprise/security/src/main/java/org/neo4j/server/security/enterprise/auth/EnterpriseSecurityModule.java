@@ -26,8 +26,10 @@ import org.apache.shiro.realm.Realm;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.neo4j.dbms.DatabaseManagementSystemSettings;
 import org.neo4j.helpers.Service;
@@ -97,10 +99,28 @@ public class EnterpriseSecurityModule extends SecurityModule
         }
     }
 
+    private List<String> getConfiguredRealms( Config config )
+    {
+        List<String> configuredRealms = config.get( SecuritySettings.active_realms );
+        List<String> authenticationRealms = config.get( SecuritySettings.active_authentication_realms );
+        List<String> authorizationRealms = config.get( SecuritySettings.active_authorization_realms );
+        List<String> commonA = authenticationRealms.stream().filter( realm -> authorizationRealms.contains( realm ) ).collect(
+                Collectors.toList());
+        List<String> commonB = authorizationRealms.stream().filter( realm -> authenticationRealms.contains( realm ) ).collect(
+                Collectors.toList());
+        if(!commonA.equals( commonB ))
+        {
+            throw new IllegalArgumentException( "Illegal configuration: " + SecuritySettings.active_authentication_realms.name() + " cannot have different order than " + SecuritySettings.active_authorization_realms );
+        }
+        // TODO: Rebuild configured realms based on combining a sorted version of the superset of the two sets above
+        // The current code will not work for most cases
+        return configuredRealms;
+    }
+
     public EnterpriseAuthAndUserManager newAuthManager( Config config, LogProvider logProvider, SecurityLog securityLog,
             FileSystemAbstraction fileSystem, JobScheduler jobScheduler )
     {
-        List<String> configuredRealms = config.get( SecuritySettings.active_realms );
+        List<String> configuredRealms = getConfiguredRealms( config );
         List<Realm> realms = new ArrayList<>( configuredRealms.size() + 1 );
 
         SecureHasher secureHasher = new SecureHasher();
