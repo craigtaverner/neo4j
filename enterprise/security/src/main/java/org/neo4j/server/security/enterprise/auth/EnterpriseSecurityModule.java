@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.neo4j.dbms.DatabaseManagementSystemSettings;
@@ -70,7 +71,11 @@ public class EnterpriseSecurityModule extends SecurityModule
     @Override
     public void setup( Dependencies dependencies ) throws KernelException
     {
-        System.out.println( "Setting up enterprise security module with config: " + dependencies.config() );
+        System.out.println( "Setting up enterprise security module with config:" );
+        for ( Map.Entry<String,String> entry : dependencies.config().getParams().entrySet() )
+        {
+            System.out.println( "\t" + entry.getKey() + ": " + entry.getValue() );
+        }
         Config config = dependencies.config();
         Procedures procedures = dependencies.procedures();
         LogProvider logProvider = dependencies.logService().getUserLogProvider();
@@ -211,6 +216,10 @@ public class EnterpriseSecurityModule extends SecurityModule
         Boolean pluginAuthenticationEnabled = config.get( SecuritySettings.plugin_authentication_enabled );
         Boolean pluginAuthorizationEnabled = config.get( SecuritySettings.plugin_authorization_enabled );
 
+        System.out.println( "Seaching for plugins based on:" );
+        System.out.println( "\tPlugin authentication enabled: " + pluginAuthenticationEnabled );
+        System.out.println( "\tPlugin authorization enabled: " + pluginAuthorizationEnabled );
+
         if ( pluginAuthenticationEnabled && pluginAuthorizationEnabled )
         {
             // Combined authentication and authorization plugins
@@ -276,6 +285,10 @@ public class EnterpriseSecurityModule extends SecurityModule
                     System.out.println( "\tExcluded: " + plugin.name() );
                 }
             }
+        }
+        if ( realms.size() == 0 )
+        {
+            System.out.println( "No plugins found" );
         }
 
         return realms;
