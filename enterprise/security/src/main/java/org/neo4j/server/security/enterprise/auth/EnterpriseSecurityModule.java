@@ -70,6 +70,7 @@ public class EnterpriseSecurityModule extends SecurityModule
     @Override
     public void setup( Dependencies dependencies ) throws KernelException
     {
+        System.out.println( "Setting up enterprise security module with config: " + dependencies.config() );
         Config config = dependencies.config();
         Procedures procedures = dependencies.procedures();
         LogProvider logProvider = dependencies.logService().getUserLogProvider();
@@ -148,6 +149,10 @@ public class EnterpriseSecurityModule extends SecurityModule
 
         // Select the active realms in the order they are configured
         List<Realm> orderedActiveRealms = selectOrderedActiveRealms( configuredRealms, realms );
+        System.out.println( "Provider selection:" );
+        System.out.println( "\tAvailable:  " + realms );
+        System.out.println( "\tConfigured: " + configuredRealms );
+        System.out.println( "\tOrdered:    " + orderedActiveRealms );
 
         if ( orderedActiveRealms.isEmpty() )
         {
@@ -209,10 +214,12 @@ public class EnterpriseSecurityModule extends SecurityModule
         if ( pluginAuthenticationEnabled && pluginAuthorizationEnabled )
         {
             // Combined authentication and authorization plugins
+            System.out.println( "Searching for authentication+authorization plugins" );
             Iterable<AuthPlugin> authPlugins = Service.load( AuthPlugin.class );
 
             for ( AuthPlugin plugin : authPlugins )
             {
+                System.out.println( "\tFound: " + plugin.name() );
                 PluginRealm pluginRealm =
                         new PluginRealm( plugin, config, securityLog, Clocks.systemClock(), secureHasher );
                 realms.add( pluginRealm );
@@ -222,10 +229,12 @@ public class EnterpriseSecurityModule extends SecurityModule
         if ( pluginAuthenticationEnabled )
         {
             // Authentication only plugins
+            System.out.println( "Searching for authentication plugins" );
             Iterable<AuthenticationPlugin> authenticationPlugins = Service.load( AuthenticationPlugin.class );
 
             for ( AuthenticationPlugin plugin : authenticationPlugins )
             {
+                System.out.println( "\tFound: " + plugin.name() );
                 PluginRealm pluginRealm;
 
                 if ( pluginAuthorizationEnabled && plugin instanceof AuthorizationPlugin )
@@ -250,15 +259,21 @@ public class EnterpriseSecurityModule extends SecurityModule
         if ( pluginAuthorizationEnabled )
         {
             // Authorization only plugins
+            System.out.println( "Searching for authorization plugins" );
             Iterable<AuthorizationPlugin> authorizationPlugins = Service.load( AuthorizationPlugin.class );
 
             for ( AuthorizationPlugin plugin : authorizationPlugins )
             {
                 if ( !excludedClasses.contains( plugin.getClass() ) )
                 {
+                    System.out.println( "\tFound: " + plugin.name() );
                     PluginRealm pluginRealm =
                             new PluginRealm( null, plugin, config, securityLog, Clocks.systemClock(), secureHasher );
                     realms.add( pluginRealm );
+                }
+                else
+                {
+                    System.out.println( "\tExcluded: " + plugin.name() );
                 }
             }
         }

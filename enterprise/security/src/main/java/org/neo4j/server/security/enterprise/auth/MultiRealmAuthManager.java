@@ -77,6 +77,7 @@ class MultiRealmAuthManager implements EnterpriseAuthAndUserManager
                 .setAuthenticationStrategy( new ShiroAuthenticationStrategy() );
 
         securityManager.setSubjectDAO( createSubjectDAO() );
+        System.out.println( "Initialized auth providers with: " + realms );
     }
 
     private SubjectDAO createSubjectDAO()
@@ -233,6 +234,7 @@ class MultiRealmAuthManager implements EnterpriseAuthAndUserManager
 
     public Collection<AuthorizationInfo> getAuthorizationInfo( PrincipalCollection principalCollection )
     {
+        System.out.println( "Attempting to authorize " + principalCollection );
         List<AuthorizationInfo> infoList = new ArrayList<>( 1 );
         for ( Realm realm : realms )
         {
@@ -242,6 +244,7 @@ class MultiRealmAuthManager implements EnterpriseAuthAndUserManager
                         .getAuthorizationInfoSnapshot( principalCollection );
                 if ( info != null )
                 {
+                    System.out.println( "\tProvider '" + realm.getName() + "' returned roles: " + info.getRoles() );
                     infoList.add( info );
                 }
             }
