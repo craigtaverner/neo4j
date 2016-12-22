@@ -54,13 +54,16 @@ public class IndexProcedures implements AutoCloseable
         IndexSpecifier index = parse( indexSpecification );
         int labelId = getLabelId( index.label() );
         int propertyKeyId = getPropertyKeyId( index.property() );
-        waitUntilOnline( getIndex( labelId, propertyKeyId, index ), index, timeout, timeoutUnits );
+        //TODO: Support composite indexes
+        waitUntilOnline( getIndex( labelId, new int[]{propertyKeyId}, index ), index, timeout, timeoutUnits );
     }
 
     public void resampleIndex( String indexSpecification ) throws ProcedureException
     {
         IndexSpecifier index = parse( indexSpecification );
-        triggerSampling( getIndex( getLabelId( index.label() ), getPropertyKeyId( index.property() ), index ) );
+        //TODO: Support composite indexes
+        triggerSampling(
+                getIndex( getLabelId( index.label() ), new int[]{getPropertyKeyId( index.property() )}, index ) );
     }
 
     public void resampleOutdatedIndexes()
@@ -94,12 +97,12 @@ public class IndexProcedures implements AutoCloseable
         return propertyKeyId;
     }
 
-    private IndexDescriptor getIndex( int labelId, int propertyKeyId, IndexSpecifier index ) throws
+    private IndexDescriptor getIndex( int labelId, int[] propertyKeyIds, IndexSpecifier index ) throws
             ProcedureException
     {
         try
         {
-            return operations.indexGetForLabelAndPropertyKey( labelId, propertyKeyId );
+            return operations.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds );
         }
         catch ( SchemaRuleNotFoundException e )
         {

@@ -63,13 +63,17 @@ class IndexLookup implements AutoCloseable
             if ( schemaRule.getKind() == SchemaRule.Kind.INDEX_RULE )
             {
                 IndexRule rule = (IndexRule) schemaRule;
-                List<IndexRule> ruleList = indexRuleIndex.get( rule.getPropertyKey() );
-                if ( ruleList == null )
+                if(rule.getPropertyKeys().length == 1)
                 {
-                    ruleList = new LinkedList<>();
-                    indexRuleIndex.put( rule.getPropertyKey(), ruleList );
+                    int propertyKey = rule.getPropertyKeys()[0];
+                    List<IndexRule> ruleList = indexRuleIndex.get( propertyKey );
+                    if ( ruleList == null )
+                    {
+                        ruleList = new LinkedList<>();
+                        indexRuleIndex.put( propertyKey, ruleList );
+                    }
+                    ruleList.add( rule );
                 }
-                ruleList.add( rule );
             }
         }
         return indexRuleIndex;
@@ -94,9 +98,13 @@ class IndexLookup implements AutoCloseable
         {
             for ( IndexRule indexRule : indexRules )
             {
-                if ( indexRule.getPropertyKey() == propertyKeyId && indexRule.getLabel() == labelId  )
+                if ( indexRule.getLabel() == labelId )
                 {
-                    return indexRule;
+                    int[] propertyKeys = indexRule.getPropertyKeys();
+                    if ( propertyKeys.length == 1 && propertyKeys[0] == propertyKeyId )
+                    {
+                        return indexRule;
+                    }
                 }
             }
         }

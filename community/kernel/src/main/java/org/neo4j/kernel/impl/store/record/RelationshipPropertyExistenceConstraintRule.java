@@ -20,6 +20,7 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
@@ -83,6 +84,12 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
     public RelationshipPropertyConstraint toConstraint()
     {
         return new RelationshipPropertyExistenceConstraint( getRelationshipType(), getPropertyKey() );
+    }
+
+    @Override
+    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
+    {
+        return propertyKeyIds.length == 1 && propertyKeyId == propertyKeyIds[0];
     }
 
     @Override

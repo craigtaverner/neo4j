@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import java.util.Arrays;
+
 /**
  * Base class describing property constraint on relationships.
  */
@@ -28,7 +30,7 @@ public abstract class RelationshipPropertyConstraint extends PropertyConstraint
 
     public RelationshipPropertyConstraint( int relationshipTypeId, int propertyKeyId )
     {
-        super( propertyKeyId );
+        super( new int[]{propertyKeyId} );
         this.relationshipTypeId = relationshipTypeId;
     }
 
@@ -49,13 +51,23 @@ public abstract class RelationshipPropertyConstraint extends PropertyConstraint
             return false;
         }
         RelationshipPropertyConstraint that = (RelationshipPropertyConstraint) o;
-        return propertyKeyId == that.propertyKeyId && relationshipTypeId == that.relationshipTypeId;
+        return propertyKeyIds[0] == that.propertyKeyIds[0] && relationshipTypeId == that.relationshipTypeId;
 
+    }
+
+    public int propertyKey()
+    {
+        return this.propertyKeyIds[0];
+    }
+
+    public boolean containsPropertyKeyId( int propertyKeyId )
+    {
+        return this.propertyKeyIds.length == 1 && this.propertyKeyIds[0] == propertyKeyId;
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * propertyKeyId + relationshipTypeId;
+        return 31 * propertyKeyIds[0] + relationshipTypeId;
     }
 }

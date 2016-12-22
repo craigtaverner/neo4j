@@ -19,19 +19,21 @@
  */
 package org.neo4j.kernel.impl.store.counts.keys;
 
+import java.util.Arrays;
+
 import org.neo4j.kernel.impl.api.CountsVisitor;
 
 public final class IndexSampleKey extends IndexKey
 {
-    IndexSampleKey( int labelId, int propertyKeyId )
+    IndexSampleKey( int labelId, int[] propertyKeyIds )
     {
-        super( labelId, propertyKeyId, CountsKeyType.INDEX_SAMPLE );
+        super( labelId, propertyKeyIds, CountsKeyType.INDEX_SAMPLE );
     }
 
     @Override
     public void accept( CountsVisitor visitor, long unique, long size )
     {
-        visitor.visitIndexSample( labelId(), propertyKeyId(), unique, size );
+        visitor.visitIndexSample( labelId(), propertyKeyIds(), unique, size );
     }
 
     @Override
@@ -39,13 +41,7 @@ public final class IndexSampleKey extends IndexKey
     {
         if ( other instanceof IndexSampleKey )
         {
-            IndexSampleKey that = (IndexSampleKey) other;
-            int cmp = this.labelId() - that.labelId();
-            if ( cmp == 0 )
-            {
-                cmp = this.propertyKeyId() - that.propertyKeyId();
-            }
-            return cmp;
+            return super.compareTo( other );
         }
         return recordType().ordinal() - other.recordType().ordinal();
     }

@@ -90,25 +90,25 @@ class UpdateCountingQueryContext(inner: QueryContext) extends DelegatingQueryCon
     removed
   }
 
-  override def addIndexRule(labelId: Int, propertyKeyId: Int) = {
-    val result = inner.addIndexRule(labelId, propertyKeyId)
+  override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) = {
+    val result = inner.addIndexRule(labelId, propertyKeyIds)
     result.ifCreated { indexesAdded.increase() }
     result
   }
 
-  override def dropIndexRule(labelId: Int, propertyKeyId: Int) {
-    inner.dropIndexRule(labelId, propertyKeyId)
+  override def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) {
+    inner.dropIndexRule(labelId, propertyKeyIds)
     indexesRemoved.increase()
   }
 
-  override def createUniqueConstraint(labelId: Int, propertyKeyId: Int) = {
-    val result = inner.createUniqueConstraint(labelId, propertyKeyId)
+  override def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) = {
+    val result = inner.createUniqueConstraint(labelId, propertyKeyIds)
     result.ifCreated { uniqueConstraintsAdded.increase() }
     result
   }
 
-  override def dropUniqueConstraint(labelId: Int, propertyKeyId: Int) {
-    inner.dropUniqueConstraint(labelId, propertyKeyId)
+  override def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) {
+    inner.dropUniqueConstraint(labelId, propertyKeyIds)
     uniqueConstraintsRemoved.increase()
   }
 

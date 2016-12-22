@@ -38,7 +38,6 @@ import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexCreator;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
-import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementTokenNameLookup;
@@ -75,6 +74,10 @@ import static org.neo4j.graphdb.schema.Schema.IndexState.POPULATING;
 import static org.neo4j.helpers.collection.Iterators.addToCollection;
 import static org.neo4j.helpers.collection.Iterators.asCollection;
 import static org.neo4j.helpers.collection.Iterators.map;
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getIndexDescriptor;
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getOrCreatePropertyKeyIds;
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeys;
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeyIds;
 
 public class SchemaImpl implements Schema
 {
@@ -129,8 +132,7 @@ public class SchemaImpl implements Schema
             try
             {
                 Label label = label( statement.labelGetName( rule.getLabelId() ) );
-                String propertyKey = statement.propertyKeyGetName( rule.getPropertyKeyId() );
-                return new IndexDefinitionImpl( actions, label, propertyKey, constraintIndex );
+                return new IndexDefinitionImpl( actions, label, getPropertyKeys( statement, rule ), constraintIndex );
             }
             catch ( LabelNotFoundKernelException | PropertyKeyIdNotFoundKernelException e )
             {
@@ -196,23 +198,9 @@ public class SchemaImpl implements Schema
     public IndexState getIndexState( final IndexDefinition index )
     {
         actions.assertInOpenTransaction();
-        String propertyKey = Iterables.single( index.getPropertyKeys() );
         try ( Statement statement = statementContextSupplier.get() )
         {
-            int labelId = statement.readOperations().labelGetForName( index.getLabel().name() );
-            int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-
-            if ( labelId == KeyReadOperations.NO_SUCH_LABEL )
-            {
-                throw new NotFoundException( format( "Label %s not found", index.getLabel().name() ) );
-            }
-
-            if ( propertyKeyId == KeyReadOperations.NO_SUCH_PROPERTY_KEY )
-            {
-                throw new NotFoundException( format( "Property key %s not found", propertyKey ) );
-            }
-
-            IndexDescriptor descriptor = statement.readOperations().indexGetForLabelAndPropertyKey( labelId, propertyKeyId );
+            IndexDescriptor descriptor = getIndexDescriptor( statement.readOperations(), index );
             InternalIndexState indexState = statement.readOperations().indexGetState( descriptor );
             switch ( indexState )
             {
@@ -229,7 +217,7 @@ public class SchemaImpl implements Schema
         catch ( SchemaRuleNotFoundException | IndexNotFoundKernelException e )
         {
             throw new NotFoundException( format( "No index for label %s on property %s",
-                    index.getLabel().name(), propertyKey ) );
+                    index.getLabel().name(), index.getPropertyKeys() ) );
         }
     }
 
@@ -237,31 +225,16 @@ public class SchemaImpl implements Schema
     public IndexPopulationProgress getIndexPopulationProgress( IndexDefinition index )
     {
         actions.assertInOpenTransaction();
-        String propertyKey = Iterables.single( index.getPropertyKeys() );
         try ( Statement statement = statementContextSupplier.get() )
         {
-            int labelId = statement.readOperations().labelGetForName( index.getLabel().name() );
-            int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-
-            if ( labelId == KeyReadOperations.NO_SUCH_LABEL )
-            {
-                throw new NotFoundException( format( "Label %s not found", index.getLabel().name() ) );
-            }
-
-            if ( propertyKeyId == KeyReadOperations.NO_SUCH_PROPERTY_KEY )
-            {
-                throw new NotFoundException( format( "Property key %s not found", propertyKey ) );
-            }
-
-            IndexDescriptor descriptor = statement.readOperations().indexGetForLabelAndPropertyKey( labelId,
-                    propertyKeyId );
+            IndexDescriptor descriptor = getIndexDescriptor( statement.readOperations(), index );
             PopulationProgress progress = statement.readOperations().indexGetPopulationProgress( descriptor );
             return new IndexPopulationProgress( progress.getCompleted(), progress.getTotal() );
         }
         catch ( SchemaRuleNotFoundException | IndexNotFoundKernelException e )
         {
             throw new NotFoundException( format( "No index for label %s on property %s", index.getLabel().name(),
-                    propertyKey ) );
+                    index.getPropertyKeys() ) );
         }
     }
 
@@ -269,29 +242,15 @@ public class SchemaImpl implements Schema
     public String getIndexFailure( IndexDefinition index )
     {
         actions.assertInOpenTransaction();
-        String propertyKey = Iterables.single( index.getPropertyKeys() );
         try ( Statement statement = statementContextSupplier.get() )
         {
-            int labelId = statement.readOperations().labelGetForName( index.getLabel().name() );
-            int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-
-            if ( labelId == KeyReadOperations.NO_SUCH_LABEL )
-            {
-                throw new NotFoundException( format( "Label %s not found", index.getLabel().name() ) );
-            }
-
-            if ( propertyKeyId == KeyReadOperations.NO_SUCH_PROPERTY_KEY )
-            {
-                throw new NotFoundException( format( "Property key %s not found", propertyKey ) );
-            }
-
-            IndexDescriptor indexId = statement.readOperations().indexGetForLabelAndPropertyKey( labelId, propertyKeyId );
-            return statement.readOperations().indexGetFailure( indexId );
+            IndexDescriptor descriptor = getIndexDescriptor( statement.readOperations(), index );
+            return statement.readOperations().indexGetFailure( descriptor );
         }
         catch ( SchemaRuleNotFoundException | IndexNotFoundKernelException e )
         {
             throw new NotFoundException( format( "No index for label %s on property %s",
-                    index.getLabel().name(), propertyKey ) );
+                    index.getLabel().name(), index.getPropertyKeys() ) );
         }
     }
 
@@ -374,22 +333,22 @@ public class SchemaImpl implements Schema
             StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
             return new NodePropertyExistenceConstraintDefinition( actions,
                     Label.label( lookup.labelGetName( ((NodePropertyConstraint) constraint).label() ) ),
-                    lookup.propertyKeyGetName( constraint.propertyKey() ) );
+                    getPropertyKeys( lookup, constraint ) );
         }
         else if ( constraint instanceof UniquenessConstraint )
         {
             StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
             return new UniquenessConstraintDefinition( actions,
                     Label.label( lookup.labelGetName( ((NodePropertyConstraint) constraint).label() ) ),
-                    lookup.propertyKeyGetName( constraint.propertyKey() ) );
+                    getPropertyKeys( lookup, constraint ) );
         }
         else if ( constraint instanceof RelationshipPropertyExistenceConstraint )
         {
             StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
+            RelationshipPropertyConstraint relConstraint = (RelationshipPropertyConstraint) constraint;
             return new RelationshipPropertyExistenceConstraintDefinition( actions,
-                    RelationshipType.withName( lookup.relationshipTypeGetName(
-                            ((RelationshipPropertyConstraint) constraint).relationshipType() ) ),
-                    lookup.propertyKeyGetName( constraint.propertyKey() ) );
+                    RelationshipType.withName( lookup.relationshipTypeGetName( relConstraint.relationshipType() ) ),
+                    lookup.propertyKeyGetName( relConstraint.propertyKey() ) );
         }
         throw new IllegalArgumentException( "Unknown constraint " + constraint );
     }
@@ -404,16 +363,16 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public IndexDefinition createIndexDefinition( Label label, String propertyKey )
+        public IndexDefinition createIndexDefinition( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     int labelId = statement.schemaWriteOperations().labelGetOrCreateForName( label.name() );
-                    int propertyKeyId = statement.schemaWriteOperations().propertyKeyGetOrCreateForName( propertyKey );
-                    statement.schemaWriteOperations().indexCreate( labelId, propertyKeyId );
-                    return new IndexDefinitionImpl( this, label, propertyKey, false );
+                    int[] propertyKeyIds = getOrCreatePropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    statement.schemaWriteOperations().indexCreate( labelId, propertyKeyIds );
+                    return new IndexDefinitionImpl( this, label, propertyKeys, false );
                 }
                 catch ( AlreadyIndexedException | AlreadyConstrainedException e )
                 {
@@ -436,21 +395,18 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropIndexDefinitions( Label label, String propertyKey )
+        public void dropIndexDefinitions( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
-                    int labelId = statement.readOperations().labelGetForName( label.name() );
-                    int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-
-                    if ( labelId != KeyReadOperations.NO_SUCH_LABEL && propertyKeyId != KeyReadOperations
-                            .NO_SUCH_PROPERTY_KEY )
-                    {
-                        statement.schemaWriteOperations().indexDrop(
-                                statement.readOperations().indexGetForLabelAndPropertyKey( labelId, propertyKeyId ) );
-                    }
+                    statement.schemaWriteOperations()
+                            .indexDrop( getIndexDescriptor( statement.readOperations(), label, propertyKeys ) );
+                }
+                catch ( NotFoundException e )
+                {
+                    // Silently ignore invalid label and property names
                 }
                 catch ( SchemaRuleNotFoundException | DropIndexFailureException e )
                 {
@@ -465,16 +421,17 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String propertyKey )
+        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     int labelId = statement.schemaWriteOperations().labelGetOrCreateForName( label.name() );
-                    int propertyKeyId = statement.schemaWriteOperations().propertyKeyGetOrCreateForName( propertyKey );
-                    statement.schemaWriteOperations().uniquePropertyConstraintCreate( labelId, propertyKeyId );
-                    return new UniquenessConstraintDefinition( this, label, propertyKey );
+                    int[] propertyKeyIds = getOrCreatePropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    statement.schemaWriteOperations()
+                            .uniquePropertyConstraintCreate( labelId, propertyKeyIds );
+                    return new UniquenessConstraintDefinition( this, label, propertyKeys );
                 }
                 catch ( AlreadyConstrainedException | CreateConstraintFailureException | AlreadyIndexedException e )
                 {
@@ -497,16 +454,16 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public ConstraintDefinition createPropertyExistenceConstraint( Label label, String propertyKey )
+        public ConstraintDefinition createPropertyExistenceConstraint( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     int labelId = statement.schemaWriteOperations().labelGetOrCreateForName( label.name() );
-                    int propertyKeyId = statement.schemaWriteOperations().propertyKeyGetOrCreateForName( propertyKey );
-                    statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate( labelId, propertyKeyId );
-                    return new NodePropertyExistenceConstraintDefinition( this, label, propertyKey );
+                    int[] propertyKeyIds = getOrCreatePropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate( labelId, propertyKeyIds );
+                    return new NodePropertyExistenceConstraintDefinition( this, label, propertyKeys );
                 }
                 catch ( AlreadyConstrainedException | CreateConstraintFailureException e )
                 {
@@ -559,15 +516,15 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropPropertyUniquenessConstraint( Label label, String propertyKey )
+        public void dropPropertyUniquenessConstraint( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     int labelId = statement.schemaWriteOperations().labelGetForName( label.name() );
-                    int propertyKeyId = statement.schemaWriteOperations().propertyKeyGetForName( propertyKey );
-                    NodePropertyConstraint constraint = new UniquenessConstraint( labelId, propertyKeyId );
+                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    NodePropertyConstraint constraint = new UniquenessConstraint( labelId, propertyKeyIds );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }
                 catch ( DropConstraintFailureException e )
@@ -583,15 +540,15 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropNodePropertyExistenceConstraint( Label label, String propertyKey )
+        public void dropNodePropertyExistenceConstraint( Label label, String[] propertyKeys )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     int labelId = statement.schemaWriteOperations().labelGetForName( label.name() );
-                    int propertyKeyId = statement.schemaWriteOperations().propertyKeyGetForName( propertyKey );
-                    NodePropertyConstraint constraint = new NodePropertyExistenceConstraint( labelId, propertyKeyId );
+                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    NodePropertyConstraint constraint = new NodePropertyExistenceConstraint( labelId, propertyKeyIds );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }
                 catch ( DropConstraintFailureException e )

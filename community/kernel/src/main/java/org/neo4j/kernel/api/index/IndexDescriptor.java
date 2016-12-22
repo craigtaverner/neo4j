@@ -19,6 +19,11 @@
  */
 package org.neo4j.kernel.api.index;
 
+import java.util.Arrays;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
@@ -29,15 +34,21 @@ import static java.lang.String.format;
  *
  * @see SchemaRule
  */
-public class IndexDescriptor
+public class IndexDescriptor implements DescriptorWithProperties
 {
     private final int labelId;
-    private final int propertyKeyId;
+    private final int[] propertyKeyIds;
 
     public IndexDescriptor( int labelId, int propertyKeyId )
     {
+        //TODO: Consider dropping this constructor to ensure consistent support for composite indexes
+        this( labelId, new int[]{propertyKeyId} );
+    }
+
+    public IndexDescriptor( int labelId, int[] propertyKeyIds )
+    {
         this.labelId = labelId;
-        this.propertyKeyId = propertyKeyId;
+        this.propertyKeyIds = propertyKeyIds;
     }
 
     @Override
@@ -51,7 +62,7 @@ public class IndexDescriptor
         {
             IndexDescriptor that = (IndexDescriptor) obj;
             return this.labelId == that.labelId &&
-                    this.propertyKeyId == that.propertyKeyId;
+                   Arrays.equals(this.propertyKeyIds,that.propertyKeyIds);
         }
         return false;
     }
@@ -59,9 +70,7 @@ public class IndexDescriptor
     @Override
     public int hashCode()
     {
-        int result = labelId;
-        result = 31 * result + propertyKeyId;
-        return result;
+        return hashcode( labelId, propertyKeyIds );
     }
 
     /**
@@ -73,17 +82,17 @@ public class IndexDescriptor
     }
 
     /**
-     * @return property key token id this index is for.
+     * @return property keys token id this index is for.
      */
-    public int getPropertyKeyId()
+    public int[] getPropertyKeyIds()
     {
-        return propertyKeyId;
+        return propertyKeyIds;
     }
 
     @Override
     public String toString()
     {
-        return format( ":label[%d](property[%d])", labelId, propertyKeyId );
+        return format( ":label[%d](property[%s])", labelId, propertyIdText(propertyKeyIds) );
     }
 
     /**
@@ -92,7 +101,29 @@ public class IndexDescriptor
      */
     public String userDescription( TokenNameLookup tokenNameLookup )
     {
-        return format( ":%s(%s)",
-                tokenNameLookup.labelGetName( labelId ), tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+        return format( ":%s(%s)", tokenNameLookup.labelGetName( labelId ),
+                propertyNameText( tokenNameLookup, propertyKeyIds ) );
+    }
+
+    public static String propertyNameText(TokenNameLookup tokenNameLookup, int[] propertyKeyIds)
+    {
+        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
+                tokenNameLookup.propertyKeyGetName( id ) ).collect( Collectors.joining( "," ) );
+    }
+
+    public static String propertyIdText(int[] propertyKeyIds)
+    {
+        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
+                Integer.toString( id ) ).collect( Collectors.joining( "," ) );
+    }
+
+    public static int hashcode(int labelId, int[] propertyKeyIds)
+    {
+        int result = labelId;
+        for (int element : propertyKeyIds)
+        {
+            result = 31 * result + element;
+        }
+        return result;
     }
 }

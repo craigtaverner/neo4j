@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api.store;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -63,7 +64,7 @@ public class CacheLayer implements StoreReadLayer
             from -> {
                 IndexRule rule = (IndexRule) from;
                 // We know that we only have int range of property key ids.
-                return new IndexDescriptor( rule.getLabel(), rule.getPropertyKey() );
+                return new IndexDescriptor( rule.getLabel(), rule.getPropertyKeys() );
             };
 
     private final SchemaCache schemaCache;
@@ -145,7 +146,8 @@ public class CacheLayer implements StoreReadLayer
             if ( rule instanceof IndexSchemaRule )
             {
                 IndexSchemaRule indexRule = (IndexSchemaRule) rule;
-                if ( filter.test( indexRule.getKind() ) && indexRule.getPropertyKey() == index.getPropertyKeyId() )
+                if ( filter.test( indexRule.getKind() ) &&
+                     Arrays.equals( indexRule.getPropertyKeys(), index.getPropertyKeyIds() ) )
                 {
                     return indexRule;
                 }
@@ -173,9 +175,9 @@ public class CacheLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int propertyKeyId )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
     {
-        return schemaCache.constraintsForLabelAndProperty( labelId, propertyKeyId );
+        return schemaCache.constraintsForLabelAndProperty( labelId, propertyKeyIds );
     }
 
     @Override
@@ -210,9 +212,9 @@ public class CacheLayer implements StoreReadLayer
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int propertyKey )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeys )
     {
-        return schemaCache.indexDescriptor( labelId, propertyKey );
+        return schemaCache.indexDescriptor( labelId, propertyKeys );
     }
 
     @Override

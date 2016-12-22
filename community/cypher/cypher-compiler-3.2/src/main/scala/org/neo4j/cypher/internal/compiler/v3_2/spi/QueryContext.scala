@@ -83,9 +83,9 @@ trait QueryContext extends TokenContext {
 
   def getOrCreatePropertyKeyId(propertyKey: String): Int
 
-  def addIndexRule(labelId: Int, propertyKeyId: Int): IdempotentResult[IndexDescriptor]
+  def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[IndexDescriptor]
 
-  def dropIndexRule(labelId: Int, propertyKeyId: Int)
+  def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int])
 
   def indexSeek(index: IndexDescriptor, value: Any): Iterator[Node]
 
@@ -103,9 +103,9 @@ trait QueryContext extends TokenContext {
 
   def getOrCreateFromSchemaState[K, V](key: K, creator: => V): V
 
-  def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint]
+  def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[UniquenessConstraint]
 
-  def dropUniqueConstraint(labelId: Int, propertyKeyId: Int)
+  def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int])
 
   def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint]
 

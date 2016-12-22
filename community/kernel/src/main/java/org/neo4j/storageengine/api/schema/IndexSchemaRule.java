@@ -29,7 +29,7 @@ public interface IndexSchemaRule extends SchemaRule
     /**
      * @return property key token id this index is associated to.
      */
-    int getPropertyKey();
+    int[] getPropertyKeys();
 
     /**
      * @return whether or not this index is related to a uniqueness constraint.

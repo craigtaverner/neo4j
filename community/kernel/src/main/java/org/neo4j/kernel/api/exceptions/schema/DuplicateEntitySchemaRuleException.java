@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.storageengine.api.EntityType;
 
 import static java.lang.String.format;
@@ -33,15 +34,15 @@ public class DuplicateEntitySchemaRuleException extends DuplicateSchemaRuleExcep
 
     private final EntityType entityType;
 
-    public DuplicateEntitySchemaRuleException( EntityType entityType, int entityId, int propertyKeyId )
+    public DuplicateEntitySchemaRuleException( EntityType entityType, int entityId, int[] propertyKeyIds )
     {
-        this( entityType, entityId, propertyKeyId, false );
+        this( entityType, entityId, propertyKeyIds, false );
     }
 
-    public DuplicateEntitySchemaRuleException( EntityType entityType, int ruleEntityId, int propertyKeyId,
+    public DuplicateEntitySchemaRuleException( EntityType entityType, int ruleEntityId, int[] propertyKeyIds,
             boolean unique )
     {
-        super( getMessageTemplate( entityType ), ruleEntityId, propertyKeyId,
+        super( getMessageTemplate( entityType ), ruleEntityId, propertyKeyIds,
                 unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
         this.entityType = entityType;
     }
@@ -52,7 +53,7 @@ public class DuplicateEntitySchemaRuleException extends DuplicateSchemaRuleExcep
         String entityName = EntityType.NODE == entityType ? tokenNameLookup.labelGetName( ruleEntityId ) :
                             tokenNameLookup.relationshipTypeGetName( ruleEntityId );
         return format( messageTemplate, messagePrefix, entityName,
-                tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+                IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
     }
 
     private static String getMessageTemplate( EntityType entityType )

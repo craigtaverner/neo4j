@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -689,7 +690,7 @@ public class OperationsFacade
 
     // <SchemaRead>
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int propertyKeyId )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyId )
             throws SchemaRuleNotFoundException
     {
         statement.assertOpen();
@@ -716,7 +717,7 @@ public class OperationsFacade
     }
 
     @Override
-    public IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int propertyKeyId )
+    public IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
             throws SchemaRuleNotFoundException, DuplicateIndexSchemaRuleException
 
     {
@@ -725,7 +726,7 @@ public class OperationsFacade
         while ( indexes.hasNext() )
         {
             IndexDescriptor index = indexes.next();
-            if ( index.getPropertyKeyId() == propertyKeyId )
+            if ( Arrays.equals(index.getPropertyKeyIds(), propertyKeyIds) )
             {
                 if ( null == result )
                 {
@@ -733,14 +734,14 @@ public class OperationsFacade
                 }
                 else
                 {
-                    throw new DuplicateIndexSchemaRuleException( labelId, propertyKeyId, true );
+                    throw new DuplicateIndexSchemaRuleException( labelId, propertyKeyIds, true );
                 }
             }
         }
 
         if ( null == result )
         {
-            throw new IndexSchemaRuleNotFoundException( labelId, propertyKeyId, true );
+            throw new IndexSchemaRuleNotFoundException( labelId, propertyKeyIds, true );
         }
 
         return result;
@@ -803,10 +804,10 @@ public class OperationsFacade
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int propertyKeyId )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
     {
         statement.assertOpen();
-        return schemaRead().constraintsGetForLabelAndPropertyKey( statement, labelId, propertyKeyId );
+        return schemaRead().constraintsGetForLabelAndPropertyKey( statement, labelId, propertyKeyIds );
     }
 
     @Override
@@ -1096,11 +1097,11 @@ public class OperationsFacade
 
     // <SchemaWrite>
     @Override
-    public IndexDescriptor indexCreate( int labelId, int propertyKeyId )
+    public IndexDescriptor indexCreate( int labelId, int[] propertyKeyIds )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().indexCreate( statement, labelId, propertyKeyId );
+        return schemaWrite().indexCreate( statement, labelId, propertyKeyIds );
     }
 
     @Override
@@ -1111,19 +1112,19 @@ public class OperationsFacade
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( int labelId, int propertyKeyId )
+    public UniquenessConstraint uniquePropertyConstraintCreate( int labelId, int[] propertyKeyIds )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
     {
         statement.assertOpen();
-        return schemaWrite().uniquePropertyConstraintCreate( statement, labelId, propertyKeyId );
+        return schemaWrite().uniquePropertyConstraintCreate( statement, labelId, propertyKeyIds );
     }
 
     @Override
-    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( int labelId, int propertyKeyId )
+    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( int labelId, int[] propertyKeyIds )
             throws CreateConstraintFailureException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, labelId, propertyKeyId );
+        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, labelId, propertyKeyIds );
     }
 
     @Override

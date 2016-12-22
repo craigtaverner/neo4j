@@ -31,7 +31,8 @@ abstract class RelationshipConstraintDefinition extends PropertyConstraintDefini
     protected RelationshipConstraintDefinition( InternalSchemaActions actions, RelationshipType relationshipType,
             String propertyKey )
     {
-        super( actions, propertyKey );
+        //TODO: Refactor to split class hierarchy for SinglePropertyConstraintDefinition and MultPropertyConstraintDefinition
+        super( actions, new String[]{propertyKey} );
         this.relationshipType = requireNonNull( relationshipType );
     }
 
@@ -49,6 +50,11 @@ abstract class RelationshipConstraintDefinition extends PropertyConstraintDefini
         return relationshipType;
     }
 
+    public String getPropertyKey()
+    {
+        return propertyKeys[0];
+    }
+
     @Override
     public boolean equals( Object o )
     {
@@ -61,13 +67,13 @@ abstract class RelationshipConstraintDefinition extends PropertyConstraintDefini
             return false;
         }
         RelationshipConstraintDefinition that = (RelationshipConstraintDefinition) o;
-        return relationshipType.name().equals( that.relationshipType.name() ) && propertyKey.equals( that.propertyKey );
+        return relationshipType.name().equals( that.relationshipType.name() ) && getPropertyKey().equals( that.getPropertyKey() );
 
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * relationshipType.name().hashCode() + propertyKey.hashCode();
+        return 31 * relationshipType.name().hashCode() + getPropertyKey().hashCode();
     }
 }

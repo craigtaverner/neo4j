@@ -55,9 +55,6 @@ public class IndexCreatorImpl implements IndexCreator
     {
         assertInUnterminatedTransaction();
 
-        if ( !propertyKeys.isEmpty() )
-            throw new UnsupportedOperationException(
-                    "Compound indexes are not yet supported, only one property per index is allowed." );
         return
             new IndexCreatorImpl( actions, label,
                                   Iterables.addToCollection( asList( propertyKey ), new ArrayList<>( propertyKeys ) ) );
@@ -71,7 +68,7 @@ public class IndexCreatorImpl implements IndexCreator
         if ( propertyKeys.isEmpty() )
             throw new ConstraintViolationException( "An index needs at least one property key to index" );
 
-        return actions.createIndexDefinition( label, Iterables.single( propertyKeys ) );
+        return actions.createIndexDefinition( label, propertyKeys.toArray( new String[propertyKeys.size()] ) );
     }
 
     protected void assertInUnterminatedTransaction()

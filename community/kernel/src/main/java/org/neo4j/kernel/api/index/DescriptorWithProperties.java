@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2017 "Neo Technology,"
+ * Copyright (c) 2002-2016 "Neo Technology,"
  * Network Engine for Objects in Lund AB [http://neotechnology.com]
  *
  * This file is part of Neo4j.
@@ -17,20 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.impl.store.record;
+package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.constraints.PropertyConstraint;
-
-public abstract class PropertyConstraintRule extends AbstractSchemaRule
+public interface DescriptorWithProperties
 {
-    PropertyConstraintRule( long id, Kind kind )
-    {
-        super( id, kind );
-    }
-
-    public abstract PropertyConstraint toConstraint();
-
-    public abstract boolean containsPropertyKeyIds( int[] propertyKeyIds );
-
-    public abstract boolean containsPropertyKeyId( int propertyKeyId );
+    int[] getPropertyKeyIds();
 }

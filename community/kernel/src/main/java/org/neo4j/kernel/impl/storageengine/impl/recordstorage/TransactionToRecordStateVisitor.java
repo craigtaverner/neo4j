@@ -186,13 +186,13 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         if ( isConstraintIndex )
         {
             rule = IndexRule.constraintIndexRule( schemaStorage.newRuleId(), element.getLabelId(),
-                    element.getPropertyKeyId(), providerDescriptor,
+                    element.getPropertyKeyIds(), providerDescriptor,
                     null );
         }
         else
         {
             rule = IndexRule.indexRule( schemaStorage.newRuleId(), element.getLabelId(),
-                    element.getPropertyKeyId(), providerDescriptor );
+                    element.getPropertyKeyIds(), providerDescriptor );
         }
         recordState.createSchemaRule( rule );
     }
@@ -203,7 +203,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         SchemaStorage.IndexRuleKind kind = isConstraintIndex ?
                 SchemaStorage.IndexRuleKind.CONSTRAINT
                 : SchemaStorage.IndexRuleKind.INDEX;
-        IndexRule rule = schemaStorage.indexRule( element.getLabelId(), element.getPropertyKeyId(), kind );
+        IndexRule rule = schemaStorage.indexRule( element.getLabelId(), element.getPropertyKeyIds(), kind );
         recordState.dropSchemaRule( rule );
     }
 
@@ -214,10 +214,10 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         long constraintId = schemaStorage.newRuleId();
         IndexRule indexRule = schemaStorage.indexRule(
                 element.label(),
-                element.propertyKey(),
+                element.getPropertyKeyIds(),
                 SchemaStorage.IndexRuleKind.CONSTRAINT );
         recordState.createSchemaRule( constraintSemantics
-                .writeUniquePropertyConstraint( constraintId, element.label(), element.propertyKey(),
+                .writeUniquePropertyConstraint( constraintId, element.label(), element.getPropertyKeyIds(),
                         indexRule.getId() ) );
         recordState.setConstraintIndexOwner( indexRule, constraintId );
     }
@@ -229,7 +229,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         {
             clearSchemaState = true;
             UniquePropertyConstraintRule rule = schemaStorage
-                    .uniquenessConstraint( element.label(), element.propertyKey() );
+                    .uniquenessConstraint( element.label(), element.getPropertyKeyIds() );
             recordState.dropSchemaRule( rule );
         }
         catch ( SchemaRuleNotFoundException e )
@@ -243,7 +243,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
             throw new IllegalStateException( "Multiple constraints found for specified label and property." );
         }
         // Remove the index for the constraint as well
-        visitRemovedIndex( new IndexDescriptor( element.label(), element.propertyKey() ), true );
+        visitRemovedIndex( new IndexDescriptor( element.label(), element.getPropertyKeyIds() ), true );
     }
 
     @Override
@@ -252,7 +252,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
     {
         clearSchemaState = true;
         recordState.createSchemaRule( constraintSemantics.writeNodePropertyExistenceConstraint(
-                schemaStorage.newRuleId(), element.label(), element.propertyKey() ) );
+                schemaStorage.newRuleId(), element.label(), element.getPropertyKeyIds() ) );
     }
 
     @Override
@@ -262,7 +262,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         {
             clearSchemaState = true;
             recordState.dropSchemaRule(
-                    schemaStorage.nodePropertyExistenceConstraint( element.label(), element.propertyKey() ) );
+                    schemaStorage.nodePropertyExistenceConstraint( element.label(), element.getPropertyKeyIds() ) );
         }
         catch ( SchemaRuleNotFoundException e )
         {

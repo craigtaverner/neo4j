@@ -69,7 +69,7 @@ public class NeoStoreIndexStoreView implements IndexStoreView
     @Override
     public DoubleLongRegister indexUpdatesAndSize( IndexDescriptor descriptor, DoubleLongRegister output )
     {
-        return counts.indexUpdatesAndSize( descriptor.getLabelId(), descriptor.getPropertyKeyId(), output );
+        return counts.indexUpdatesAndSize( descriptor.getLabelId(), descriptor.getPropertyKeyIds(), output );
     }
 
     @Override
@@ -77,11 +77,11 @@ public class NeoStoreIndexStoreView implements IndexStoreView
                                     long uniqueElements, long maxUniqueElements, long indexSize )
     {
         int labelId = descriptor.getLabelId();
-        int propertyKeyId = descriptor.getPropertyKeyId();
+        int[] propertyKeyIds = descriptor.getPropertyKeyIds();
         try ( CountsAccessor.IndexStatsUpdater updater = counts.updateIndexCounts() )
         {
-            updater.replaceIndexSample( labelId, propertyKeyId, uniqueElements, maxUniqueElements );
-            updater.replaceIndexUpdateAndSize( labelId, propertyKeyId, 0L, indexSize );
+            updater.replaceIndexSample( labelId, propertyKeyIds, uniqueElements, maxUniqueElements );
+            updater.replaceIndexUpdateAndSize( labelId, propertyKeyIds, 0L, indexSize );
         }
     }
 
@@ -90,14 +90,14 @@ public class NeoStoreIndexStoreView implements IndexStoreView
     {
         try ( CountsAccessor.IndexStatsUpdater updater = counts.updateIndexCounts() )
         {
-            updater.incrementIndexUpdates( descriptor.getLabelId(), descriptor.getPropertyKeyId(), updatesDelta );
+            updater.incrementIndexUpdates( descriptor.getLabelId(), descriptor.getPropertyKeyIds(), updatesDelta );
         }
     }
 
     @Override
     public DoubleLongRegister indexSample( IndexDescriptor descriptor, DoubleLongRegister output )
     {
-        return counts.indexSample( descriptor.getLabelId(), descriptor.getPropertyKeyId(), output );
+        return counts.indexSample( descriptor.getLabelId(), descriptor.getPropertyKeyIds(), output );
     }
 
     @Override

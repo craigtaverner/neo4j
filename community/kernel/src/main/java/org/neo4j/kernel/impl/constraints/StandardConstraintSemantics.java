@@ -37,10 +37,10 @@ public class StandardConstraintSemantics implements ConstraintSemantics
     public static final String ERROR_MESSAGE = "Property existence constraint requires Neo4j Enterprise Edition";
 
     @Override
-    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int propertyKey )
+    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int[] propertyKeys )
             throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKey ) );
+        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKeys ) );
     }
 
     @Override
@@ -73,16 +73,16 @@ public class StandardConstraintSemantics implements ConstraintSemantics
     }
 
     @Override
-    public PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, int label, int propertyKey, long indexId )
+    public PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, int label, int[] propertyKeys, long indexId )
     {
-        return UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId, label, propertyKey, indexId );
+        return UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId, label, propertyKeys, indexId );
     }
 
     @Override
-    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int label, int propertyKey )
+    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int label, int[] propertyKeys )
             throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKey ) );
+        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKeys ) );
     }
 
     @Override

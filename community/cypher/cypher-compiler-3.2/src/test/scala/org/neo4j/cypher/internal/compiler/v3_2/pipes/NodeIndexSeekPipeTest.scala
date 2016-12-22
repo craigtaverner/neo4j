@@ -24,6 +24,7 @@ import org.mockito.Mockito._
 import org.neo4j.cypher.internal.compiler.v3_2._
 import org.neo4j.cypher.internal.compiler.v3_2.commands.expressions.{ListLiteral, Literal, Variable}
 import org.neo4j.cypher.internal.compiler.v3_2.commands.{ManyQueryExpression, SingleQueryExpression}
+import org.neo4j.cypher.internal.compiler.v3_2.helpers.JavaConversionSupport
 import org.neo4j.cypher.internal.compiler.v3_2.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_2.ast._
 import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.CypherFunSuite
@@ -36,8 +37,8 @@ class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSuppo
   implicit val monitor = mock[PipeMonitor]
 
   val label = LabelToken(LabelName("LabelName") _, LabelId(11))
-  val propertyKey = PropertyKeyToken(PropertyKeyName("PropertyName") _, PropertyKeyId(10))
-  val descriptor = new IndexDescriptor(label.nameId.id, propertyKey.nameId.id)
+  val propertyKey = Seq(PropertyKeyToken(PropertyKeyName("PropertyName") _, PropertyKeyId(10)))
+  val descriptor = new IndexDescriptor(label.nameId.id, JavaConversionSupport.asJavaIntArray(propertyKey.map(_.nameId.id)))
   val node = mock[Node]
   val node2 = mock[Node]
 

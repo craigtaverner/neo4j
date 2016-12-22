@@ -19,7 +19,9 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class IndexSchemaRuleNotFoundException extends SchemaRuleNotFoundException
 {
@@ -28,12 +30,12 @@ public class IndexSchemaRuleNotFoundException extends SchemaRuleNotFoundExceptio
     private static final String INDEX_RULE_NOT_FOUND_MESSAGE_TEMPLATE =
             "%s for label '%s' and property '%s' not found.";
 
-    public IndexSchemaRuleNotFoundException( int labelId, int propertyKeyId )
+    public IndexSchemaRuleNotFoundException( int labelId, int[] propertyKeyId )
     {
         this( labelId, propertyKeyId, false );
     }
 
-    public IndexSchemaRuleNotFoundException( int labelId, int propertyKeyId, boolean unique )
+    public IndexSchemaRuleNotFoundException( int labelId, int[] propertyKeyId, boolean unique )
     {
         super( INDEX_RULE_NOT_FOUND_MESSAGE_TEMPLATE, labelId, propertyKeyId,
                 unique ? UNIQUE_INDEX_PREFIX : INDEX_PREFIX );
@@ -44,6 +46,6 @@ public class IndexSchemaRuleNotFoundException extends SchemaRuleNotFoundExceptio
     {
         return String.format( messageTemplate, messagePrefix,
                 tokenNameLookup.labelGetName( ruleEntityId ),
-                tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+                IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
     }
 }

@@ -20,13 +20,14 @@
 package org.neo4j.kernel.api.constraints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
  * Description of uniqueness constraint over nodes given a label and a property key id.
  */
 public class UniquenessConstraint extends NodePropertyConstraint
 {
-    public UniquenessConstraint( int labelId, int propertyKeyId )
+    public UniquenessConstraint( int labelId, int[] propertyKeyId )
     {
         super( labelId, propertyKeyId );
     }
@@ -49,13 +50,13 @@ public class UniquenessConstraint extends NodePropertyConstraint
         String labelName = labelName( tokenNameLookup );
         String boundIdentifier = labelName.toLowerCase();
         return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s.%s IS UNIQUE",
-                boundIdentifier, labelName, boundIdentifier, tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+                boundIdentifier, labelName, boundIdentifier, IndexDescriptor.propertyNameText( tokenNameLookup,propertyKeyIds ) );
     }
 
     @Override
     public String toString()
     {
         return String.format( "CONSTRAINT ON ( n:label[%s] ) ASSERT n.property[%s] IS UNIQUE",
-                labelId, propertyKeyId );
+                labelId, IndexDescriptor.propertyIdText( propertyKeyIds ) );
     }
 }

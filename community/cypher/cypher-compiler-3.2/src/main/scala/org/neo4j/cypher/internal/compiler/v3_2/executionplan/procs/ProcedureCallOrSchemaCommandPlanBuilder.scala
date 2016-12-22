@@ -52,13 +52,13 @@ case object ProcedureCallOrSchemaCommandPlanBuilder extends Phase {
       // CREATE CONSTRAINT ON (node:Label) ASSERT node.prop IS UNIQUE
       case CreateUniquePropertyConstraint(node, label, prop) =>
         Some(PureSideEffectExecutionPlan("CreateUniqueConstraint", SCHEMA_WRITE, (ctx) => {
-          (ctx.createUniqueConstraint _).tupled(labelProp(ctx)(label, prop.propertyKey))
+          (ctx.createUniqueConstraint _).tupled(labelProps(ctx)(label, List(prop.propertyKey)))
         }))
 
       // DROP CONSTRAINT ON (node:Label) ASSERT node.prop IS UNIQUE
       case DropUniquePropertyConstraint(_, label, prop) =>
         Some(PureSideEffectExecutionPlan("DropUniqueConstraint", SCHEMA_WRITE, (ctx) => {
-          (ctx.dropUniqueConstraint _).tupled(labelProp(ctx)(label, prop.propertyKey))
+          (ctx.dropUniqueConstraint _).tupled(labelProps(ctx)(label, List(prop.propertyKey)))
         }))
 
       // CREATE CONSTRAINT ON (node:Label) ASSERT node.prop EXISTS
@@ -105,6 +105,9 @@ case object ProcedureCallOrSchemaCommandPlanBuilder extends Phase {
 
   private def labelProp(ctx: QueryContext)(label: LabelName, prop: PropertyKeyName) =
     (ctx.getOrCreateLabelId(label.name), ctx.getOrCreatePropertyKeyId(prop.name))
+
+  private def labelProps(ctx: QueryContext)(label: LabelName, props: List[PropertyKeyName]) =
+    (ctx.getOrCreateLabelId(label.name), props.map(prop => ctx.getOrCreatePropertyKeyId(prop.name)))
 
   private def typeProp(ctx: QueryContext)(relType: RelTypeName, prop: PropertyKeyName) =
     (ctx.getOrCreateRelTypeId(relType.name), ctx.getOrCreatePropertyKeyId(prop.name))

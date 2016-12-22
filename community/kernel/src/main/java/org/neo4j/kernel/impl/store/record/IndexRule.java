@@ -20,6 +20,8 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
@@ -37,7 +39,7 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     private static final long NO_OWNING_CONSTRAINT = -1;
     private final SchemaIndexProvider.Descriptor providerDescriptor;
     private final int label;
-    private final int propertyKey;
+    private final int[] propertyKeys;
     /**
      * Non-null for constraint indexes, equal to {@link #NO_OWNING_CONSTRAINT} for
      * constraint indexes with no owning constraint record.
@@ -47,33 +49,33 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     static IndexRule readIndexRule( long id, boolean constraintIndex, int label, ByteBuffer serialized )
     {
         SchemaIndexProvider.Descriptor providerDescriptor = readProviderDescriptor( serialized );
-        int propertyKeyId = readPropertyKey( serialized );
+        int[] propertyKeyIds = readPropertyKeys( serialized );
         if ( constraintIndex )
         {
             long owningConstraint = readOwningConstraint( serialized );
-            return constraintIndexRule( id, label, propertyKeyId, providerDescriptor, owningConstraint );
+            return constraintIndexRule( id, label, propertyKeyIds, providerDescriptor, owningConstraint );
         }
         else
         {
-            return indexRule( id, label, propertyKeyId, providerDescriptor );
+            return indexRule( id, label, propertyKeyIds, providerDescriptor );
         }
     }
 
-    public static IndexRule indexRule( long id, int label, int propertyKeyId,
+    public static IndexRule indexRule( long id, int label, int[] propertyKeyIds,
                                        SchemaIndexProvider.Descriptor providerDescriptor )
     {
-        return new IndexRule( id, label, propertyKeyId, providerDescriptor, null );
+        return new IndexRule( id, label, propertyKeyIds, providerDescriptor, null );
     }
 
-    public static IndexRule constraintIndexRule( long id, int label, int propertyKeyId,
+    public static IndexRule constraintIndexRule( long id, int label, int[] propertyKeyIds,
                                                  SchemaIndexProvider.Descriptor providerDescriptor,
                                                  Long owningConstraint )
     {
-        return new IndexRule( id, label, propertyKeyId, providerDescriptor,
+        return new IndexRule( id, label, propertyKeyIds, providerDescriptor,
                               owningConstraint == null ? NO_OWNING_CONSTRAINT : owningConstraint );
     }
 
-    public IndexRule( long id, int label, int propertyKey, SchemaIndexProvider.Descriptor providerDescriptor,
+    public IndexRule( long id, int label, int[] propertyKeys, SchemaIndexProvider.Descriptor providerDescriptor,
                        Long owningConstraint )
     {
         super( id, indexKind( owningConstraint ) );
@@ -86,7 +88,7 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
 
         this.providerDescriptor = providerDescriptor;
         this.label = label;
-        this.propertyKey = propertyKey;
+        this.propertyKeys = propertyKeys;
     }
 
     private static Kind indexKind( Long owningConstraint )
@@ -101,14 +103,19 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         return new SchemaIndexProvider.Descriptor( providerKey, providerVersion );
     }
 
-    private static int readPropertyKey( ByteBuffer serialized )
+    private static int[] readPropertyKeys( ByteBuffer serialized )
     {
         // Currently only one key is supported although the data format supports multiple
         int count = serialized.getShort();
-        assert count == 1;
+        assert count >= 1;
 
         // Changed from being a long to an int 2013-09-10, but keeps reading a long to not change the store format.
-        return safeCastLongToInt( serialized.getLong() );
+        int[] props = new int[count];
+        for ( int i = 0; i < count; i++ )
+        {
+            props[i] = safeCastLongToInt( serialized.getLong() );
+        }
+        return props;
     }
 
     private static long readOwningConstraint( ByteBuffer serialized )
@@ -122,9 +129,9 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     }
 
     @Override
-    public int getPropertyKey()
+    public int[] getPropertyKeys()
     {
-        return propertyKey;
+        return propertyKeys;
     }
 
     @Override
@@ -167,8 +174,8 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
                + 1 /* kind id */
                + UTF8.computeRequiredByteBufferSize( providerDescriptor.getKey() )
                + UTF8.computeRequiredByteBufferSize( providerDescriptor.getVersion() )
-               + 2 * 1                              /* number of property keys, for now always 1 */
-               + 8                                  /* the property keys */
+               + 2                                  /* number of property keys (short) */
+               + 8 * propertyKeys.length            /* the property keys, each 8 bytes (long) */
                + (isConstraintIndex() ? 8 : 0)      /* constraint indexes have an owner field */;
     }
 
@@ -180,8 +187,11 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         target.put( (byte) (kind.ordinal()+1) );
         UTF8.putEncodedStringInto( providerDescriptor.getKey(), target );
         UTF8.putEncodedStringInto( providerDescriptor.getVersion(), target );
-        target.putShort( (short) 1 /*propertyKeys.length*/ );
-        target.putLong( propertyKey );
+        target.putShort( (short) propertyKeys.length );
+        for ( int i = 0; i < propertyKeys.length; i++ )
+        {
+            target.putLong( propertyKeys[i] );
+        }
         if ( isConstraintIndex() )
         {
             target.putLong( owningConstraint );
@@ -192,7 +202,12 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     public int hashCode()
     {
         // TODO: Think if this needs to be extended with providerDescriptor
-        return 31 * (31 * super.hashCode() + label) + propertyKey;
+        int result = 31 * (31 * super.hashCode() + label);
+        for (int element : propertyKeys)
+        {
+            result = 31 * result + element;
+        }
+        return result;
     }
 
     @Override
@@ -211,7 +226,7 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
             return false;
         }
         IndexRule indexRule = (IndexRule) o;
-        return label == indexRule.label && propertyKey == indexRule.propertyKey;
+        return label == indexRule.label && Arrays.equals( propertyKeys, indexRule.propertyKeys );
     }
 
     @Override
@@ -222,9 +237,11 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         {
             ownerString = ", owner=" + (owningConstraint == -1 ? "<not set>" : owningConstraint);
         }
+        String propertyKeyString = Arrays.stream(propertyKeys).mapToObj(id -> Integer.toString(id)).collect(
+                Collectors.joining(","));
 
         return "IndexRule[id=" + id + ", label=" + label + ", kind=" + kind +
-               ", provider=" + providerDescriptor + ", properties=" + propertyKey + ownerString + "]";
+               ", provider=" + providerDescriptor + ", properties=" + propertyKeyString + ownerString + "]";
     }
 
     public IndexRule withOwningConstraint( long constraintId )
@@ -233,6 +250,6 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         {
             throw new IllegalStateException( this + " is not a constraint index" );
         }
-        return constraintIndexRule( getId(), getLabel(), getPropertyKey(), getProviderDescriptor(), constraintId );
+        return constraintIndexRule( getId(), getLabel(), getPropertyKeys(), getProviderDescriptor(), constraintId );
     }
 }

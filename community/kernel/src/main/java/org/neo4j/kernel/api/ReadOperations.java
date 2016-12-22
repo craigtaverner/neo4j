@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -290,7 +291,7 @@ public interface ReadOperations
     //===========================================
 
     /** Returns the index rule for the given labelId and propertyKey. */
-    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int propertyKey )
+    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKey )
             throws SchemaRuleNotFoundException;
 
     /** Get all indexes for a label. */
@@ -300,7 +301,7 @@ public interface ReadOperations
     Iterator<IndexDescriptor> indexesGetAll();
 
     /** Returns the constraint index for the given labelId and propertyKey. */
-    IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int propertyKeyId )
+    IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
             throws SchemaRuleNotFoundException, DuplicateIndexSchemaRuleException;
 
     /** Get all constraint indexes for a label. */
@@ -328,7 +329,7 @@ public interface ReadOperations
      * Get all constraints applicable to label and propertyKey. There are only {@link NodePropertyConstraint}
      * for the time being.
      */
-    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int propertyKeyId );
+    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
 
     /**
      * Get all constraints applicable to label. There are only {@link NodePropertyConstraint}

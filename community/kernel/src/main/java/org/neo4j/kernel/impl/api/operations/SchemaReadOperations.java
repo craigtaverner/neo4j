@@ -39,7 +39,7 @@ public interface SchemaReadOperations
     /**
      * Returns the descriptor for the given labelId and propertyKey.
      */
-    IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, int labelId, int propertyKey );
+    IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, int labelId, int[] propertyKey );
 
     /**
      * Get all indexes for a label.
@@ -88,10 +88,10 @@ public interface SchemaReadOperations
     String indexGetFailure( Statement state, IndexDescriptor descriptor ) throws IndexNotFoundKernelException;
 
     /**
-     * Get all constraints applicable to label and propertyKey. There are only {@link NodePropertyConstraint}
+     * Get all constraints applicable to label and propertyKeys. There are only {@link NodePropertyConstraint}
      * for the time being.
      */
-    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( KernelStatement state, int labelId, int propertyKeyId );
+    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( KernelStatement state, int labelId, int[] propertyKeyIds );
 
     /**
      * Get all constraints applicable to label. There are only {@link NodePropertyConstraint}

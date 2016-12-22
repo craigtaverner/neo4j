@@ -171,8 +171,9 @@ public class BuiltInProceduresIT extends KernelIntegrationTest
         int labelId1 = ops.labelGetOrCreateForName( "Person" );
         int labelId2 = ops.labelGetOrCreateForName( "Age" );
         int propertyKeyId = ops.propertyKeyGetOrCreateForName( "foo" );
-        ops.indexCreate( labelId1, propertyKeyId );
-        ops.uniquePropertyConstraintCreate( labelId2, propertyKeyId );
+        //TODO: Add test support for composite indexes
+        ops.indexCreate( labelId1, new int[]{propertyKeyId} );
+        ops.uniquePropertyConstraintCreate( labelId2, new int[]{propertyKeyId} );
         commit();
 
         //let indexes come online

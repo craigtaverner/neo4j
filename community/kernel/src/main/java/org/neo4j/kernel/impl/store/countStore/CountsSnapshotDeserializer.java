@@ -64,13 +64,13 @@ public class CountsSnapshotDeserializer
                 break;
 
             case INDEX_SAMPLE:
-                key = indexSampleKey( channel.getInt(), channel.getInt() );
+                key = indexSampleKey( channel.getInt(), readPropertyKeyIds( channel ) );
                 value = new long[]{channel.getLong(), channel.getLong()};
                 map.put( key, value );
                 break;
 
             case INDEX_STATISTICS:
-                key = indexStatisticsKey( channel.getInt(), channel.getInt() );
+                key = indexStatisticsKey( channel.getInt(), readPropertyKeyIds( channel ) );
                 value = new long[]{channel.getLong(), channel.getLong()};
                 map.put( key, value );
                 break;
@@ -83,5 +83,16 @@ public class CountsSnapshotDeserializer
             }
         }
         return new CountsSnapshot( txid, map );
+    }
+
+    private static int[] readPropertyKeyIds( ReadableClosableChannel channel ) throws IOException
+    {
+        short length = channel.getShort();
+        int[] propertyKeyIds = new int[length];
+        for ( int ip = 0; ip < length; ip++ )
+        {
+            propertyKeyIds[ip] = channel.getInt();
+        }
+        return propertyKeyIds;
     }
 }

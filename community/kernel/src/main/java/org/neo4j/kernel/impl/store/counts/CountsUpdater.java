@@ -97,11 +97,11 @@ final class CountsUpdater implements CountsAccessor.Updater, CountsAccessor.Inde
      * For key format, see {@link KeyFormat#visitIndexStatistics(int, int, long, long)}
      */
     @Override
-    public void replaceIndexUpdateAndSize( int labelId, int propertyKeyId, long updates, long size )
+    public void replaceIndexUpdateAndSize( int labelId, int[] propertyKeyIds, long updates, long size )
     {
         try
         {
-            updater.apply( indexStatisticsKey( labelId, propertyKeyId ), new Write( updates, size ) );
+            updater.apply( indexStatisticsKey( labelId, propertyKeyIds ), new Write( updates, size ) );
         }
         catch ( IOException e )
         {
@@ -120,11 +120,11 @@ final class CountsUpdater implements CountsAccessor.Updater, CountsAccessor.Inde
      * For key format, see {@link KeyFormat#visitIndexSample(int, int, long, long)}
      */
     @Override
-    public void replaceIndexSample( int labelId, int propertyKeyId, long unique, long size )
+    public void replaceIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
     {
         try
         {
-            updater.apply( indexSampleKey( labelId, propertyKeyId ), new Write( unique, size ) );
+            updater.apply( indexSampleKey( labelId, propertyKeyIds ), new Write( unique, size ) );
         }
         catch ( IOException e )
         {
@@ -134,14 +134,14 @@ final class CountsUpdater implements CountsAccessor.Updater, CountsAccessor.Inde
 
     /**
      * For key format, see {@link KeyFormat#visitIndexStatistics(int, int, long, long)}
-     * For value format, see {@link CountsUpdater#replaceIndexUpdateAndSize(int, int, long, long)}
+     * For value format, see {@link CountsUpdater#replaceIndexUpdateAndSize(int, int[], long, long)}
      */
     @Override
-    public void incrementIndexUpdates( int labelId, int propertyKeyId, long delta )
+    public void incrementIndexUpdates( int labelId, int[] propertyKeyIds, long delta )
     {
         try
         {
-            updater.apply( indexStatisticsKey( labelId, propertyKeyId ), incrementFirstBy( delta ) );
+            updater.apply( indexStatisticsKey( labelId, propertyKeyIds ), incrementFirstBy( delta ) );
         }
         catch ( IOException e )
         {

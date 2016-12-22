@@ -26,6 +26,7 @@ import java.util.Set;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.exceptions.index.IndexEntryConflictException;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class UniquenessConstraintVerificationFailedKernelException extends ConstraintVerificationFailedKernelException
 {
@@ -56,7 +57,7 @@ public class UniquenessConstraintVerificationFailedKernelException extends Const
             IndexEntryConflictException conflict = iterator.next();
             message.append( conflict.evidenceMessage(
                     tokenNameLookup.labelGetName( constraint.label() ),
-                    tokenNameLookup.propertyKeyGetName( constraint.propertyKey() )
+                    IndexDescriptor.propertyNameText( tokenNameLookup, constraint.getPropertyKeyIds() )
             ) );
             if ( iterator.hasNext() )
             {

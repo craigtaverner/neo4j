@@ -19,7 +19,10 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import java.util.Arrays;
+
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
  * Base class describing property constraint on nodes.
@@ -28,9 +31,9 @@ public abstract class NodePropertyConstraint extends PropertyConstraint
 {
     protected final int labelId;
 
-    public NodePropertyConstraint( int labelId, int propertyKeyId )
+    public NodePropertyConstraint( int labelId, int[] propertyKeyIds )
     {
-        super( propertyKeyId );
+        super( propertyKeyIds );
         this.labelId = labelId;
     }
 
@@ -51,7 +54,7 @@ public abstract class NodePropertyConstraint extends PropertyConstraint
             return false;
         }
         NodePropertyConstraint that = (NodePropertyConstraint) o;
-        return propertyKeyId == that.propertyKeyId && labelId == that.labelId;
+        return Arrays.equals( propertyKeyIds, that.propertyKeyIds ) && labelId == that.labelId;
 
     }
 
@@ -69,9 +72,14 @@ public abstract class NodePropertyConstraint extends PropertyConstraint
         }
     }
 
+    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
+    {
+        return Arrays.equals( this.propertyKeyIds, propertyKeyIds );
+    }
+
     @Override
     public int hashCode()
     {
-        return 31 * propertyKeyId + labelId;
+        return IndexDescriptor.hashcode( labelId, propertyKeyIds );
     }
 }

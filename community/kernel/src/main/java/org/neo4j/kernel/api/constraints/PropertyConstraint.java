@@ -21,11 +21,12 @@ package org.neo4j.kernel.api.constraints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
+import org.neo4j.kernel.api.index.DescriptorWithProperties;
 
 /**
  * Base class describing a property constraint.
  */
-public abstract class PropertyConstraint
+public abstract class PropertyConstraint implements DescriptorWithProperties
 {
     public interface ChangeVisitor
     {
@@ -44,20 +45,20 @@ public abstract class PropertyConstraint
         void visitRemovedRelationshipPropertyExistenceConstraint( RelationshipPropertyExistenceConstraint constraint );
     }
 
-    protected final int propertyKeyId;
+    protected final int[] propertyKeyIds;
 
-    public PropertyConstraint( int propertyKeyId )
+    public PropertyConstraint( int[] propertyKeyIds )
     {
-        this.propertyKeyId = propertyKeyId;
+        this.propertyKeyIds = propertyKeyIds;
     }
 
     public abstract void added( ChangeVisitor visitor ) throws CreateConstraintFailureException;
 
     public abstract void removed( ChangeVisitor visitor );
 
-    public int propertyKey()
+    public int[] getPropertyKeyIds()
     {
-        return propertyKeyId;
+        return propertyKeyIds;
     }
 
     public abstract String userDescription( TokenNameLookup tokenNameLookup );

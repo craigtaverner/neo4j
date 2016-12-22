@@ -90,7 +90,7 @@ public class SchemaRuleCommandTest
             mock( PropertyLoader.class ), new PropertyPhysicalToLogicalConverter( propertyStore ),
             TransactionApplicationMode.INTERNAL );
     private final PhysicalLogCommandReaderV2_2 reader = new PhysicalLogCommandReaderV2_2();
-    private final IndexRule rule = IndexRule.indexRule( id, labelId, propertyKey, PROVIDER_DESCRIPTOR );
+    private final IndexRule rule = IndexRule.indexRule( id, labelId, new int[]{propertyKey}, PROVIDER_DESCRIPTOR );
 
     @Test
     public void shouldWriteCreatedSchemaRuleToStore() throws Exception
@@ -134,7 +134,8 @@ public class SchemaRuleCommandTest
         when( neoStores.getSchemaStore() ).thenReturn( schemaStore );
         when( neoStores.getMetaDataStore() ).thenReturn( metaDataStore );
 
-        UniquePropertyConstraintRule schemaRule = uniquenessConstraintRule( id, labelId, propertyKey, 0 );
+        //TODO: Consider testing composite indexes
+        UniquePropertyConstraintRule schemaRule = uniquenessConstraintRule( id, labelId, new int[]{propertyKey}, 0 );
 
         // WHEN
         visitSchemaRuleCommand( storeApplier, new SchemaRuleCommand( beforeRecords, afterRecords, schemaRule ) );
@@ -240,7 +241,8 @@ public class SchemaRuleCommandTest
     {
         assertEquals( id, readSchemaCommand.getKey() );
         assertEquals( labelId, readSchemaCommand.getSchemaRule().getLabel() );
-        assertEquals( propertyKey, ((IndexRule)readSchemaCommand.getSchemaRule()).getPropertyKey() );
+        //TODO: Consider generalizing to composite indexes
+        assertEquals( propertyKey, ((IndexRule)readSchemaCommand.getSchemaRule()).getPropertyKeys()[0] );
     }
 
     private void visitSchemaRuleCommand( BatchTransactionApplier applier, SchemaRuleCommand command ) throws Exception

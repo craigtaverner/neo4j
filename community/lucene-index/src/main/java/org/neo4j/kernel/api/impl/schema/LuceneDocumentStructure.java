@@ -85,7 +85,19 @@ public class LuceneDocumentStructure
     public static Document documentRepresentingProperty( long nodeId, Object value )
     {
         DocWithId document = reuseDocument( nodeId );
+        document.removeAllValueFields();
         document.setValue( ValueEncoding.forValue( value ), value );
+        return document.document;
+    }
+
+    public static Document documentRepresentingProperties( long nodeId, Object[] values )
+    {
+        DocWithId document = reuseDocument( nodeId );
+        document.removeAllValueFields();
+        for ( Object value : values )
+        {
+            document.setValue( ValueEncoding.forValue( value ), value );
+        }
         return document.document;
     }
 
@@ -277,7 +289,6 @@ public class LuceneDocumentStructure
 
         private void setValue( ValueEncoding encoding, Object value )
         {
-            removeAllValueFields();
             Field reusableField = getFieldWithValue( encoding, value );
             document.add( reusableField );
         }

@@ -316,7 +316,7 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
 
         DataWriteOperations statement = dataWriteOperationsInNewTransaction();
         IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( statement
-                .labelGetForName( "Person" ), statement.propertyKeyGetForName( "id" ) );
+                .labelGetForName( "Person" ), new int[]{statement.propertyKeyGetForName( "id" )} );
 
         // when
         createLabeledNode( statement, "Item", "id", 2 );
@@ -341,7 +341,7 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
 
         DataWriteOperations statement = dataWriteOperationsInNewTransaction();
         IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( statement
-                .labelGetForName( "Person" ), statement.propertyKeyGetForName( "id" ) );
+                .labelGetForName( "Person" ), new int[]{statement.propertyKeyGetForName( "id" )} );
 
         // when
         createLabeledNode( statement, "Person", "id", 2 );
@@ -369,6 +369,7 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
 
     private void createConstraint( String label, String propertyKey ) throws KernelException
     {
+        //TODO: Consider testing composite indexes
         int labelId, propertyKeyId;
         {
             DataWriteOperations statement = dataWriteOperationsInNewTransaction();
@@ -379,7 +380,7 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
 
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( labelId, propertyKeyId );
+            statement.uniquePropertyConstraintCreate( labelId, new int[]{propertyKeyId} );
             commit();
         }
     }

@@ -86,6 +86,7 @@ import org.neo4j.kernel.impl.coreapi.schema.IndexCreatorImpl;
 import org.neo4j.kernel.impl.coreapi.schema.IndexDefinitionImpl;
 import org.neo4j.kernel.impl.coreapi.schema.InternalSchemaActions;
 import org.neo4j.kernel.impl.coreapi.schema.NodePropertyExistenceConstraintDefinition;
+import org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils;
 import org.neo4j.kernel.impl.coreapi.schema.RelationshipPropertyExistenceConstraintDefinition;
 import org.neo4j.kernel.impl.coreapi.schema.UniquenessConstraintDefinition;
 import org.neo4j.kernel.impl.factory.DatabaseInfo;
@@ -370,32 +371,32 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         propertyCreator.primitiveSetProperty( primitiveRecord, propertyKey, propertyValue, propertyRecords );
     }
 
-    private void validateIndexCanBeCreated( int labelId, int propertyKeyId )
+    private void validateIndexCanBeCreated( int labelId, int[] propertyKeyIds )
     {
-        verifyIndexOrUniquenessConstraintCanBeCreated( labelId, propertyKeyId,
+        verifyIndexOrUniquenessConstraintCanBeCreated( labelId, propertyKeyIds,
                 "Index for given {label;property} already exists" );
     }
 
-    private void validateUniquenessConstraintCanBeCreated( int labelId, int propertyKeyId )
+    private void validateUniquenessConstraintCanBeCreated( int labelId, int[] propertyKeyIds )
     {
-        verifyIndexOrUniquenessConstraintCanBeCreated( labelId, propertyKeyId,
+        verifyIndexOrUniquenessConstraintCanBeCreated( labelId, propertyKeyIds,
                 "It is not allowed to create uniqueness constraints and indexes on the same {label;property}" );
     }
 
-    private void verifyIndexOrUniquenessConstraintCanBeCreated( int labelId, int propertyKeyId, String errorMessage )
+    private void verifyIndexOrUniquenessConstraintCanBeCreated( int labelId, int[] propertyKeyIds, String errorMessage )
     {
         for ( SchemaRule rule : schemaCache.schemaRulesForLabel( labelId ) )
         {
-            int otherPropertyKeyId;
+            int[] otherPropertyKeyIds;
 
             switch ( rule.getKind() )
             {
             case INDEX_RULE:
             case CONSTRAINT_INDEX_RULE:
-                otherPropertyKeyId = ((IndexRule) rule).getPropertyKey();
+                otherPropertyKeyIds = ((IndexRule) rule).getPropertyKeys();
                 break;
             case UNIQUENESS_CONSTRAINT:
-                otherPropertyKeyId = ((UniquePropertyConstraintRule) rule).getPropertyKey();
+                otherPropertyKeyIds = ((UniquePropertyConstraintRule) rule).getPropertyKeys();
                 break;
             case NODE_PROPERTY_EXISTENCE_CONSTRAINT:
                 continue;
@@ -403,19 +404,19 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
                 throw new IllegalStateException( "Case not handled for " + rule.getKind() );
             }
 
-            if ( otherPropertyKeyId == propertyKeyId )
+            if ( Arrays.equals( otherPropertyKeyIds, propertyKeyIds ) )
             {
                 throw new ConstraintViolationException( errorMessage );
             }
         }
     }
 
-    private void validateNodePropertyExistenceConstraintCanBeCreated( int labelId, int propertyKeyId )
+    private void validateNodePropertyExistenceConstraintCanBeCreated( int labelId, int[] propertyKeyIds )
     {
         for ( SchemaRule rule : schemaCache.schemaRulesForLabel( labelId ) )
         {
             if ( rule.getKind() == SchemaRule.Kind.NODE_PROPERTY_EXISTENCE_CONSTRAINT &&
-                 propertyKeyId == ((NodePropertyExistenceConstraintRule) rule).getPropertyKey() )
+                 propertyKeyIds == ((NodePropertyExistenceConstraintRule) rule).getPropertyKeys() )
             {
                 throw new ConstraintViolationException(
                         "Node property existence constraint for given {label;property} already exists" );
@@ -436,9 +437,9 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         }
     }
 
-    private void createIndexRule( int labelId, int propertyKeyId )
+    private void createIndexRule( int labelId, int[] propertyKeyIds )
     {
-        IndexRule schemaRule = IndexRule.indexRule( schemaStore.nextId(), labelId, propertyKeyId,
+        IndexRule schemaRule = IndexRule.indexRule( schemaStore.nextId(), labelId, propertyKeyIds,
                                                     this.schemaIndexProviders.getDefaultProvider()
                                                                              .getProviderDescriptor() );
         for ( DynamicRecord record : schemaStore.allocateFrom( schemaRule ) )
@@ -468,9 +469,10 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         {
             IndexRule rule = rules[i];
             int labelId = rule.getLabel();
-            int propertyKeyId = rule.getPropertyKey();
+            int[] propertyKeyId = rule.getPropertyKeys();
             labelIds[i] = labelId;
-            propertyKeyIds[i] = propertyKeyId;
+            // TODO: Support composite indexes
+            propertyKeyIds[i] = propertyKeyId[0];
 
             IndexDescriptor descriptor = new IndexDescriptor( labelId, propertyKeyId );
             populators[i] = schemaIndexProviders.apply( rule.getProviderDescriptor() )
@@ -498,7 +500,8 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
                             }
                             catch ( IndexEntryConflictException conflict )
                             {
-                                throw conflict.notAllowed( rules[i].getLabel(), rules[i].getPropertyKey() );
+                                //TODO: Support composite indexes
+                                throw conflict.notAllowed( rules[i].getLabel(), rules[i].getPropertyKeys()[0] );
                             }
                         }
                     }
@@ -586,12 +589,12 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         long constraintRuleId = schemaStore.nextId();
 
         IndexRule indexRule = IndexRule.constraintIndexRule(
-                indexRuleId, constraint.label(), constraint.propertyKey(),
+                indexRuleId, constraint.label(), constraint.getPropertyKeyIds(),
                 this.schemaIndexProviders.getDefaultProvider().getProviderDescriptor(),
                 constraintRuleId );
         UniquePropertyConstraintRule
                 constraintRule = UniquePropertyConstraintRule.uniquenessConstraintRule(
-                constraintRuleId, constraint.label(), constraint.propertyKey(), indexRuleId );
+                constraintRuleId, constraint.label(), constraint.getPropertyKeyIds(), indexRuleId );
 
         for ( DynamicRecord record : schemaStore.allocateFrom( constraintRule ) )
         {
@@ -610,7 +613,7 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
     private void createConstraintRule( NodePropertyExistenceConstraint constraint )
     {
         SchemaRule rule = NodePropertyExistenceConstraintRule.nodePropertyExistenceConstraintRule( schemaStore.nextId(),
-                constraint.label(), constraint.propertyKey() );
+                constraint.label(), constraint.getPropertyKeyIds() );
 
         for ( DynamicRecord record : schemaStore.allocateFrom( rule ) )
         {
@@ -1105,46 +1108,56 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
 
     private class BatchSchemaActions implements InternalSchemaActions
     {
-        @Override
-        public IndexDefinition createIndexDefinition( Label label, String propertyKey )
+        private int[] getOrCreatePropertyKeyIds( String[] propertyKeys )
         {
-            int labelId = getOrCreateLabelId( label.name() );
-            int propertyKeyId = getOrCreatePropertyKeyId( propertyKey );
-
-            validateIndexCanBeCreated( labelId, propertyKeyId );
-
-            createIndexRule( labelId, propertyKeyId );
-            return new IndexDefinitionImpl( this, label, propertyKey, false );
+            int[] propertyKeyIds = new int[propertyKeys.length];
+            for ( int i = 0; i < propertyKeys.length; i++ )
+            {
+                propertyKeyIds[i] = getOrCreatePropertyKeyId( propertyKeys[i] );
+            }
+            return propertyKeyIds;
         }
 
         @Override
-        public void dropIndexDefinitions( Label label, String propertyKey )
+        public IndexDefinition createIndexDefinition( Label label, String[] propertyKeys )
+        {
+            int labelId = getOrCreateLabelId( label.name() );
+            int[] propertyKeyIds = getOrCreatePropertyKeyIds( propertyKeys );
+
+            validateIndexCanBeCreated( labelId, propertyKeyIds );
+
+            createIndexRule( labelId, propertyKeyIds );
+            return new IndexDefinitionImpl( this, label, propertyKeys, false );
+        }
+
+        @Override
+        public void dropIndexDefinitions( Label label, String[] propertyKeys )
         {
             throw unsupportedException();
         }
 
         @Override
-        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String propertyKey )
+        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String[] propertyKeys )
         {
             int labelId = getOrCreateLabelId( label.name() );
-            int propertyKeyId = getOrCreatePropertyKeyId( propertyKey );
+            int[] propertyKeyIds = getOrCreatePropertyKeyIds( propertyKeys );
 
-            validateUniquenessConstraintCanBeCreated( labelId, propertyKeyId );
+            validateUniquenessConstraintCanBeCreated( labelId, propertyKeyIds );
 
-            createConstraintRule( new UniquenessConstraint( labelId, propertyKeyId ) );
-            return new UniquenessConstraintDefinition( this, label, propertyKey );
+            createConstraintRule( new UniquenessConstraint( labelId, propertyKeyIds ) );
+            return new UniquenessConstraintDefinition( this, label, propertyKeys );
         }
 
         @Override
-        public ConstraintDefinition createPropertyExistenceConstraint( Label label, String propertyKey )
+        public ConstraintDefinition createPropertyExistenceConstraint( Label label, String[] propertyKeys )
         {
             int labelId = getOrCreateLabelId( label.name() );
-            int propertyKeyId = getOrCreatePropertyKeyId( propertyKey );
+            int[] propertyKeyIds = getOrCreatePropertyKeyIds( propertyKeys );
 
-            validateNodePropertyExistenceConstraintCanBeCreated( labelId, propertyKeyId );
+            validateNodePropertyExistenceConstraintCanBeCreated( labelId, propertyKeyIds );
 
-            createConstraintRule( new NodePropertyExistenceConstraint( labelId, propertyKeyId ) );
-            return new NodePropertyExistenceConstraintDefinition( this, label, propertyKey );
+            createConstraintRule( new NodePropertyExistenceConstraint( labelId, propertyKeyIds ) );
+            return new NodePropertyExistenceConstraintDefinition( this, label, propertyKeys );
         }
 
         @Override
@@ -1161,13 +1174,13 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         }
 
         @Override
-        public void dropPropertyUniquenessConstraint( Label label, String propertyKey )
+        public void dropPropertyUniquenessConstraint( Label label, String[] propertyKeys )
         {
             throw unsupportedException();
         }
 
         @Override
-        public void dropNodePropertyExistenceConstraint( Label label, String propertyKey )
+        public void dropNodePropertyExistenceConstraint( Label label, String[] propertyKeys )
         {
             throw unsupportedException();
         }

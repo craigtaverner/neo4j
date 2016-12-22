@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api.store;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class SchemaCache
 
     private final Collection<NodePropertyConstraint> nodeConstraints = new HashSet<>();
     private final Collection<RelationshipPropertyConstraint> relationshipConstraints = new HashSet<>();
-    private final Map<Integer, Map<Integer, CommittedIndexDescriptor>> indexDescriptors = new HashMap<>();
+    private final Map<IndexDescriptor, CommittedIndexDescriptor> indexDescriptors = new HashMap<>();
     private final ConstraintSemantics constraintSemantics;
 
     public SchemaCache( ConstraintSemantics constraintSemantics, Iterable<SchemaRule> initialRules )
@@ -101,10 +102,11 @@ public class SchemaCache
         return Iterators.filter( constraint -> constraint.label() == label, nodeConstraints.iterator() );
     }
 
-    public Iterator<NodePropertyConstraint> constraintsForLabelAndProperty( final int label, final int property )
+    public Iterator<NodePropertyConstraint> constraintsForLabelAndProperty( final int label, final int[] properties )
     {
         return Iterators.filter( constraint -> constraint.label() == label &&
-                                     constraint.propertyKey() == property, nodeConstraints.iterator() );
+                                               constraint.containsPropertyKeyIds( properties ),
+                nodeConstraints.iterator() );
     }
 
     public Iterator<RelationshipPropertyConstraint> constraintsForRelationshipType( final int typeId )
@@ -117,7 +119,7 @@ public class SchemaCache
     {
         return Iterators.filter(
                 constraint -> constraint.relationshipType() == typeId &&
-                              constraint.propertyKey() == propertyKeyId, relationshipConstraints.iterator() );
+                              constraint.containsPropertyKeyId( propertyKeyId ), relationshipConstraints.iterator() );
     }
 
     public void addSchemaRule( SchemaRule rule )
@@ -139,13 +141,11 @@ public class SchemaCache
         else if ( rule instanceof IndexRule )
         {
             IndexRule indexRule = (IndexRule) rule;
-            Map<Integer, CommittedIndexDescriptor> byLabel = indexDescriptors.get( indexRule.getLabel() );
-            if ( byLabel == null )
+            IndexDescriptor index = new IndexDescriptor( indexRule.getLabel(), indexRule.getPropertyKeys() );
+            if ( !indexDescriptors.containsKey( index ) )
             {
-                indexDescriptors.put( indexRule.getLabel(), byLabel = new HashMap<>() );
+                indexDescriptors.put( index, new CommittedIndexDescriptor( index, indexRule.getId() ) );
             }
-            byLabel.put( indexRule.getPropertyKey(), new CommittedIndexDescriptor( indexRule.getLabel(),
-                    indexRule.getPropertyKey(), indexRule.getId() ) );
         }
     }
 
@@ -174,12 +174,12 @@ public class SchemaCache
     private static class CommittedIndexDescriptor
     {
         private final IndexDescriptor descriptor;
-        private final long id;
+//        private final long id;
 
-        public CommittedIndexDescriptor( int labelId, int propertyKey, long id )
+        public CommittedIndexDescriptor( IndexDescriptor descriptor, long id )
         {
-            this.descriptor = new IndexDescriptor( labelId, propertyKey );
-            this.id = id;
+            this.descriptor = descriptor;
+//            this.id = id;
         }
 
         public IndexDescriptor getDescriptor()
@@ -187,10 +187,10 @@ public class SchemaCache
             return descriptor;
         }
 
-        public long getId()
-        {
-            return id;
-        }
+//        public long getId()
+//        {
+//            return id;
+//        }
     }
 
     public void removeSchemaRule( long id )
@@ -212,26 +212,13 @@ public class SchemaCache
         else if ( rule instanceof IndexRule )
         {
             IndexRule indexRule = (IndexRule) rule;
-            Map<Integer, CommittedIndexDescriptor> byLabel = indexDescriptors.get( indexRule.getLabel() );
-            byLabel.remove( indexRule.getPropertyKey() );
-            if ( byLabel.isEmpty() )
-            {
-                indexDescriptors.remove( indexRule.getLabel() );
-            }
+            indexDescriptors.remove( new IndexDescriptor( indexRule.getLabel(), indexRule.getPropertyKeys() ) );
         }
     }
 
-    public IndexDescriptor indexDescriptor( int labelId, int propertyKey )
+    public IndexDescriptor indexDescriptor( int labelId, int[] propertyKeys )
     {
-        Map<Integer, CommittedIndexDescriptor> byLabel = indexDescriptors.get( labelId );
-        if ( byLabel != null )
-        {
-            CommittedIndexDescriptor committed = byLabel.get( propertyKey );
-            if ( committed != null )
-            {
-                return committed.getDescriptor();
-            }
-        }
-        return null;
+        IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, propertyKeys );
+        return indexDescriptors.containsKey(indexDescriptor) ? indexDescriptor : null;
     }
 }

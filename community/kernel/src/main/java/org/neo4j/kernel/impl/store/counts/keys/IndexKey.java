@@ -19,19 +19,22 @@
  */
 package org.neo4j.kernel.impl.store.counts.keys;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import static org.neo4j.kernel.impl.util.IdPrettyPrinter.label;
 import static org.neo4j.kernel.impl.util.IdPrettyPrinter.propertyKey;
 
 abstract class IndexKey implements CountsKey
 {
     private final int labelId;
-    private final int propertyKeyId;
+    private final int[] propertyKeyIds;
     private final CountsKeyType type;
 
-    IndexKey( int labelId, int propertyKeyId, CountsKeyType type )
+    IndexKey( int labelId, int[] propertyKeyIds, CountsKeyType type )
     {
         this.labelId = labelId;
-        this.propertyKeyId = propertyKeyId;
+        this.propertyKeyIds = propertyKeyIds;
         this.type = type;
     }
 
@@ -40,15 +43,17 @@ abstract class IndexKey implements CountsKey
         return labelId;
     }
 
-    public int propertyKeyId()
+    public int[] propertyKeyIds()
     {
-        return propertyKeyId;
+        return propertyKeyIds;
     }
 
     @Override
     public String toString()
     {
-        return String.format( "IndexKey[%s (%s {%s})]", type.name(), label( labelId ), propertyKey( propertyKeyId ) );
+        String propertyText = Arrays.stream( propertyKeyIds ).mapToObj( id -> propertyKey( id ) )
+                .collect( Collectors.joining( "," ) );
+        return String.format( "IndexKey[%s (%s {%s})]", type.name(), label( labelId ), propertyText );
     }
 
     @Override
@@ -61,7 +66,10 @@ abstract class IndexKey implements CountsKey
     public int hashCode()
     {
         int result = labelId;
-        result = 31 * result + propertyKeyId;
+        for ( int propertyKeyId : propertyKeyIds )
+        {
+            result = 31 * result + propertyKeyId;
+        }
         result = 31 * result + type.hashCode();
         return result;
     }
@@ -79,6 +87,34 @@ abstract class IndexKey implements CountsKey
         }
 
         IndexKey indexKey = (IndexKey) other;
-        return labelId == indexKey.labelId && propertyKeyId == indexKey.propertyKeyId && type == indexKey.type;
+        return labelId == indexKey.labelId && Arrays.equals( propertyKeyIds, indexKey.propertyKeyIds ) &&
+               type == indexKey.type;
+    }
+
+    @Override
+    public int compareTo( CountsKey other )
+    {
+        if ( other instanceof IndexKey )
+        {
+            IndexKey that = (IndexKey) other;
+            int cmp = this.labelId() - that.labelId();
+            if ( cmp == 0 && !Arrays.equals( this.propertyKeyIds(), that.propertyKeyIds() ) )
+            {
+                cmp = this.propertyKeyIds().length - that.propertyKeyIds().length;
+                if ( cmp == 0 )
+                {
+                    for ( int i = 0; i < this.propertyKeyIds().length; i++ )
+                    {
+                        cmp = this.propertyKeyIds()[i] - that.propertyKeyIds()[i];
+                        if ( cmp != 0 )
+                        {
+                            return cmp;
+                        }
+                    }
+                }
+            }
+            return cmp;
+        }
+        return recordType().ordinal() - other.recordType().ordinal();
     }
 }

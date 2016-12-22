@@ -25,17 +25,20 @@ import org.neo4j.cypher.internal.compiler.v3_2.commands.{QueryExpression, indexQ
 import org.neo4j.cypher.internal.compiler.v3_2.planDescription.Id
 import org.neo4j.cypher.internal.frontend.v3_2.ast.{LabelToken, PropertyKeyToken}
 import org.neo4j.kernel.api.index.IndexDescriptor
+import scala.collection.JavaConversions._
 
 case class NodeIndexSeekPipe(ident: String,
                              label: LabelToken,
-                             propertyKey: PropertyKeyToken,
+                             propertyKeys: Seq[PropertyKeyToken],
                              valueExpr: QueryExpression[Expression],
                              indexMode: IndexSeekMode = IndexSeek)
                             (val id: Id = new Id)
                             (implicit pipeMonitor: PipeMonitor)
   extends Pipe {
 
-  private val descriptor = new IndexDescriptor(label.nameId.id, propertyKey.nameId.id)
+  private val propertyIds: Array[Int] = seqAsJavaList(propertyKeys.map(_.nameId.id)).toArray(Array[Int]())
+
+  private val descriptor = new IndexDescriptor(label.nameId.id, propertyIds)
 
   private val indexFactory = indexMode.indexFactory(descriptor)
 
@@ -45,7 +48,7 @@ case class NodeIndexSeekPipe(ident: String,
 
     val index = indexFactory(state)
     val baseContext = state.initialContext.getOrElse(ExecutionContext.empty)
-    val resultNodes = indexQuery(valueExpr, baseContext, state, index, label.name, propertyKey.name)
+    val resultNodes = indexQuery(valueExpr, baseContext, state, index, label.name, propertyKeys.map(_.name))
     resultNodes.map(node => baseContext.newWith1(ident, node))
   }
 

@@ -20,37 +20,37 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class NodePropertyExistenceConstraintRule extends NodePropertyConstraintRule
 {
-    private final int propertyKeyId;
 
     public static NodePropertyExistenceConstraintRule nodePropertyExistenceConstraintRule( long id, int labelId,
-            int propertyKeyId )
+            int[] propertyKeyIds )
     {
-        return new NodePropertyExistenceConstraintRule( id, labelId, propertyKeyId );
+        return new NodePropertyExistenceConstraintRule( id, labelId, propertyKeyIds );
     }
 
     public static NodePropertyExistenceConstraintRule readNodePropertyExistenceConstraintRule( long id, int labelId,
             ByteBuffer buffer )
     {
-        return new NodePropertyExistenceConstraintRule( id, labelId, readPropertyKey( buffer ) );
+        return new NodePropertyExistenceConstraintRule( id, labelId, new int[]{buffer.getInt()} );
     }
 
-    private NodePropertyExistenceConstraintRule( long id, int labelId, int propertyKeyId )
+    private NodePropertyExistenceConstraintRule( long id, int labelId, int[] propertyKeyIds )
     {
-        super( id, labelId, Kind.NODE_PROPERTY_EXISTENCE_CONSTRAINT );
-        this.propertyKeyId = propertyKeyId;
+        super( id, labelId, propertyKeyIds, Kind.NODE_PROPERTY_EXISTENCE_CONSTRAINT );
     }
 
     @Override
     public String toString()
     {
         return "NodePropertyExistenceConstraintRule[id=" + id + ", label=" + label + ", kind=" + kind +
-               ", propertyKeyId=" + propertyKeyId + "]";
+               ", propertyKeyIds=" + getPropertyKeys() + "]";
     }
 
     @Override
@@ -66,53 +66,12 @@ public class NodePropertyExistenceConstraintRule extends NodePropertyConstraintR
     {
         target.putInt( label );
         target.put( kind.id() );
-        target.putInt( propertyKeyId );
-    }
-
-    private static int readPropertyKey( ByteBuffer buffer )
-    {
-        return buffer.getInt();
-    }
-
-    public int getPropertyKey()
-    {
-        return propertyKeyId;
+        target.putInt( propertyKeyIds[0] );
     }
 
     @Override
     public NodePropertyConstraint toConstraint()
     {
-        return new NodePropertyExistenceConstraint( getLabel(), getPropertyKey() );
-    }
-
-    @Override
-    public boolean containsPropertyKeyId( int propertyKeyId )
-    {
-        return propertyKeyId == this.propertyKeyId;
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-        if ( o == null || getClass() != o.getClass() )
-        {
-            return false;
-        }
-        if ( !super.equals( o ) )
-        {
-            return false;
-        }
-        return propertyKeyId == ((NodePropertyExistenceConstraintRule) o).propertyKeyId;
-
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 31 * super.hashCode() + propertyKeyId;
+        return new NodePropertyExistenceConstraint( getLabel(), getPropertyKeys() );
     }
 }

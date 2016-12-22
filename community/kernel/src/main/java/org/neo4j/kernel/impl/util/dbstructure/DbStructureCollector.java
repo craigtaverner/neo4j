@@ -85,9 +85,10 @@ public class DbStructureCollector implements DbStructureVisitor
             @Override
             public Iterator<Pair<String, String>> knownUniqueConstraints()
             {
+                //TODO: Add support for composite indexes
                 return Iterators.map( uniquenessConstraint -> {
                     String label = labels.byIdOrFail( uniquenessConstraint.label() );
-                    String propertyKey = propertyKeys.byIdOrFail( uniquenessConstraint.propertyKey() );
+                    String propertyKey = propertyKeys.byIdOrFail( uniquenessConstraint.getPropertyKeyIds()[0] );
                     return Pair.of( label, propertyKey );
                 }, uniquenessConstraints.iterator() );
             }
@@ -95,9 +96,10 @@ public class DbStructureCollector implements DbStructureVisitor
             @Override
             public Iterator<Pair<String,String>> knownNodePropertyExistenceConstraints()
             {
+                //TODO: Add support for composite indexes
                 return Iterators.map( uniquenessConstraint -> {
                     String label = labels.byIdOrFail( uniquenessConstraint.label() );
-                    String propertyKey = propertyKeys.byIdOrFail( uniquenessConstraint.propertyKey() );
+                    String propertyKey = propertyKeys.byIdOrFail( uniquenessConstraint.getPropertyKeyIds()[0] );
                     return Pair.of( label, propertyKey );
                 }, nodePropertyExistenceConstraints.iterator() );
             }
@@ -327,7 +329,8 @@ public class DbStructureCollector implements DbStructureVisitor
 
         public IndexStatistics getIndex( int labelId, int propertyKeyId )
         {
-            return indexMap.get( new IndexDescriptor( labelId, propertyKeyId ) );
+            //TODO: Add support for composite indexes
+            return indexMap.get( new IndexDescriptor( labelId, new int[]{propertyKeyId} ) );
         }
 
         public Iterator<Pair<String, String>> iterator()
@@ -344,9 +347,10 @@ public class DbStructureCollector implements DbStructureVisitor
                 @Override
                 public Pair<String, String> next()
                 {
+                    //TODO: Add support for composite indexes
                     IndexDescriptor next = iterator.next();
                     String label = labels.byIdOrFail( next.getLabelId() );
-                    String propertyKey = propertyKeys.byIdOrFail( next.getPropertyKeyId() );
+                    String propertyKey = propertyKeys.byIdOrFail( next.getPropertyKeyIds()[0] );
                     return Pair.of( label, propertyKey );
                 }
 
@@ -378,6 +382,16 @@ public class DbStructureCollector implements DbStructureVisitor
                 throw new IllegalArgumentException( format( "Didn't find %s token with id %s", tokenType, token ) );
             }
             return result;
+        }
+
+        public String[] byIdOrFail( int[] tokens )
+        {
+            String[] results = new String[tokens.length];
+            for ( int i = 0; i < tokens.length; i++ )
+            {
+                results[i] = byIdOrFail( tokens[i] );
+            }
+            return results;
         }
 
         public void putToken( int token, String name )

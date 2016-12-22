@@ -611,7 +611,7 @@ public class GraphDatabaseFacade implements GraphDatabaseAPI
     {
         try
         {
-            IndexDescriptor descriptor = readOps.indexGetForLabelAndPropertyKey( labelId, propertyId );
+            IndexDescriptor descriptor = readOps.indexGetForLabelAndPropertyKey( labelId, new int[]{propertyId} );
 
             if ( readOps.indexGetState( descriptor ) == InternalIndexState.ONLINE )
             {

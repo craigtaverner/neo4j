@@ -99,14 +99,16 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
         while ( constraints.hasNext() )
         {
             PropertyConstraint constraint = constraints.next();
-            int propertyKeyId = constraint.propertyKey();
+            int[] propertyKeyIds = constraint.getPropertyKeyIds();
             try ( Cursor<NodeItem> cursor = nodeCursorById( state, nodeId ) )
             {
                 NodeItem node = cursor.get();
-                Object propertyValue = node.getProperty( propertyKeyId );
+                // TODO: Support composite indexes
+                Object propertyValue = node.getProperty( propertyKeyIds[0] );
                 if ( propertyValue != null )
                 {
-                    validateNoExistingNodeWithLabelAndProperty( state, labelId, propertyKeyId, propertyValue, node.id() );
+                    // TODO: Support composite indexes
+                    validateNoExistingNodeWithLabelAndProperty( state, labelId, propertyKeyIds[0], propertyValue, node.id() );
                 }
             }
 
@@ -132,7 +134,7 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
                     Iterator<NodePropertyConstraint> constraintIterator =
                             uniquePropertyConstraints(
                                     schemaReadOperations.constraintsGetForLabelAndPropertyKey( state, labelId,
-                                            propertyKeyId ) );
+                                            new int[]{propertyKeyId} ) );
                     if ( constraintIterator.hasNext() )
                     {
                         validateNoExistingNodeWithLabelAndProperty(
@@ -152,7 +154,8 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     {
         try
         {
-            IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, propertyKeyId );
+            // TODO: Support composite constraints
+            IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, new int[]{propertyKeyId} );
             assertIndexOnline( state, indexDescriptor );
             state.locks().optimistic().acquireExclusive( INDEX_ENTRY,
                     indexEntryResourceId( labelId, propertyKeyId, Strings.prettyPrint( value ) ) );
@@ -318,9 +321,11 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
             throws IndexNotFoundKernelException, IndexBrokenKernelException
     {
         assertIndexOnline( state, index );
+        // TODO: Support composite index, either by allowing value to be an array, or by creating a new method
+        assert (index.getPropertyKeyIds().length == 1);
 
         int labelId = index.getLabelId();
-        int propertyKeyId = index.getPropertyKeyId();
+        int propertyKeyId = index.getPropertyKeyIds()[0];
         String stringVal = "";
         if ( null != value )
         {
@@ -523,10 +528,10 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     }
 
     @Override
-    public IndexDescriptor indexCreate( KernelStatement state, int labelId, int propertyKeyId )
+    public IndexDescriptor indexCreate( KernelStatement state, int labelId, int[] propertyKeyIds )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
-        return schemaWriteOperations.indexCreate( state, labelId, propertyKeyId );
+        return schemaWriteOperations.indexCreate( state, labelId, propertyKeyIds );
     }
 
     @Override
@@ -542,21 +547,21 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, int labelId, int propertyKeyId )
+    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, int labelId, int[] propertyKeyIds )
             throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException
     {
-        return schemaWriteOperations.uniquePropertyConstraintCreate( state, labelId, propertyKeyId );
+        return schemaWriteOperations.uniquePropertyConstraintCreate( state, labelId, propertyKeyIds );
     }
 
     @Override
     public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state, int labelId,
-            int propertyKeyId ) throws AlreadyConstrainedException, CreateConstraintFailureException
+            int[] propertyKeyIds ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         try ( Cursor<NodeItem> cursor = nodeCursorGetForLabel( state, labelId ) )
         {
-            constraintSemantics.validateNodePropertyExistenceConstraint( cursor, labelId, propertyKeyId );
+            constraintSemantics.validateNodePropertyExistenceConstraint( cursor, labelId, propertyKeyIds );
         }
-        return schemaWriteOperations.nodePropertyExistenceConstraintCreate( state, labelId, propertyKeyId );
+        return schemaWriteOperations.nodePropertyExistenceConstraintCreate( state, labelId, propertyKeyIds );
     }
 
     @Override

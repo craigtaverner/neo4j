@@ -290,7 +290,7 @@ public class BatchingMultipleIndexPopulatorTest
     private static IndexPopulator addPopulator( BatchingMultipleIndexPopulator batchingPopulator, int id )
     {
         IndexPopulator populator = mock( IndexPopulator.class );
-        IndexDescriptor descriptor = new IndexDescriptor( id, id );
+        IndexDescriptor descriptor = new IndexDescriptor( id, new int[]{id} );
 
         IndexProxyFactory indexProxyFactory = mock( IndexProxyFactory.class );
         FailedIndexProxyFactory failedIndexProxyFactory = mock( FailedIndexProxyFactory.class );

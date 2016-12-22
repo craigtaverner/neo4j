@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.store;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -107,9 +108,9 @@ public class SchemaStorage implements SchemaRuleAccess
      *
      * Otherwise throw if there are not exactly one matching candidate rule.
      */
-    public IndexRule indexRule( int labelId, int propertyKeyId )
+    public IndexRule indexRule( int labelId, int[] propertyKeyIds )
     {
-        return indexRule( labelId, propertyKeyId, IndexRuleKind.ALL );
+        return indexRule( labelId, propertyKeyIds, IndexRuleKind.ALL );
     }
 
     /**
@@ -117,10 +118,10 @@ public class SchemaStorage implements SchemaRuleAccess
      *
      * Otherwise throw if there are not exactly one matching candidate rule.
      */
-    public IndexRule indexRule( final int labelId, final int propertyKeyId, IndexRuleKind kind )
+    public IndexRule indexRule( final int labelId, final int[] propertyKeyIds, IndexRuleKind kind )
     {
         Iterator<IndexRule> rules = schemaRules( cast( IndexRule.class ), IndexRule.class,
-                rule -> rule.getLabel() == labelId && rule.getPropertyKey() == propertyKeyId );
+                rule -> rule.getLabel() == labelId && Arrays.equals( rule.getPropertyKeys(), propertyKeyIds ) );
 
         IndexRule foundRule = null;
 
@@ -261,10 +262,10 @@ public class SchemaStorage implements SchemaRuleAccess
         return schemaStore.nextId();
     }
 
-    public NodePropertyExistenceConstraintRule nodePropertyExistenceConstraint( int labelId, int propertyKeyId )
+    public NodePropertyExistenceConstraintRule nodePropertyExistenceConstraint( int labelId, int[] propertyKeyIds )
             throws SchemaRuleNotFoundException, DuplicateSchemaRuleException
     {
-        return nodeConstraintRule( NodePropertyExistenceConstraintRule.class, labelId, propertyKeyId );
+        return nodeConstraintRule( NodePropertyExistenceConstraintRule.class, labelId, propertyKeyIds );
     }
 
     public RelationshipPropertyExistenceConstraintRule relationshipPropertyExistenceConstraint( int typeId,
@@ -273,28 +274,28 @@ public class SchemaStorage implements SchemaRuleAccess
         return relationshipConstraintRule( RelationshipPropertyExistenceConstraintRule.class, typeId, propertyKeyId );
     }
 
-    public UniquePropertyConstraintRule uniquenessConstraint( int labelId, final int propertyKeyId )
+    public UniquePropertyConstraintRule uniquenessConstraint( int labelId, final int[] propertyKeyIds )
             throws SchemaRuleNotFoundException, DuplicateSchemaRuleException
     {
-        return nodeConstraintRule( UniquePropertyConstraintRule.class, labelId, propertyKeyId );
+        return nodeConstraintRule( UniquePropertyConstraintRule.class, labelId, propertyKeyIds );
     }
 
     private <Rule extends NodePropertyConstraintRule> Rule nodeConstraintRule( Class<Rule> type,
-            final int labelId, final int propertyKeyId )
+            final int labelId, final int[] propertyKeyIds )
             throws SchemaRuleNotFoundException, DuplicateEntitySchemaRuleException
     {
         Iterator<Rule> rules = schemaRules( cast( type ), type, item -> item.getLabel() == labelId &&
-                                                                item.containsPropertyKeyId( propertyKeyId ) );
+                                                                item.containsPropertyKeyIds( propertyKeyIds ) );
         if ( !rules.hasNext() )
         {
-            throw new EntitySchemaRuleNotFoundException( EntityType.NODE, labelId, propertyKeyId );
+            throw new EntitySchemaRuleNotFoundException( EntityType.NODE, labelId, propertyKeyIds );
         }
 
         Rule rule = rules.next();
 
         if ( rules.hasNext() )
         {
-            throw new DuplicateEntitySchemaRuleException( EntityType.NODE, labelId, propertyKeyId );
+            throw new DuplicateEntitySchemaRuleException( EntityType.NODE, labelId, propertyKeyIds );
         }
         return rule;
     }
@@ -308,14 +309,14 @@ public class SchemaStorage implements SchemaRuleAccess
                         item.containsPropertyKeyId( propertyKeyId ) );
         if ( !rules.hasNext() )
         {
-            throw new EntitySchemaRuleNotFoundException( EntityType.RELATIONSHIP, relationshipTypeId, propertyKeyId );
+            throw new EntitySchemaRuleNotFoundException( EntityType.RELATIONSHIP, relationshipTypeId, new int[]{propertyKeyId} );
         }
 
         Rule rule = rules.next();
 
         if ( rules.hasNext() )
         {
-            throw new DuplicateEntitySchemaRuleException( EntityType.RELATIONSHIP, relationshipTypeId, propertyKeyId );
+            throw new DuplicateEntitySchemaRuleException( EntityType.RELATIONSHIP, relationshipTypeId, new int[]{propertyKeyId} );
         }
         return rule;
     }

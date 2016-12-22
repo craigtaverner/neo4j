@@ -20,11 +20,15 @@
 package org.neo4j.kernel.impl.api.index;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.helpers.collection.PrefetchingIterator;
@@ -47,16 +51,52 @@ public class IndexUpdaterMap implements AutoCloseable, Iterable<IndexUpdater>
 {
     private final IndexUpdateMode indexUpdateMode;
     private final IndexMap indexMap;
+    private final HashMap<IndexDescriptor,List<IndexDescriptor>> affectedIndexes;
     private final Map<IndexDescriptor, IndexUpdater> updaterMap;
+    private final static List<IndexUpdater> EMPTY_UPDATERS = new ArrayList<>();
 
     public IndexUpdaterMap( IndexMap indexMap, IndexUpdateMode indexUpdateMode )
     {
         this.indexUpdateMode = indexUpdateMode;
         this.indexMap = indexMap;
         this.updaterMap = new HashMap<>();
+        this.affectedIndexes = new HashMap<>();
+        this.indexMap.foreachIndexProxy( ( i, indexProxy ) -> {
+            IndexDescriptor d = indexProxy.getDescriptor();
+            for ( int propertyId : d.getPropertyKeyIds() )
+            {
+                updateAffectedIndexes( new IndexDescriptor( d.getLabelId(), new int[]{propertyId} ), d );
+            }
+            updateAffectedIndexes( d, d );
+        } );
     }
 
-    public IndexUpdater getUpdater( IndexDescriptor descriptor )
+    private void updateAffectedIndexes( IndexDescriptor key, IndexDescriptor indexDescriptor )
+    {
+        List<IndexDescriptor> indexes = affectedIndexes.get( key );
+        if ( indexes == null )
+        {
+            indexes = new ArrayList<>();
+            affectedIndexes.put( key, indexes );
+        }
+        indexes.add( indexDescriptor );
+    }
+
+    public List<IndexUpdater> getUpdaters( int labelId, int propertyKeyId )
+    {
+        IndexDescriptor key = new IndexDescriptor( labelId, new int[]{propertyKeyId} );
+        if ( affectedIndexes.containsKey( key ) )
+        {
+            return affectedIndexes.get( key ).stream().map( d -> getUpdater( d ) )
+                    .collect( Collectors.toList() );
+        }
+        else
+        {
+            return EMPTY_UPDATERS;
+        }
+    }
+
+    private IndexUpdater getUpdater( IndexDescriptor descriptor )
     {
         IndexUpdater updater = updaterMap.get( descriptor );
         if ( null == updater )

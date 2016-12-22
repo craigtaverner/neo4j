@@ -87,12 +87,12 @@ class KeyFormat implements CountsVisitor
      *  l - label id
      *  p - property key id
      * </pre>
-     * For value format, see {@link org.neo4j.kernel.impl.store.counts.CountsUpdater#replaceIndexUpdateAndSize(int, int, long, long)}.
+     * For value format, see {@link org.neo4j.kernel.impl.store.counts.CountsUpdater#replaceIndexUpdateAndSize(int, int[], long, long)}.
      */
     @Override
-    public void visitIndexStatistics( int labelId, int propertyKeyId, long updates, long size )
+    public void visitIndexStatistics( int labelId, int[] propertyKeyIds, long updates, long size )
     {
-        indexKey( INDEX_STATS, labelId, propertyKeyId );
+        indexKey( INDEX_STATS, labelId, propertyKeyIds );
     }
 
     /**
@@ -105,20 +105,24 @@ class KeyFormat implements CountsVisitor
      *  l - label id
      *  p - property key id
      * </pre>
-     * For value format, see {@link org.neo4j.kernel.impl.store.counts.CountsUpdater#replaceIndexSample(int, int, long, long)}.
+     * For value format, see {@link org.neo4j.kernel.impl.store.counts.CountsUpdater#replaceIndexSample(int, int[], long, long)}.
      */
     @Override
-    public void visitIndexSample( int labelId, int propertyKeyId, long unique, long size )
+    public void visitIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
     {
-        indexKey( INDEX_SAMPLE, labelId, propertyKeyId );
+        indexKey( INDEX_SAMPLE, labelId, propertyKeyIds );
     }
 
-    private void indexKey( byte indexKey, int labelId, int propertyKeyId )
+    private void indexKey( byte indexKey, int labelId, int[] propertyKeyIds )
     {
-        buffer.putByte( 0, INDEX )
-              .putInt( 4, labelId )
-              .putInt( 8, propertyKeyId )
-              .putByte( 15, indexKey );
+        buffer.putByte( 0, INDEX );
+        buffer.putInt( 4, labelId );
+        buffer.putShort( 8, (short) propertyKeyIds.length );
+        for ( int i = 0; i < propertyKeyIds.length; i++ )
+        {
+            buffer.putInt( 10 + 4 * i, propertyKeyIds[i] );
+        }
+        buffer.putByte( 10 + 4 * propertyKeyIds.length + 3, indexKey );
     }
 
     public static CountsKey readKey( ReadableBuffer key ) throws UnknownKey
@@ -130,13 +134,20 @@ class KeyFormat implements CountsVisitor
         case KeyFormat.RELATIONSHIP_COUNT:
             return CountsKeyFactory.relationshipKey( key.getInt( 4 ), key.getInt( 8 ), key.getInt( 12 ) );
         case KeyFormat.INDEX:
-            byte indexKeyByte = key.getByte( 15 );
+            int labelId = key.getInt( 4 );
+            int length = key.getShort( 8 );
+            int[] propertyKeyIds = new int[length];
+            for ( int i = 0; i < length; i++ )
+            {
+                propertyKeyIds[i] = key.getInt( 10 + 4 * i );
+            }
+            byte indexKeyByte = key.getByte( 10 + 4 * propertyKeyIds.length + 3 );
             switch ( indexKeyByte )
             {
             case KeyFormat.INDEX_STATS:
-                return indexStatisticsKey( key.getInt( 4 ), key.getInt( 8 ) );
+                return indexStatisticsKey( labelId, propertyKeyIds );
             case KeyFormat.INDEX_SAMPLE:
-                return CountsKeyFactory.indexSampleKey( key.getInt( 4 ), key.getInt( 8 ) );
+                return CountsKeyFactory.indexSampleKey( labelId, propertyKeyIds );
             default:
                 throw new IllegalStateException( "Unknown index key: " + indexKeyByte );
             }

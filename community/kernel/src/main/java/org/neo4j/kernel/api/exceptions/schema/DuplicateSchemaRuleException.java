@@ -26,9 +26,9 @@ public abstract class DuplicateSchemaRuleException extends SchemaRuleException
     protected static final String UNIQUE_CONSTRAINT_PREFIX = "uniqueness constraints";
     protected static final String CONSTRAINT_PREFIX = "constraints";
 
-    protected DuplicateSchemaRuleException( String messageTemplate, int ruleEntityId, int propertyKeyId, String
+    protected DuplicateSchemaRuleException( String messageTemplate, int ruleEntityId, int[] propertyKeyIds, String
             messagePrefix )
     {
-        super( Status.Schema.SchemaRuleDuplicateFound, messageTemplate, ruleEntityId, propertyKeyId, messagePrefix );
+        super( Status.Schema.SchemaRuleDuplicateFound, messageTemplate, ruleEntityId, propertyKeyIds, messagePrefix );
     }
 }

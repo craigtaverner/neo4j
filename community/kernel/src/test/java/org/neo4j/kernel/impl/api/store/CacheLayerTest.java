@@ -43,7 +43,7 @@ public class CacheLayerTest
     public void shouldLoadAllConstraintsFromCache() throws Exception
     {
         // Given
-        Set<PropertyConstraint> constraints = asSet( (PropertyConstraint) new UniquenessConstraint( 0, 1 ) );
+        Set<PropertyConstraint> constraints = asSet( (PropertyConstraint) new UniquenessConstraint( 0, new int[]{1} ) );
         when( schemaCache.constraints() ).thenReturn( constraints.iterator() );
 
         // When & Then
@@ -55,7 +55,7 @@ public class CacheLayerTest
     {
         // Given
         int labelId = 0;
-        Set<NodePropertyConstraint> constraints = asSet( (NodePropertyConstraint) new UniquenessConstraint( labelId, 1 ) );
+        Set<NodePropertyConstraint> constraints = asSet( (NodePropertyConstraint) new UniquenessConstraint( labelId, new int[]{1} ) );
         when( schemaCache.constraintsForLabel( labelId ) ).thenReturn( constraints.iterator() );
 
         // When & Then
@@ -67,10 +67,10 @@ public class CacheLayerTest
     {
         // Given
         int labelId = 0, propertyId = 1;
-        Set<NodePropertyConstraint> constraints = asSet( (NodePropertyConstraint) new UniquenessConstraint( labelId, propertyId ) );
-        when( schemaCache.constraintsForLabelAndProperty( labelId, propertyId ) ).thenReturn( constraints.iterator() );
+        Set<NodePropertyConstraint> constraints = asSet( (NodePropertyConstraint) new UniquenessConstraint( labelId, new int[]{propertyId} ) );
+        when( schemaCache.constraintsForLabelAndProperty( labelId, new int[]{propertyId} ) ).thenReturn( constraints.iterator() );
 
         // When & Then
-        assertThat( asSet( context.constraintsGetForLabelAndPropertyKey( labelId, propertyId ) ), equalTo( constraints ) );
+        assertThat( asSet( context.constraintsGetForLabelAndPropertyKey( labelId, new int[]{propertyId} ) ), equalTo( constraints ) );
     }
 }

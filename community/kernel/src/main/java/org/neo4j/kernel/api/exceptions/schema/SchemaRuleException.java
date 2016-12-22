@@ -20,22 +20,24 @@
 package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 import static java.lang.String.format;
 
 public class SchemaRuleException extends SchemaKernelException
 {
     protected final int ruleEntityId;
-    protected final int propertyKeyId;
+    protected final int[] propertyKeyIds;
     protected final String messageTemplate;
     protected final String messagePrefix;
 
-    protected SchemaRuleException( Status status, String messageTemplate, int ruleEntityId, int propertyKeyId,
+    protected SchemaRuleException( Status status, String messageTemplate, int ruleEntityId, int[] propertyKeyIds,
             String messagePrefix)
     {
-        super( status, format( messageTemplate, messagePrefix, ruleEntityId, propertyKeyId ) );
+        super( status, format( messageTemplate, messagePrefix, ruleEntityId,
+                IndexDescriptor.propertyIdText( propertyKeyIds ) ) );
         this.ruleEntityId = ruleEntityId;
-        this.propertyKeyId = propertyKeyId;
+        this.propertyKeyIds = propertyKeyIds;
         this.messageTemplate = messageTemplate;
         this.messagePrefix = messagePrefix;
     }

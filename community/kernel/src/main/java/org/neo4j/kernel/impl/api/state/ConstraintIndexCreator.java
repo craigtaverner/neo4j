@@ -58,7 +58,7 @@ public class ConstraintIndexCreator
      * You MUST hold a schema write lock before you call this method.
      */
     public long createUniquenessConstraintIndex( KernelStatement state, SchemaReadOperations schema,
-            int labelId, int propertyKeyId )
+            int labelId, int[] propertyKeyId )
             throws ConstraintVerificationFailedKernelException, TransactionFailureException,
             CreateConstraintFailureException, DropIndexFailureException
     {
@@ -140,7 +140,7 @@ public class ConstraintIndexCreator
         }
     }
 
-    public IndexDescriptor createConstraintIndex( final int labelId, final int propertyKeyId )
+    public IndexDescriptor createConstraintIndex( final int labelId, final int[] propertyKeyId )
     {
         try ( KernelTransaction transaction =
                       kernelSupplier.get().newTransaction( KernelTransaction.Type.implicit, AUTH_DISABLED );

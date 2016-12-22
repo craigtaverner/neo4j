@@ -124,7 +124,7 @@ public interface ReadableTransactionState
 
     ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabel( int labelId );
 
-    ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( int labelId, int propertyKey );
+    ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( int labelId, int[] propertyKeys );
 
     ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipType( int relTypeId );
 

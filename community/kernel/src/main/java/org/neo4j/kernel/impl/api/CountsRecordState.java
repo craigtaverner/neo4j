@@ -67,9 +67,9 @@ public class CountsRecordState implements CountsAccessor, RecordState, CountsAcc
     }
 
     @Override
-    public DoubleLongRegister indexSample( int labelId, int propertyKeyId, DoubleLongRegister target )
+    public DoubleLongRegister indexSample( int labelId, int[] propertyKeyIds, DoubleLongRegister target )
     {
-        counts( indexSampleKey( labelId, propertyKeyId ) ).copyTo( target );
+        counts( indexSampleKey( labelId, propertyKeyIds ) ).copyTo( target );
         return target;
     }
 
@@ -83,28 +83,28 @@ public class CountsRecordState implements CountsAccessor, RecordState, CountsAcc
     }
 
     @Override
-    public DoubleLongRegister indexUpdatesAndSize( int labelId, int propertyKeyId, DoubleLongRegister target )
+    public DoubleLongRegister indexUpdatesAndSize( int labelId, int[] propertyKeyIds, DoubleLongRegister target )
     {
-        counts( indexStatisticsKey( labelId, propertyKeyId ) ).copyTo( target );
+        counts( indexStatisticsKey( labelId, propertyKeyIds ) ).copyTo( target );
         return target;
     }
 
     @Override
-    public void replaceIndexUpdateAndSize( int labelId, int propertyKeyId, long updates, long size )
+    public void replaceIndexUpdateAndSize( int labelId, int[] propertyKeyIds, long updates, long size )
     {
-        counts( indexStatisticsKey( labelId, propertyKeyId ) ).write( updates, size );
+        counts( indexStatisticsKey( labelId, propertyKeyIds ) ).write( updates, size );
     }
 
     @Override
-    public void incrementIndexUpdates( int labelId, int propertyKeyId, long delta )
+    public void incrementIndexUpdates( int labelId, int[] propertyKeyIds, long delta )
     {
-        counts( indexStatisticsKey( labelId, propertyKeyId ) ).increment( delta, 0L );
+        counts( indexStatisticsKey( labelId, propertyKeyIds ) ).increment( delta, 0L );
     }
 
     @Override
-    public void replaceIndexSample( int labelId, int propertyKeyId, long unique, long size )
+    public void replaceIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
     {
-        counts( indexSampleKey( labelId, propertyKeyId ) ).write( unique, size );
+        counts( indexSampleKey( labelId, propertyKeyIds ) ).write( unique, size );
     }
 
     @Override
@@ -285,15 +285,15 @@ public class CountsRecordState implements CountsAccessor, RecordState, CountsAcc
             verify( relationshipKey( startLabelId, typeId, endLabelId ), 0, count );
         }
         @Override
-        public void visitIndexStatistics( int labelId, int propertyKeyId, long updates, long size )
+        public void visitIndexStatistics( int labelId, int[] propertyKeyIds, long updates, long size )
         {
-            verify( indexStatisticsKey( labelId, propertyKeyId ), updates, size );
+            verify( indexStatisticsKey( labelId, propertyKeyIds ), updates, size );
         }
 
         @Override
-        public void visitIndexSample( int labelId, int propertyKeyId, long unique, long size )
+        public void visitIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
         {
-            verify( indexSampleKey( labelId, propertyKeyId ), unique, size );
+            verify( indexSampleKey( labelId, propertyKeyIds ), unique, size );
         }
 
         private void verify( CountsKey key, long actualFirst, long actualSecond )

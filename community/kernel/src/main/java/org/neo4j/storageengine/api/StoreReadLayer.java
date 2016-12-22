@@ -120,10 +120,10 @@ public interface StoreReadLayer
 
     /**
      * @param labelId label token id .
-     * @param propertyKeyId property key token id.
-     * @return node property constraints associated with the label and property key token ids.
+     * @param propertyKeyIds property keyd token ids.
+     * @return node property constraints associated with the label and one or more property keys token ids.
      */
-    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int propertyKeyId );
+    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
 
     /**
      * @param labelId label token id .
@@ -156,10 +156,10 @@ public interface StoreReadLayer
      * Looks for a stored index by given {@code labelId} and {@code propertyKey}
      *
      * @param labelId label id.
-     * @param propertyKeyId property key id.
+     * @param propertyKeyIds property key ids.
      * @return {@link IndexDescriptor} for matching index, or {@code null} if not found. TODO should throw exception.
      */
-    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int propertyKeyId );
+    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
 
     /**
      * Returns state of a stored index.

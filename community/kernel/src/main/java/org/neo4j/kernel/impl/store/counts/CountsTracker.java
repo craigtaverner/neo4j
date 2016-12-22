@@ -183,16 +183,16 @@ public class CountsTracker extends AbstractKeyValueStore<CountsKey>
     }
 
     @Override
-    public Register.DoubleLongRegister indexUpdatesAndSize( int labelId, int propertyKeyId,
+    public Register.DoubleLongRegister indexUpdatesAndSize( int labelId, int[] propertyKeyIds,
                                                             Register.DoubleLongRegister target )
     {
-        return get( indexStatisticsKey( labelId, propertyKeyId ), target );
+        return get( indexStatisticsKey( labelId, propertyKeyIds ), target );
     }
 
     @Override
-    public Register.DoubleLongRegister indexSample( int labelId, int propertyKeyId, Register.DoubleLongRegister target )
+    public Register.DoubleLongRegister indexSample( int labelId, int[] propertyKeyIds, Register.DoubleLongRegister target )
     {
-        return get( indexSampleKey( labelId, propertyKeyId ), target );
+        return get( indexSampleKey( labelId, propertyKeyIds ), target );
     }
 
     public Optional<CountsAccessor.Updater> apply( long txId )

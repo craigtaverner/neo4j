@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.storageengine.api.EntityType;
 
 public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundException
@@ -30,14 +31,14 @@ public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundExcepti
             "%s for relationship type '%s' and property '%s' not found.";
     private final EntityType entityType;
 
-    public EntitySchemaRuleNotFoundException( EntityType entityType, int labelId, int propertyKeyId )
+    public EntitySchemaRuleNotFoundException( EntityType entityType, int labelId, int[] propertyKeyIds )
     {
-        this( entityType, labelId, propertyKeyId, false );
+        this( entityType, labelId, propertyKeyIds, false );
     }
 
-    public EntitySchemaRuleNotFoundException( EntityType entityType, int entityId, int propertyKeyId, boolean unique )
+    public EntitySchemaRuleNotFoundException( EntityType entityType, int entityId, int[] propertyKeyIds, boolean unique )
     {
-        super( getMessageTemplate( entityType ), entityId, propertyKeyId,
+        super( getMessageTemplate( entityType ), entityId, propertyKeyIds,
                 unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
         this.entityType = entityType;
     }
@@ -48,7 +49,7 @@ public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundExcepti
         String entityName = EntityType.NODE == entityType ? tokenNameLookup.labelGetName( ruleEntityId ) :
                             tokenNameLookup.relationshipTypeGetName( ruleEntityId );
         return String.format( messageTemplate, messagePrefix, entityName,
-                tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+                IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
     }
 
     private static String getMessageTemplate( EntityType entityType )

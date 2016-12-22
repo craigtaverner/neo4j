@@ -28,6 +28,7 @@ import org.neo4j.kernel.impl.store.counts.keys.IndexStatisticsKey;
 import org.neo4j.kernel.impl.store.counts.keys.NodeKey;
 import org.neo4j.kernel.impl.store.counts.keys.RelationshipKey;
 import org.neo4j.kernel.impl.transaction.log.FlushableChannel;
+import org.neo4j.kernel.impl.transaction.log.ReadableClosableChannel;
 
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyType.ENTITY_NODE;
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyType.ENTITY_RELATIONSHIP;
@@ -85,7 +86,7 @@ public class CountsSnapshotSerializer
                 IndexSampleKey indexSampleKey = (IndexSampleKey) key;
                 channel.put( INDEX_SAMPLE.code );
                 channel.putInt( indexSampleKey.labelId() );
-                channel.putInt( indexSampleKey.propertyKeyId() );
+                writePropertyKeyIds( channel, indexSampleKey.propertyKeyIds() );
                 channel.putLong( value[0] );
                 channel.putLong( value[1] );
                 break;
@@ -99,7 +100,7 @@ public class CountsSnapshotSerializer
                 IndexStatisticsKey indexStatisticsKey = (IndexStatisticsKey) key;
                 channel.put( INDEX_STATISTICS.code );
                 channel.putInt( indexStatisticsKey.labelId() );
-                channel.putInt( indexStatisticsKey.propertyKeyId() );
+                writePropertyKeyIds( channel, indexStatisticsKey.propertyKeyIds() );
                 channel.putLong( value[0] );
                 channel.putLong( value[1] );
                 break;
@@ -110,6 +111,15 @@ public class CountsSnapshotSerializer
             default:
                 throw new IllegalArgumentException( "The read CountsKey has an unknown type." );
             }
+        }
+    }
+
+    private static void writePropertyKeyIds( FlushableChannel channel, int[] propertyKeyIds ) throws IOException
+    {
+        channel.putShort( (short) propertyKeyIds.length );
+        for ( int prop : propertyKeyIds )
+        {
+            channel.putInt( prop );
         }
     }
 }

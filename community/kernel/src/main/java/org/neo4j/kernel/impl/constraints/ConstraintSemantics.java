@@ -34,7 +34,7 @@ import org.neo4j.storageengine.api.txstate.TxStateVisitor;
  */
 public interface ConstraintSemantics
 {
-    void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int propertyKey )
+    void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int[] propertyKeys )
             throws CreateConstraintFailureException;
 
     void validateRelationshipPropertyExistenceConstraint( Cursor<RelationshipItem> allRels, int type, int propertyKey )
@@ -42,9 +42,9 @@ public interface ConstraintSemantics
 
     PropertyConstraint readConstraint( PropertyConstraintRule rule );
 
-    PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, int label, int propertyKey, long indexId );
+    PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, int label, int[] propertyKeys, long indexId );
 
-    PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int label, int propertyKey )
+    PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int label, int[] propertyKeys )
             throws CreateConstraintFailureException;
 
     PropertyConstraintRule writeRelationshipPropertyExistenceConstraint( long ruleId, int type, int propertyKey )

@@ -28,14 +28,12 @@ import static org.neo4j.kernel.impl.util.IoPrimitiveUtils.safeCastLongToInt;
 
 public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
 {
-    private final int[] propertyKeyIds;
     private final long ownedIndexRule;
 
-    /** We currently only support uniqueness constraints on a single property. */
-    public static UniquePropertyConstraintRule uniquenessConstraintRule( long id, int labelId, int propertyKeyId,
+    public static UniquePropertyConstraintRule uniquenessConstraintRule( long id, int labelId, int[] propertyKeyIds,
                                                                          long ownedIndexRule )
     {
-        return new UniquePropertyConstraintRule( id, labelId, new int[] {propertyKeyId}, ownedIndexRule );
+        return new UniquePropertyConstraintRule( id, labelId, propertyKeyIds, ownedIndexRule );
     }
 
     public static UniquePropertyConstraintRule readUniquenessConstraintRule( long id, int labelId, ByteBuffer buffer )
@@ -45,10 +43,9 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
 
     private UniquePropertyConstraintRule( long id, int labelId, int[] propertyKeyIds, long ownedIndexRule )
     {
-        super( id, labelId, Kind.UNIQUENESS_CONSTRAINT );
+        super( id, labelId, propertyKeyIds, Kind.UNIQUENESS_CONSTRAINT );
         this.ownedIndexRule = ownedIndexRule;
         assert propertyKeyIds.length == 1; // Only uniqueness of a single property supported for now
-        this.propertyKeyIds = propertyKeyIds;
     }
 
     @Override
@@ -96,26 +93,6 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
         return buffer.getLong();
     }
 
-    @Override
-    public boolean containsPropertyKeyId( int propertyKeyId )
-    {
-        for ( int keyId : propertyKeyIds )
-        {
-            if ( keyId == propertyKeyId )
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // This method exists as long as only single property keys are supported
-    public int getPropertyKey()
-    {
-        // Property key "singleness" is checked elsewhere, in the constructor and when deserializing.
-        return propertyKeyIds[0];
-    }
-
     public long getOwnedIndex()
     {
         return ownedIndexRule;
@@ -124,30 +101,7 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
     @Override
     public UniquenessConstraint toConstraint()
     {
-        return new UniquenessConstraint( getLabel(), getPropertyKey() );
+        return new UniquenessConstraint( getLabel(), propertyKeyIds );
     }
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-        if ( o == null || getClass() != o.getClass() )
-        {
-            return false;
-        }
-        if ( !super.equals( o ) )
-        {
-            return false;
-        }
-        return Arrays.equals( propertyKeyIds, ((UniquePropertyConstraintRule) o).propertyKeyIds );
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 31 * super.hashCode() + Arrays.hashCode( propertyKeyIds );
-    }
 }

@@ -201,7 +201,7 @@ public class TransactionRecordStateTest
         // -- an index
         long ruleId = 0;
         TransactionRecordState recordState = newTransactionRecordState( neoStores );
-        SchemaRule rule = indexRule( ruleId, labelId, propertyKeyId, PROVIDER_DESCRIPTOR );
+        SchemaRule rule = indexRule( ruleId, labelId, new int[]{propertyKeyId}, PROVIDER_DESCRIPTOR );
         recordState.createSchemaRule( rule );
         apply( neoStores, recordState );
 

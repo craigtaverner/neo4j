@@ -140,9 +140,9 @@ public class Commands
     }
 
     public static SchemaRuleCommand createIndexRule( SchemaIndexProvider.Descriptor provider,
-            long id, int label, int property )
+            long id, int label, int[] properties )
     {
-        SchemaRule rule = IndexRule.indexRule( id, label, property, provider );
+        SchemaRule rule = IndexRule.indexRule( id, label, properties, provider );
         RecordSerializer serializer = new RecordSerializer();
         serializer.append( (AbstractSchemaRule)rule );
         DynamicRecord record = new DynamicRecord( id );

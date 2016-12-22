@@ -21,6 +21,7 @@ package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class NodePropertyExistenceConstraintVerificationFailedKernelException
         extends ConstraintVerificationFailedKernelException
@@ -42,7 +43,7 @@ public class NodePropertyExistenceConstraintVerificationFailedKernelException
         return String.format( "Node(%s) with label `%s` has no value for property `%s`",
                 nodeId,
                 tokenNameLookup.labelGetName( constraint.label() ),
-                tokenNameLookup.propertyKeyGetName( constraint.propertyKey() ) );
+                IndexDescriptor.propertyNameText( tokenNameLookup, constraint.getPropertyKeyIds() ) );
     }
 
     @Override

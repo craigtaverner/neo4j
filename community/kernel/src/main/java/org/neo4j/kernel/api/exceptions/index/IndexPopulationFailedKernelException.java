@@ -31,13 +31,14 @@ public class IndexPopulationFailedKernelException extends KernelException
                                                  Throwable cause )
     {
         super( Status.Schema.IndexCreationFailed, cause, FORMAT_MESSAGE, indexUserDescription,
-                descriptor.getLabelId(), descriptor.getPropertyKeyId() );
+                descriptor.getLabelId(), IndexDescriptor.propertyIdText( descriptor.getPropertyKeyIds() ) );
     }
 
     public IndexPopulationFailedKernelException( IndexDescriptor descriptor, String indexUserDescription,
                                                  String message )
     {
         super( Status.Schema.IndexCreationFailed, FORMAT_MESSAGE + ", due to " + message,
-               indexUserDescription, descriptor.getLabelId(), descriptor.getPropertyKeyId() );
+                indexUserDescription, descriptor.getLabelId(),
+                IndexDescriptor.propertyIdText( descriptor.getPropertyKeyIds() ) );
     }
 }

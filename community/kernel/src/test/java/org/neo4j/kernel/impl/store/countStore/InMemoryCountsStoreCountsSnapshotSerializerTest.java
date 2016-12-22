@@ -32,11 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKey;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyType;
+import org.neo4j.kernel.impl.store.counts.keys.IndexSampleKey;
+import org.neo4j.kernel.impl.store.counts.keys.IndexStatisticsKey;
 import org.neo4j.kernel.impl.transaction.log.InMemoryClosableChannel;
 
 import static org.neo4j.kernel.impl.store.countStore.CountsSnapshotSerializer.serialize;
-import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory.indexSampleKey;
-import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory.indexStatisticsKey;
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory.nodeKey;
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory.relationshipKey;
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyType.EMPTY;
@@ -229,6 +229,18 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
                 new CountsKeyType[]{EMPTY, ENTITY_NODE, ENTITY_RELATIONSHIP, INDEX_STATISTICS, INDEX_SAMPLE} );
     }
 
+    public static IndexSampleKey indexSampleKey( int labelId, int propertyKeyId )
+    {
+        //TODO: Consider enhancing stests for composite indexes
+        return CountsKeyFactory.indexSampleKey( labelId, new int[]{propertyKeyId} );
+    }
+
+    public static IndexStatisticsKey indexStatisticsKey( int labelId, int propertyKeyId )
+    {
+        //TODO: Consider enhancing stests for composite indexes
+        return CountsKeyFactory.indexStatisticsKey( labelId, new int[]{propertyKeyId} );
+    }
+
     private void initializeBuffers( int serializedLength )
     {
         serializedBytes = ByteBuffer.allocate( serializedLength );
@@ -264,7 +276,7 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
             throws IOException
     {
         countsSnapshot.getMap()
-                .put( CountsKeyFactory.indexSampleKey( labelId, propertyKeyId ), new long[]{count, count} );
+                .put( indexSampleKey( labelId, propertyKeyId ), new long[]{count, count} );
         serialize( logChannel, countsSnapshot );
     }
 
@@ -272,7 +284,7 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
             throws IOException
     {
         countsSnapshot.getMap()
-                .put( CountsKeyFactory.indexStatisticsKey( labelId, propertyKeyId ), new long[]{count, count} );
+                .put( indexStatisticsKey( labelId, propertyKeyId ), new long[]{count, count} );
         serialize( logChannel, countsSnapshot );
     }
 }

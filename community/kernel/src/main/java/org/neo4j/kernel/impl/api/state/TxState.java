@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api.state;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -1094,10 +1095,10 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
 
     @Override
     public ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( int labelId,
-            final int propertyKey )
+            final int[] propertyKeys )
     {
         return LABEL_STATE.get( this, labelId ).nodeConstraintsChanges().filterAdded(
-                item -> item.propertyKey() == propertyKey );
+                item -> Arrays.equals(item.getPropertyKeyIds(), propertyKeys) );
     }
 
     @Override
@@ -1122,7 +1123,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
             int relTypeId, final int propertyKey )
     {
         return constraintsChangesForRelationshipType( relTypeId ).filterAdded(
-                constraint -> constraint.propertyKey() == propertyKey
+                constraint -> constraint.getPropertyKeyIds()[0] == propertyKey
         );
     }
 
@@ -1148,7 +1149,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
 
         if ( constraint instanceof UniquenessConstraint )
         {
-            constraintIndexDoDrop( new IndexDescriptor( constraint.label(), constraint.propertyKey() ) );
+            constraintIndexDoDrop( new IndexDescriptor( constraint.label(), constraint.getPropertyKeyIds() ) );
         }
         getOrCreateLabelState( constraint.label() ).getOrCreateConstraintsChanges().remove( constraint );
         changed();
@@ -1203,7 +1204,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     {
         if ( createdConstraintIndexesByConstraint != null && !createdConstraintIndexesByConstraint.isEmpty() )
         {
-            return map( constraint -> new IndexDescriptor( constraint.label(), constraint.propertyKey() ),
+            return map( constraint -> new IndexDescriptor( constraint.label(), constraint.getPropertyKeyIds() ),
                     createdConstraintIndexesByConstraint.keySet() );
         }
         return Iterables.empty();
@@ -1222,12 +1223,12 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         return ReadableDiffSets.Empty.ifNull( (value == null) ?
             getIndexUpdatesForScanOrSeek(
                     descriptor.getLabelId(),
-                    descriptor.getPropertyKeyId()
+                    descriptor.getPropertyKeyIds()
             )
             :
             getIndexUpdatesForScanOrSeek(
                     descriptor.getLabelId(), /*create=*/false,
-                    Property.property( descriptor.getPropertyKeyId(), value )
+                    Property.property( descriptor.getPropertyKeyIds()[0], value )
             )
         );
     }
@@ -1258,7 +1259,8 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         DefinedProperty selectedUpper;
         boolean selectedIncludeUpper;
 
-        int propertyKeyId = descriptor.getPropertyKeyId();
+        //TODO: Get working with composite indexes
+        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
 
         if ( lower == null )
         {
@@ -1318,7 +1320,8 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         DefinedProperty selectedUpper;
         boolean selectedIncludeUpper;
 
-        int propertyKeyId = descriptor.getPropertyKeyId();
+        //TODO: Get working with composite indexes
+        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
 
         if ( lower == null )
         {
@@ -1365,7 +1368,8 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         {
             return null;
         }
-        int propertyKeyId = descriptor.getPropertyKeyId();
+        //TODO: get working with composite indexes
+        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
         DefinedProperty floor = Property.stringProperty( propertyKeyId, prefix );
         DiffSets<Long> diffs = new DiffSets<>();
         for ( Map.Entry<DefinedProperty,DiffSets<Long>> entry : sortedUpdates.tailMap( floor ).entrySet() )
@@ -1477,7 +1481,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         return diffs;
     }
 
-    private DiffSets<Long> getIndexUpdatesForScanOrSeek( int label, int propertyKeyId )
+    private DiffSets<Long> getIndexUpdatesForScanOrSeek( int label, int[] propertyKeyIds )
     {
         if ( indexUpdates == null )
         {
@@ -1491,7 +1495,8 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         DiffSets<Long> diffs = new DiffSets<>();
         for ( Map.Entry<DefinedProperty, DiffSets<Long>> entry : updates.entrySet() )
         {
-            if ( entry.getKey().propertyKeyId() == propertyKeyId )
+            //TODO: Make this work for composite indexes
+            if ( propertyKeyIds.length == 1 && entry.getKey().propertyKeyId() == propertyKeyIds[0] )
             {
                 diffs.addAll( entry.getValue().getAdded().iterator() );
                 diffs.removeAll( entry.getValue().getRemoved().iterator() );

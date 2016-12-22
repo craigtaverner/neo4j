@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.api;
 
+import java.util.List;
+
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -37,16 +39,16 @@ public interface SchemaWriteOperations extends TokenWriteOperations
      * Creates an index, indexing properties with the given {@code propertyKeyId} for nodes with the given
      * {@code labelId}.
      */
-    IndexDescriptor indexCreate( int labelId, int propertyKeyId )
+    IndexDescriptor indexCreate( int labelId, int[] propertyKeyId )
             throws AlreadyIndexedException, AlreadyConstrainedException;
 
     /** Drops a {@link IndexDescriptor} from the database */
     void indexDrop( IndexDescriptor descriptor ) throws DropIndexFailureException;
 
-    UniquenessConstraint uniquePropertyConstraintCreate( int labelId, int propertyKeyId )
+    UniquenessConstraint uniquePropertyConstraintCreate( int labelId, int[] propertyKeyIds )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException;
 
-    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( int labelId, int propertyKeyId )
+    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( int labelId, int[] propertyKeyIds )
             throws CreateConstraintFailureException, AlreadyConstrainedException;
 
     RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( int relationshipTypeId,

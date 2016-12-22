@@ -181,14 +181,14 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int propertyKey )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeys )
     {
-        return descriptor( schemaStorage.indexRule( labelId, propertyKey ) );
+        return descriptor( schemaStorage.indexRule( labelId, propertyKeys ) );
     }
 
     private static IndexDescriptor descriptor( IndexRule ruleRecord )
     {
-        return new IndexDescriptor( ruleRecord.getLabel(), ruleRecord.getPropertyKey() );
+        return new IndexDescriptor( ruleRecord.getLabel(), ruleRecord.getPropertyKeys() );
     }
 
     @Override
@@ -248,20 +248,20 @@ public class DiskLayer implements StoreReadLayer
     public Long indexGetOwningUniquenessConstraintId( IndexDescriptor index )
             throws SchemaRuleNotFoundException
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyId() ).getOwningConstraint();
+        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() ).getOwningConstraint();
     }
 
     @Override
     public IndexSchemaRule indexRule( IndexDescriptor index, Predicate<SchemaRule.Kind> filter )
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyId() );
+        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() );
     }
 
     @Override
     public long indexGetCommittedId( IndexDescriptor index, Predicate<SchemaRule.Kind> filter )
             throws SchemaRuleNotFoundException
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyId() ).getId();
+        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() ).getId();
     }
 
     @Override
@@ -298,10 +298,10 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, final int propertyKeyId )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, final int[] propertyKeyIds )
     {
         return schemaStorage.schemaRulesForNodes( NODE_RULE_TO_CONSTRAINT, NodePropertyConstraintRule.class,
-                labelId, rule -> rule.containsPropertyKeyId( propertyKeyId ) );
+                labelId, rule -> rule.containsPropertyKeyIds( propertyKeyIds ) );
     }
 
     @Override
@@ -605,13 +605,13 @@ public class DiskLayer implements StoreReadLayer
     @Override
     public DoubleLongRegister indexUpdatesAndSize( IndexDescriptor index, DoubleLongRegister target )
     {
-        return counts.indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyId(), target );
+        return counts.indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyIds(), target );
     }
 
     @Override
     public DoubleLongRegister indexSample( IndexDescriptor index, DoubleLongRegister target )
     {
-        return counts.indexSample( index.getLabelId(), index.getPropertyKeyId(), target );
+        return counts.indexSample( index.getLabelId(), index.getPropertyKeyIds(), target );
     }
 
     @Override

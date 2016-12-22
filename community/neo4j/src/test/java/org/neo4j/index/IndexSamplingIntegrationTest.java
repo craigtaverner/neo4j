@@ -189,7 +189,7 @@ public class IndexSamplingIntegrationTest
             GraphDatabaseAPI api = (GraphDatabaseAPI) db;
             CountsTracker countsTracker = api.getDependencyResolver().resolveDependency( RecordStorageEngine.class )
                     .testAccessNeoStores().getCounts();
-            IndexSampleKey key = CountsKeyFactory.indexSampleKey( 0, 0 ); // cheating a bit...
+            IndexSampleKey key = CountsKeyFactory.indexSampleKey( 0, new int[]{0} ); // cheating a bit...
             return countsTracker.get( key, Registers.newDoubleLongRegister() );
         }
         finally
@@ -211,7 +211,7 @@ public class IndexSamplingIntegrationTest
             GraphDatabaseAPI api = (GraphDatabaseAPI) db;
             CountsTracker countsTracker = api.getDependencyResolver().resolveDependency( RecordStorageEngine.class )
                     .testAccessNeoStores().getCounts();
-            IndexStatisticsKey key = CountsKeyFactory.indexStatisticsKey( 0, 0 ); // cheating a bit...
+            IndexStatisticsKey key = CountsKeyFactory.indexStatisticsKey( 0, new int[]{0} ); // cheating a bit...
             return countsTracker.get( key, Registers.newDoubleLongRegister() );
         }
         finally

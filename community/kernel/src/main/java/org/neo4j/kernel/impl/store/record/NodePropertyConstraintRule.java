@@ -19,16 +19,22 @@
  */
 package org.neo4j.kernel.impl.store.record;
 
+import java.util.Arrays;
+
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
+import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
 {
     protected final int label;
+    protected final int[] propertyKeyIds;
 
-    public NodePropertyConstraintRule( long id, int label, Kind kind )
+    public NodePropertyConstraintRule( long id, int label, int[] propertyKeyIds, Kind kind )
     {
         super( id, kind );
         this.label = label;
+        this.propertyKeyIds = propertyKeyIds;
     }
 
     @Override
@@ -41,6 +47,23 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
     public final int getRelationshipType()
     {
         throw new IllegalStateException( "Constraint rule is associated with nodes" );
+    }
+
+    public int[] getPropertyKeys()
+    {
+        return propertyKeyIds;
+    }
+
+    @Override
+    public boolean containsPropertyKeyId( int propertyKeyId )
+    {
+        return this.propertyKeyIds.length == 1 && propertyKeyId == this.propertyKeyIds[0];
+    }
+
+    @Override
+    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
+    {
+        return Arrays.equals(propertyKeyIds, this.propertyKeyIds);
     }
 
     @Override
@@ -61,13 +84,13 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
         {
             return false;
         }
-        return label == ((NodePropertyConstraintRule) o).label;
-
+        return label == ((NodePropertyConstraintRule) o).label &&
+               containsPropertyKeyIds( ((NodePropertyConstraintRule) o).propertyKeyIds );
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + label;
+        return IndexDescriptor.hashcode( 31 * super.hashCode() + label, propertyKeyIds );
     }
 }

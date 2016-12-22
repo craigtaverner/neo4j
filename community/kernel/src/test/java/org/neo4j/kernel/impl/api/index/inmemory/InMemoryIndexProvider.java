@@ -72,8 +72,9 @@ public class InMemoryIndexProvider extends SchemaIndexProvider
     public IndexPopulator getPopulator( long indexId, IndexDescriptor descriptor, IndexConfiguration config,
                                         IndexSamplingConfig samplingConfig )
     {
+        // TODO: Consider supporting composite indexes
         InMemoryIndex index = config.isUnique()
-                ? new UniqueInMemoryIndex( descriptor.getPropertyKeyId() ) : new InMemoryIndex();
+                ? new UniqueInMemoryIndex( descriptor.getPropertyKeyIds()[0] ) : new InMemoryIndex();
         indexes.put( indexId, index );
         return index.getPopulator();
     }
