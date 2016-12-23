@@ -82,7 +82,7 @@ public class IndexingServiceIntegrationTest
         LabelTokenHolder labelTokenHolder = getLabelTokenHolder( database );
         PropertyKeyTokenHolder propertyKeyTokenHolder = getPropertyKeyTokenHolder( database );
         int foodId = labelTokenHolder.getIdByName( FOOD_LABEL );
-        int propertyId = propertyKeyTokenHolder.getIdByName( PROPERTY_NAME );
+        int[] propertyId = {propertyKeyTokenHolder.getIdByName( PROPERTY_NAME )};
 
         IndexRule rule = IndexRule.indexRule( schemaStore.nextId(), foodId, propertyId,
                 indexDescriptor );

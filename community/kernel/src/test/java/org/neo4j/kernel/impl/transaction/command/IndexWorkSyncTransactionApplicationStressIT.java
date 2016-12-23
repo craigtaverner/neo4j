@@ -79,7 +79,7 @@ public class IndexWorkSyncTransactionApplicationStressIT
                                           .around( storageEngineRule );
 
     private final int labelId = 0;
-    private final int propertyKeyId = 0;
+    private final int[] propertyKeyId = {0};
 
     @Test
     public void shouldApplyIndexUpdatesInWorkSyncedBatches() throws Exception
@@ -191,8 +191,8 @@ public class IndexWorkSyncTransactionApplicationStressIT
             txState.nodeDoCreate( nodeId );
             txState.nodeDoAddLabel( labelId, nodeId );
             txState.nodeDoReplaceProperty( nodeId,
-                    noNodeProperty( nodeId, propertyKeyId ),
-                    property( propertyKeyId, propertyValue( id, progress ) ) );
+                    noNodeProperty( nodeId, propertyKeyId[0] ),
+                    property( propertyKeyId[0], propertyValue( id, progress ) ) );
             Collection<StorageCommand> commands = new ArrayList<>();
             try ( StorageStatement statement = storageEngine.storeReadLayer().newStatement() )
             {

@@ -139,7 +139,7 @@ public class KernelSchemaStateFlushingTest
         try ( KernelTransaction transaction = kernel.newTransaction( KernelTransaction.Type.implicit, AUTH_DISABLED );
               Statement statement = transaction.acquireStatement() )
         {
-            UniquenessConstraint descriptor = statement.schemaWriteOperations().uniquePropertyConstraintCreate( 1, 1 );
+            UniquenessConstraint descriptor = statement.schemaWriteOperations().uniquePropertyConstraintCreate( 1, new int[]{1} );
             transaction.success();
             return descriptor;
         }
@@ -160,7 +160,7 @@ public class KernelSchemaStateFlushingTest
         try ( KernelTransaction transaction = kernel.newTransaction( KernelTransaction.Type.implicit, AUTH_DISABLED );
               Statement statement = transaction.acquireStatement() )
         {
-            IndexDescriptor descriptor = statement.schemaWriteOperations().indexCreate( 1, 1 );
+            IndexDescriptor descriptor = statement.schemaWriteOperations().indexCreate( 1, new int[]{1} );
             transaction.success();
             return descriptor;
         }

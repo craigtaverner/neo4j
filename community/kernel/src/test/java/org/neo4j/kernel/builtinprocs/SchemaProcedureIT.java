@@ -72,13 +72,13 @@ public class SchemaProcedureIT extends KernelIntegrationTest
         long nodeId = ops.nodeCreate();
         int labelId = ops.labelGetOrCreateForName( "Person" );
         ops.nodeAddLabel( nodeId, labelId );
-        int propertyIdName = ops.propertyKeyGetOrCreateForName( "name" );
-        int propertyIdAge = ops.propertyKeyGetOrCreateForName( "age" );
-        ops.nodeSetProperty( nodeId, DefinedProperty.stringProperty( propertyIdName, "Emil" ) );
+        int[] propertyIdNames = new int[]{ops.propertyKeyGetOrCreateForName( "name" )};
+        int[] propertyIdAge = new int[]{ops.propertyKeyGetOrCreateForName( "age" )};
+        ops.nodeSetProperty( nodeId, DefinedProperty.stringProperty( propertyIdNames[0], "Emil" ) );
         commit();
 
         SchemaWriteOperations schemaOps = schemaWriteOperationsInNewTransaction();
-        schemaOps.indexCreate( labelId, propertyIdName );
+        schemaOps.indexCreate( labelId, propertyIdNames );
         schemaOps.uniquePropertyConstraintCreate( labelId, propertyIdAge );
         commit();
 

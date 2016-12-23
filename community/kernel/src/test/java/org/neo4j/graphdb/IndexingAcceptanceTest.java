@@ -604,7 +604,7 @@ public class IndexingAcceptanceTest
     {
         int labelId = readOperations.labelGetForName( index.getLabel().name() );
         String propertyName = index.getPropertyKeys().iterator().next();
-        int propertyId = readOperations.propertyKeyGetForName( propertyName );
+        int[] propertyId = new int[] {readOperations.propertyKeyGetForName( propertyName )};
         return readOperations.indexGetForLabelAndPropertyKey( labelId, propertyId );
     }
 

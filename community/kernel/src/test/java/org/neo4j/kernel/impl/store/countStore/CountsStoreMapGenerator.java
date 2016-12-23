@@ -60,7 +60,7 @@ public class CountsStoreMapGenerator
     {
         for ( int i = 0; i < num; i++ )
         {
-            map.put( CountsKeyFactory.indexSampleKey( i, i ), new long[]{i, i} );
+            map.put( CountsKeyFactory.indexSampleKey( i, new int[]{i} ), new long[]{i, i} );
         }
     }
 
@@ -68,7 +68,7 @@ public class CountsStoreMapGenerator
     {
         for ( int i = 0; i < num; i++ )
         {
-            map.put( CountsKeyFactory.indexStatisticsKey( i, i ), new long[]{i, i} );
+            map.put( CountsKeyFactory.indexStatisticsKey( i, new int[]{i} ), new long[]{i, i} );
         }
     }
 }

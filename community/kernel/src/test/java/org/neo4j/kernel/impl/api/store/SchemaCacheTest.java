@@ -108,29 +108,29 @@ public class SchemaCacheTest
         SchemaCache cache = newSchemaCache();
 
         // WHEN
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, 2, 133L ) );
-        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, 4, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, new int[]{4}, 133L ) );
         cache.addSchemaRule( relPropertyExistenceConstraintRule( 2L, 5, 6 ) );
-        cache.addSchemaRule( nodePropertyExistenceConstraintRule( 3L, 7, 8 ) );
+        cache.addSchemaRule( nodePropertyExistenceConstraintRule( 3L, 7, new int[]{8} ) );
 
         // THEN
         assertEquals(
-                asSet( new UniquenessConstraint( 1, 2 ), new UniquenessConstraint( 3, 4 ),
+                asSet( new UniquenessConstraint( 1, new int[]{2} ), new UniquenessConstraint( 3, new int[]{4} ),
                         new RelationshipPropertyExistenceConstraint( 5, 6 ),
-                        new NodePropertyExistenceConstraint( 7, 8 ) ),
+                        new NodePropertyExistenceConstraint( 7, new int[]{8} ) ),
                 asSet( cache.constraints() ) );
 
         assertEquals(
-                asSet( new UniquenessConstraint( 1, 2 ) ),
+                asSet( new UniquenessConstraint( 1, new int[]{2} ) ),
                 asSet( cache.constraintsForLabel( 1 ) ) );
 
         assertEquals(
-                asSet( new UniquenessConstraint( 1, 2 ) ),
-                asSet( cache.constraintsForLabelAndProperty( 1, 2 ) ) );
+                asSet( new UniquenessConstraint( 1, new int[]{2} ) ),
+                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) ) );
 
         assertEquals(
                 asSet(),
-                asSet( cache.constraintsForLabelAndProperty( 1, 3 ) ) );
+                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{3} ) ) );
 
         assertEquals(
                 asSet( new RelationshipPropertyExistenceConstraint( 5, 6 ) ),
@@ -147,15 +147,15 @@ public class SchemaCacheTest
         // GIVEN
         SchemaCache cache = newSchemaCache();
 
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, 2, 133L ) );
-        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, 4, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, new int[]{4}, 133L ) );
 
         // WHEN
         cache.removeSchemaRule( 0L );
 
         // THEN
         assertEquals(
-                asSet( new UniquenessConstraint( 3, 4 ) ),
+                asSet( new UniquenessConstraint( 3, new int[]{4} ) ),
                 asSet( cache.constraints() ) );
 
         assertEquals(
@@ -164,7 +164,7 @@ public class SchemaCacheTest
 
         assertEquals(
                 asSet(),
-                asSet( cache.constraintsForLabelAndProperty( 1, 2 ) ) );
+                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) ) );
     }
 
     @Test
@@ -173,14 +173,14 @@ public class SchemaCacheTest
         // given
         SchemaCache cache = newSchemaCache();
 
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, 2, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
 
         // when
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, 2, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
 
         // then
         assertEquals(
-                asList( new UniquenessConstraint( 1, 2 ) ),
+                asList( new UniquenessConstraint( 1, new int[]{2} ) ),
                 Iterators.asList( cache.constraints() ) );
     }
 
@@ -195,11 +195,11 @@ public class SchemaCacheTest
         cache.addSchemaRule( newIndexRule( 3L, 2, 2 ) );
 
         // When
-        IndexDescriptor descriptor = cache.indexDescriptor( 1, 3 );
+        IndexDescriptor descriptor = cache.indexDescriptor( 1, new int[]{3} );
 
         // Then
         assertEquals( 1, descriptor.getLabelId() );
-        assertEquals( 3, descriptor.getPropertyKeyId() );
+        assertEquals( new int[]{3}, descriptor.getPropertyKeyIds() );
     }
 
     @Test
@@ -209,7 +209,7 @@ public class SchemaCacheTest
         SchemaCache schemaCache = newSchemaCache();
 
         // When
-        IndexDescriptor indexDescriptor = schemaCache.indexDescriptor( 1, 1 );
+        IndexDescriptor indexDescriptor = schemaCache.indexDescriptor( 1, new int[]{1} );
 
         // Then
         assertNull( indexDescriptor );
@@ -219,9 +219,9 @@ public class SchemaCacheTest
     public void shouldListConstraintsForLabel()
     {
         // Given
-        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, 1, 0 );
-        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, 1, 0 );
-        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, 2 );
+        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, new int[]{1}, 0 );
+        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, new int[]{1}, 0 );
+        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, new int[]{2} );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
@@ -237,14 +237,14 @@ public class SchemaCacheTest
     public void shouldListConstraintsForLabelAndProperty()
     {
         // Given
-        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, 1, 0 );
-        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, 1, 0 );
-        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, 2 );
+        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, new int[]{1}, 0 );
+        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, new int[]{1}, 0 );
+        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, new int[]{2} );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
         // When
-        Set<NodePropertyConstraint> listed = asSet( cache.constraintsForLabelAndProperty( 1, 2 ) );
+        Set<NodePropertyConstraint> listed = asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) );
 
         // Then
         assertEquals( singleton( rule3.toConstraint() ), listed );
@@ -287,7 +287,7 @@ public class SchemaCacheTest
 
     private IndexRule newIndexRule( long id, int label, int propertyKey )
     {
-        return IndexRule.indexRule( id, label, propertyKey, PROVIDER_DESCRIPTOR );
+        return IndexRule.indexRule( id, label, new int[]{propertyKey}, PROVIDER_DESCRIPTOR );
     }
 
     private static SchemaCache newSchemaCache( SchemaRule... rules )

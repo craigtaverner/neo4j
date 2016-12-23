@@ -95,7 +95,7 @@ public class LogTruncationTest
                         createLabelTokenRecord( 1 ) ) } );
         permutations.put( Command.SchemaRuleCommand.class, new Command[] { new Command.SchemaRuleCommand(
                 asList( dynamicRecord( 1L, false, true, -1L, 1, "hello".getBytes() ) ),
-                asList( dynamicRecord( 1L, true, true, -1L, 1, "hello".getBytes() ) ), new IndexRule( 1, 3, 4,
+                asList( dynamicRecord( 1L, true, true, -1L, 1, "hello".getBytes() ) ), new IndexRule( 1, 3, new int[]{4},
                         new SchemaIndexProvider.Descriptor( "1", "2" ), null ) ) } );
         permutations
                 .put( Command.RelationshipTypeTokenCommand.class,

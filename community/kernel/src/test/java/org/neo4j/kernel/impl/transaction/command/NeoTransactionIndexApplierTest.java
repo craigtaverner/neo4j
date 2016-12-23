@@ -104,7 +104,7 @@ public class NeoTransactionIndexApplierTest
     public void shouldCreateIndexGivenCreateSchemaRuleCommand() throws Exception
     {
         // Given
-        final IndexRule indexRule = indexRule( 1, 42, 42, INDEX_DESCRIPTOR );
+        final IndexRule indexRule = indexRule( 1, 42, new int[]{42}, INDEX_DESCRIPTOR );
 
         final IndexBatchTransactionApplier applier = newIndexTransactionApplier();
 
@@ -127,7 +127,7 @@ public class NeoTransactionIndexApplierTest
     public void shouldDropIndexGivenDropSchemaRuleCommand() throws Exception
     {
         // Given
-        final IndexRule indexRule = indexRule( 1, 42, 42, INDEX_DESCRIPTOR );
+        final IndexRule indexRule = indexRule( 1, 42, new int[]{42}, INDEX_DESCRIPTOR );
 
         final IndexBatchTransactionApplier applier = newIndexTransactionApplier();
 

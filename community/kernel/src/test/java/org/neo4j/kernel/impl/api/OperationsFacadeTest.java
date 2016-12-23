@@ -44,7 +44,7 @@ public class OperationsFacadeTest
     private final String LABEL1 = "Label1";
     private final String PROP1 = "Prop1";
     private final int LABEL1_ID = 1;
-    private final int PROP1_ID = 2;
+    private final int[] PROP1_ID = {2};
 
     @Mock
     private KernelStatement kernelStatement;
@@ -124,7 +124,7 @@ public class OperationsFacadeTest
     {
         TokenNameLookup tokenNameLookup = Mockito.mock( TokenNameLookup.class );
         Mockito.when( tokenNameLookup.labelGetName( LABEL1_ID ) ).thenReturn( LABEL1 );
-        Mockito.when( tokenNameLookup.propertyKeyGetName( PROP1_ID ) ).thenReturn( PROP1 );
+        Mockito.when( tokenNameLookup.propertyKeyGetName( PROP1_ID[0] ) ).thenReturn( PROP1 );
         return tokenNameLookup;
     }
 

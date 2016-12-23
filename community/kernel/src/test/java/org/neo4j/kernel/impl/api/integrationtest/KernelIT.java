@@ -631,7 +631,7 @@ public class KernelIT extends KernelIntegrationTest
     private IndexDescriptor createIndex( SchemaWriteOperations schemaWriteOperations ) throws SchemaKernelException
     {
         return schemaWriteOperations.indexCreate( schemaWriteOperations.labelGetOrCreateForName( "hello" ),
-                schemaWriteOperations.propertyKeyGetOrCreateForName( "hepp" ) );
+                new int[]{schemaWriteOperations.propertyKeyGetOrCreateForName( "hepp" ) });
     }
 
     private String getOrCreateSchemaState( String key, final String maybeSetThisState )

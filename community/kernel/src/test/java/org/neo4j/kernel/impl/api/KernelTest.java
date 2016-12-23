@@ -58,7 +58,7 @@ public class KernelTest
 
             try
             {
-                statement.schemaWriteOperations().uniquePropertyConstraintCreate( 1, 1 );
+                statement.schemaWriteOperations().uniquePropertyConstraintCreate( 1, new int[]{1} );
                 fail( "expected exception here" );
             }
             catch ( InvalidTransactionTypeKernelException e )

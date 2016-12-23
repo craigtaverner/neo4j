@@ -40,14 +40,15 @@ import static org.junit.Assert.assertTrue;
 
 public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
 {
-    private int labelId, propertyKeyId;
+    private int labelId;
+    private int[] propertyKeyId;
 
     @Before
     public void createKeys() throws Exception
     {
         SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
         this.labelId = statement.labelGetOrCreateForName( "Person" );
-        this.propertyKeyId = statement.propertyKeyGetOrCreateForName( "foo" );
+        this.propertyKeyId =new int[]{statement.propertyKeyGetOrCreateForName( "foo" )};
         commit();
     }
 
@@ -133,7 +134,7 @@ public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
         dataStatement.nodeAddLabel( nodeId, labelId );
 
         // This adds the node to the unique index and should take an index write lock
-        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId, value ) );
+        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId[0], value ) );
 
         Runnable runnableForThread2 = () ->
         {
@@ -184,7 +185,7 @@ public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
         DataWriteOperations dataStatement = dataWriteOperationsInNewTransaction();
         long nodeId = dataStatement.nodeCreate();
         dataStatement.nodeAddLabel( nodeId, labelId );
-        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId, value ) );
+        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId[0], value ) );
         commit();
         return nodeId;
     }

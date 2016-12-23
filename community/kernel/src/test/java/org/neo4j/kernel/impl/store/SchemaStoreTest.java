@@ -90,7 +90,7 @@ public class SchemaStoreTest
     public void serializationAndDeserialization() throws Exception
     {
         // GIVEN
-        int propertyKey = 4;
+        int[] propertyKey = {4};
         int labelId = 1;
         IndexRule indexRule = IndexRule.indexRule( store.nextId(), labelId, propertyKey, PROVIDER_DESCRIPTOR );
 
@@ -102,7 +102,7 @@ public class SchemaStoreTest
         assertEquals( indexRule.getId(), readIndexRule.getId() );
         assertEquals( indexRule.getKind(), readIndexRule.getKind() );
         assertEquals( indexRule.getLabel(), readIndexRule.getLabel() );
-        assertEquals( indexRule.getPropertyKey(), readIndexRule.getPropertyKey() );
+        assertEquals( indexRule.getPropertyKeys(), readIndexRule.getPropertyKeys() );
         assertEquals( indexRule.getProviderDescriptor(), readIndexRule.getProviderDescriptor() );
     }
 
@@ -111,9 +111,9 @@ public class SchemaStoreTest
     {
         // GIVEN
         Collection<SchemaRule> rules = Arrays.<SchemaRule>asList(
-                IndexRule.indexRule( store.nextId(), 0, 5, PROVIDER_DESCRIPTOR ),
-                IndexRule.indexRule( store.nextId(), 1, 6, PROVIDER_DESCRIPTOR ),
-                IndexRule.indexRule( store.nextId(), 1, 7, PROVIDER_DESCRIPTOR ) );
+                IndexRule.indexRule( store.nextId(), 0, new int[]{5}, PROVIDER_DESCRIPTOR ),
+                IndexRule.indexRule( store.nextId(), 1, new int[]{6}, PROVIDER_DESCRIPTOR ),
+                IndexRule.indexRule( store.nextId(), 1, new int[]{7}, PROVIDER_DESCRIPTOR ) );
         for ( SchemaRule rule : rules )
         {
             storeRule( rule );

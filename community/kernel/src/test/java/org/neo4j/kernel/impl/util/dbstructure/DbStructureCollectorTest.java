@@ -43,7 +43,7 @@ public class DbStructureCollectorTest
         collector.visitRelationshipType( 1, "LIVES_IN" );
         collector.visitRelationshipType( 2, "FRIEND" );
         collector.visitUniqueIndex( new IndexDescriptor( 1, 1 ), ":Person(name)", 1.0d, 1L );
-        collector.visitUniqueConstraint( new UniquenessConstraint( 2, 1 ), ":Person(name)" );
+        collector.visitUniqueConstraint( new UniquenessConstraint( 2, new int[]{1} ), ":Person(name)" );
         collector.visitIndex( new IndexDescriptor( 2, 2 ), ":City(income)", 0.2d, 1L );
         collector.visitAllNodesCount( 50 );
         collector.visitNodeCount( 1, "Person", 20 );

@@ -455,7 +455,7 @@ public class MultipleIndexPopulatorTest
     {
         IndexDescriptor descriptor = mock( IndexDescriptor.class );
         when( descriptor.getLabelId() ).thenReturn( id );
-        when( descriptor.getPropertyKeyId() ).thenReturn( id );
+        when( descriptor.getPropertyKeyIds() ).thenReturn( new int[]{id} );
         addPopulator( multipleIndexPopulator, descriptor, indexPopulator, flippableIndexProxy,
                 failedIndexProxyFactory );
     }

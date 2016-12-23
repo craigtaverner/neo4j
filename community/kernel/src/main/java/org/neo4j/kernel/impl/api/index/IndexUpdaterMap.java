@@ -96,7 +96,7 @@ public class IndexUpdaterMap implements AutoCloseable, Iterable<IndexUpdater>
         }
     }
 
-    private IndexUpdater getUpdater( IndexDescriptor descriptor )
+    public IndexUpdater getUpdater( IndexDescriptor descriptor )
     {
         IndexUpdater updater = updaterMap.get( descriptor );
         if ( null == updater )

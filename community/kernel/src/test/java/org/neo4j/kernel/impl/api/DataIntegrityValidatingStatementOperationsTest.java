@@ -79,7 +79,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), new int[]{anyInt()} );
     }
 
     @Test
@@ -107,7 +107,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(),  new int[]{anyInt()} );
     }
 
     @Test
@@ -135,7 +135,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(),  new int[]{anyInt()} );
     }
 
     @Test
@@ -164,7 +164,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(),  new int[]{anyInt()} );
     }
 
     @Test
@@ -193,7 +193,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(),  new int[]{anyInt()} );
     }
 
     @Test
@@ -222,7 +222,7 @@ public class DataIntegrityValidatingStatementOperationsTest
         }
 
         // THEN
-        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(), anyInt() );
+        verify( innerWrite, never() ).indexCreate( eq( state ), anyInt(),  new int[]{anyInt()} );
     }
 
     @Test

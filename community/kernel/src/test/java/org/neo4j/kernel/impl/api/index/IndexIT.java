@@ -47,14 +47,14 @@ public class IndexIT extends KernelIntegrationTest
     private static final String PROPERTY_KEY = "prop";
 
     private int labelId;
-    private int propertyKeyId;
+    private int[] propertyKeyIds;
 
     @Before
     public void createLabelAndProperty() throws Exception
     {
         TokenWriteOperations tokenWrites = tokenWriteOperationsInNewTransaction();
         labelId = tokenWrites.labelGetOrCreateForName( LABEL );
-        propertyKeyId = tokenWrites.propertyKeyGetOrCreateForName( PROPERTY_KEY );
+        propertyKeyIds = new int[]{ tokenWrites.propertyKeyGetOrCreateForName( PROPERTY_KEY )};
         commit();
     }
 
@@ -67,7 +67,7 @@ public class IndexIT extends KernelIntegrationTest
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
 
             // WHEN
-            expectedRule = statement.indexCreate( labelId, propertyKeyId );
+            expectedRule = statement.indexCreate( labelId, propertyKeyIds );
             commit();
         }
 
@@ -76,7 +76,7 @@ public class IndexIT extends KernelIntegrationTest
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
             assertEquals( asSet( expectedRule ),
                           asSet( statement.indexesGetForLabel( labelId ) ) );
-            assertEquals( expectedRule, statement.indexGetForLabelAndPropertyKey( labelId, propertyKeyId ) );
+            assertEquals( expectedRule, statement.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds ) );
             commit();
         }
     }
@@ -88,7 +88,7 @@ public class IndexIT extends KernelIntegrationTest
         IndexDescriptor existingRule;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            existingRule = statement.indexCreate( labelId, propertyKeyId );
+            existingRule = statement.indexCreate( labelId, propertyKeyIds );
             commit();
         }
 
@@ -97,7 +97,7 @@ public class IndexIT extends KernelIntegrationTest
         Set<IndexDescriptor> indexRulesInTx;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            int propertyKey2 = 10;
+            int[] propertyKey2 = {10};
             addedRule = statement.indexCreate( labelId, propertyKey2 );
             indexRulesInTx = asSet( statement.indexesGetForLabel( labelId ) );
             commit();
@@ -115,7 +115,7 @@ public class IndexIT extends KernelIntegrationTest
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
 
             // WHEN
-            statement.indexCreate( labelId, propertyKeyId );
+            statement.indexCreate( labelId, propertyKeyIds );
             // don't mark as success
             rollback();
         }
@@ -133,7 +133,7 @@ public class IndexIT extends KernelIntegrationTest
     {
         // given
         ConstraintIndexCreator creator = new ConstraintIndexCreator( () -> kernel, indexingService );
-        creator.createConstraintIndex( labelId, propertyKeyId );
+        creator.createConstraintIndex( labelId, propertyKeyIds );
 
         // when
         restartDb();
@@ -153,7 +153,7 @@ public class IndexIT extends KernelIntegrationTest
         IndexDescriptor index;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            index = statement.indexCreate( labelId, propertyKeyId );
+            index = statement.indexCreate( labelId, propertyKeyIds );
             commit();
         }
         {
@@ -172,8 +172,8 @@ public class IndexIT extends KernelIntegrationTest
         // then
         catch ( SchemaKernelException e )
         {
-            assertEquals( "Unable to drop index on :label[" + labelId + "](property[" + propertyKeyId + "]): " +
-                          "No such INDEX ON :label[" + labelId + "](property[" + propertyKeyId + "]).", e.getMessage() );
+            assertEquals( "Unable to drop index on :label[" + labelId + "](property[" + propertyKeyIds + "]): " +
+                          "No such INDEX ON :label[" + labelId + "](property[" + propertyKeyIds + "]).", e.getMessage() );
         }
     }
 
@@ -183,7 +183,7 @@ public class IndexIT extends KernelIntegrationTest
         // given
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( labelId, propertyKeyId );
+            statement.uniquePropertyConstraintCreate( labelId, propertyKeyIds );
             commit();
         }
 
@@ -191,7 +191,7 @@ public class IndexIT extends KernelIntegrationTest
         try
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.indexCreate( labelId, propertyKeyId );
+            statement.indexCreate( labelId, propertyKeyIds );
             commit();
 
             fail( "expected exception" );
@@ -211,7 +211,7 @@ public class IndexIT extends KernelIntegrationTest
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
             statement.uniquePropertyConstraintCreate( statement.labelGetOrCreateForName( "Label1" ),
-                    statement.propertyKeyGetOrCreateForName( "property1" ) );
+                    new int[]{ statement.propertyKeyGetOrCreateForName( "property1" )} );
             commit();
         }
 
@@ -251,7 +251,7 @@ public class IndexIT extends KernelIntegrationTest
         // given
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( labelId, propertyKeyId );
+            statement.uniquePropertyConstraintCreate( labelId, propertyKeyIds );
             commit();
         }
 
@@ -269,7 +269,7 @@ public class IndexIT extends KernelIntegrationTest
         // given
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.indexCreate( labelId, propertyKeyId );
+            statement.indexCreate( labelId, propertyKeyIds );
             commit();
         }
 

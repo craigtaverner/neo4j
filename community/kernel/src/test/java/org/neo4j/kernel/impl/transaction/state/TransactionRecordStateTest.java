@@ -678,7 +678,7 @@ public class TransactionRecordStateTest
         final long indexId = neoStores.getSchemaStore().nextId();
         final long constraintId = neoStores.getSchemaStore().nextId();
 
-        recordState.createSchemaRule( uniquenessConstraintRule( constraintId, 1, 1, indexId ) );
+        recordState.createSchemaRule( uniquenessConstraintRule( constraintId, 1, new int[]{1}, indexId ) );
 
         // WHEN
         recordState.extractCommands( new ArrayList<>() );

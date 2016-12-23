@@ -65,7 +65,7 @@ public class UniqueIndexPopulatorCompatibility extends IndexProviderCompatibilit
         try
         {
             PropertyAccessor propertyAccessor = mock( PropertyAccessor.class );
-            int propertyKeyId = descriptor.getPropertyKeyId();
+            int propertyKeyId = descriptor.getPropertyKeyIds()[0];
             when( propertyAccessor.getProperty( nodeId1, propertyKeyId )).thenReturn(
                     stringProperty( propertyKeyId, value ) );
             when( propertyAccessor.getProperty( nodeId2, propertyKeyId )).thenReturn(

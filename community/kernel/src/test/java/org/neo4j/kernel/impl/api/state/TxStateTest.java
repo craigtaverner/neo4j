@@ -933,7 +933,7 @@ public class TxStateTest
     public void shouldAddUniquenessConstraint() throws Exception
     {
         // when
-        UniquenessConstraint constraint = new UniquenessConstraint( 1, 17 );
+        UniquenessConstraint constraint = new UniquenessConstraint( 1, new int[]{17} );
         state.constraintDoAdd( constraint, 7 );
 
         // then
@@ -947,11 +947,11 @@ public class TxStateTest
     public void addingUniquenessConstraintShouldBeIdempotent() throws Exception
     {
         // given
-        UniquenessConstraint constraint1 = new UniquenessConstraint( 1, 17 );
+        UniquenessConstraint constraint1 = new UniquenessConstraint( 1, new int[]{17} );
         state.constraintDoAdd( constraint1, 7 );
 
         // when
-        UniquenessConstraint constraint2 = new UniquenessConstraint( 1, 17 );
+        UniquenessConstraint constraint2 = new UniquenessConstraint( 1, new int[]{17} );
         state.constraintDoAdd( constraint2, 19 );
 
         // then
@@ -963,9 +963,9 @@ public class TxStateTest
     public void shouldDifferentiateBetweenUniquenessConstraintsForDifferentLabels() throws Exception
     {
         // when
-        UniquenessConstraint constraint1 = new UniquenessConstraint( 1, 17 );
+        UniquenessConstraint constraint1 = new UniquenessConstraint( 1, new int[]{17} );
         state.constraintDoAdd( constraint1, 7 );
-        UniquenessConstraint constraint2 = new UniquenessConstraint( 2, 17 );
+        UniquenessConstraint constraint2 = new UniquenessConstraint( 2, new int[]{17} );
         state.constraintDoAdd( constraint2, 19 );
 
         // then
@@ -1742,7 +1742,7 @@ public class TxStateTest
             public void withStringProperties( Collection<Pair<Long,String>> nodesWithValues )
             {
                 final int labelId = descriptor.getLabelId();
-                final int propertyKeyId = descriptor.getPropertyKeyId();
+                final int propertyKeyId = descriptor.getPropertyKeyIds()[0];
                 for ( Pair<Long,String> entry : nodesWithValues )
                 {
                     long nodeId = entry.first();
@@ -1759,7 +1759,7 @@ public class TxStateTest
             public <T extends Number> void withNumberProperties( Collection<Pair<Long,T>> nodesWithValues )
             {
                 final int labelId = descriptor.getLabelId();
-                final int propertyKeyId = descriptor.getPropertyKeyId();
+                final int propertyKeyId = descriptor.getPropertyKeyIds()[0];
                 for ( Pair<Long,T> entry : nodesWithValues )
                 {
                     long nodeId = entry.first();
@@ -1776,7 +1776,7 @@ public class TxStateTest
             public void withBooleanProperties( Collection<Pair<Long,Boolean>> nodesWithValues )
             {
                 final int labelId = descriptor.getLabelId();
-                final int propertyKeyId = descriptor.getPropertyKeyId();
+                final int propertyKeyId = descriptor.getPropertyKeyIds()[0];
                 for ( Pair<Long,Boolean> entry : nodesWithValues )
                 {
                     long nodeId = entry.first();

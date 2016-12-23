@@ -47,7 +47,7 @@ public class IntegrityValidatorTest
         doThrow( new UniquenessConstraintVerificationFailedKernelException( null, new RuntimeException() ) )
                 .when( indexes ).validateIndex( 2L );
 
-        UniquePropertyConstraintRule record = uniquenessConstraintRule( 1L, 1, 1, 2L );
+        UniquePropertyConstraintRule record = uniquenessConstraintRule( 1L, 1, new int[]{1}, 2L );
 
         // When
         try

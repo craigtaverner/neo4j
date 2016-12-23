@@ -108,7 +108,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKey() );
+        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
         assertEquals( SchemaRule.Kind.INDEX_RULE, rule.getKind() );
     }
 
@@ -140,7 +140,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKey() );
+        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
         assertEquals( SchemaRule.Kind.CONSTRAINT_INDEX_RULE, rule.getKind() );
     }
 
@@ -218,7 +218,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKey() );
+        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
         assertEquals( SchemaRule.Kind.UNIQUENESS_CONSTRAINT, rule.getKind() );
     }
 
@@ -274,7 +274,7 @@ public class SchemaStorageTest
                 "Constraint for relationship type 'Type1' and property 'prop1' not found." ) );
 
         //WHEN
-        storage.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 ) );
+        storage.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 )[0] );
     }
 
     @Test
@@ -296,14 +296,14 @@ public class SchemaStorageTest
                 "Multiple constraints found for relationship type 'Type1' and property 'prop1'." ) );
 
         // WHEN
-        schemaStorageSpy.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 ) );
+        schemaStorageSpy.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 )[0] );
     }
 
     private TokenNameLookup getDefaultTokenNameLookup()
     {
         TokenNameLookup tokenNameLookup = Mockito.mock( TokenNameLookup.class );
         Mockito.when( tokenNameLookup.labelGetName( labelId( LABEL1 ) ) ).thenReturn( LABEL1 );
-        Mockito.when( tokenNameLookup.propertyKeyGetName( propId( PROP1 ) ) ).thenReturn( PROP1 );
+        Mockito.when( tokenNameLookup.propertyKeyGetName( propId( PROP1 )[0] ) ).thenReturn( PROP1 );
         Mockito.when( tokenNameLookup.relationshipTypeGetName( typeId( TYPE1 ) ) ).thenReturn( TYPE1 );
         return tokenNameLookup;
     }
@@ -320,7 +320,7 @@ public class SchemaStorageTest
             String property )
     {
         return RelationshipPropertyExistenceConstraintRule
-                .relPropertyExistenceConstraintRule( id, typeId( type ), propId( property ) );
+                .relPropertyExistenceConstraintRule( id, typeId( type ), propId( property )[0] );
     }
 
     private static void awaitIndexes()
@@ -340,11 +340,11 @@ public class SchemaStorageTest
         }
     }
 
-    private int propId( String propName )
+    private int[] propId( String propName )
     {
         try ( Transaction ignore = db.beginTx() )
         {
-            return readOps().propertyKeyGetForName( propName );
+            return new int[]{readOps().propertyKeyGetForName( propName )};
         }
     }
 

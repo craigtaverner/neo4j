@@ -19,10 +19,10 @@
  */
 package org.neo4j.kernel.impl.enterprise;
 
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import org.neo4j.collection.primitive.Primitive;
+import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveIntSet;
 import org.neo4j.cursor.Cursor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
@@ -131,12 +131,16 @@ class PropertyExistenceEnforcer extends TxStateVisitor.Delegator
                         }
 
                         // Check if this node has the mandatory property set
-                        if ( !propertyKeyIds.contains( constraint.propertyKey() ) )
-                        {
-                            throw new NodePropertyExistenceConstraintViolationKernelException(
-                                    ((NodePropertyExistenceConstraint) constraint).label(),
-                                    constraint.propertyKey(), nodeId );
+                        int[] propertyKeyIds= constraint.getPropertyKeyIds();
+                        for(int i: propertyKeyIds){
+                            if ( !this.propertyKeyIds.contains( i) )
+                            {
+                                throw new NodePropertyExistenceConstraintViolationKernelException(
+                                        ((NodePropertyExistenceConstraint) constraint).label(),
+                                        constraint.getPropertyKeyIds(), nodeId );
+                            }
                         }
+
                     }
                 }
             }

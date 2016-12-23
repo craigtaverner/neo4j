@@ -80,6 +80,9 @@ public class StateHandlingStatementOperationsTest
 
     StoreReadLayer inner = mock( StoreReadLayer.class );
 
+    private int[] properties={66};
+    private int[] properties2={99};
+
     @Test
     public void shouldNeverDelegateWrites() throws Exception
     {
@@ -94,7 +97,7 @@ public class StateHandlingStatementOperationsTest
         StateHandlingStatementOperations ctx = newTxStateOps( inner );
 
         // When
-        ctx.indexCreate( state, 0, 0 );
+        ctx.indexCreate( state, 0, new int[]{0});
         ctx.nodeAddLabel( state, 0, 0 );
         ctx.indexDrop( state, new IndexDescriptor( 0, 0 ) );
         ctx.nodeRemoveLabel( state, 0, 0 );
@@ -108,17 +111,17 @@ public class StateHandlingStatementOperationsTest
     public void shouldNotAddConstraintAlreadyExistsInTheStore() throws Exception
     {
         // given
-        PropertyConstraint constraint = new UniquenessConstraint( 10, 66 );
+        PropertyConstraint constraint = new UniquenessConstraint( 10, properties );
         TransactionState txState = mock( TransactionState.class );
         when( txState.nodesWithLabelChanged( anyInt() ) ).thenReturn( new DiffSets<Long>() );
         when( txState.hasChanges() ).thenReturn( true );
         KernelStatement state = mockedState( txState );
-        when( inner.constraintsGetForLabelAndPropertyKey( 10, 66 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 10, properties ) )
                 .thenAnswer( invocation -> Iterators.iterator( constraint ) );
         StateHandlingStatementOperations context = newTxStateOps( inner );
 
         // when
-        context.uniquePropertyConstraintCreate( state, 10, 66 );
+        context.uniquePropertyConstraintCreate( state, 10, properties );
 
         // then
         verify( txState ).constraintIndexDoUnRemove( any( IndexDescriptor.class ) );
@@ -128,17 +131,17 @@ public class StateHandlingStatementOperationsTest
     public void shouldGetConstraintsByLabelAndProperty() throws Exception
     {
         // given
-        PropertyConstraint constraint = new UniquenessConstraint( 10, 66 );
+        PropertyConstraint constraint = new UniquenessConstraint( 10, properties );
         TransactionState txState = new TxState();
         KernelStatement state = mockedState( txState );
-        when( inner.constraintsGetForLabelAndPropertyKey( 10, 66 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 10, properties ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
         StateHandlingStatementOperations context = newTxStateOps( inner );
-        context.uniquePropertyConstraintCreate( state, 10, 66 );
+        context.uniquePropertyConstraintCreate( state, 10, properties );
 
         // when
         Set<NodePropertyConstraint> result = Iterables.asSet(
-                asIterable( context.constraintsGetForLabelAndPropertyKey( state, 10, 66 ) ) );
+                asIterable( context.constraintsGetForLabelAndPropertyKey( state, 10, properties ) ) );
 
         // then
         assertEquals( asSet( constraint ), result );
@@ -148,22 +151,22 @@ public class StateHandlingStatementOperationsTest
     public void shouldGetConstraintsByLabel() throws Exception
     {
         // given
-        PropertyConstraint constraint2 = new UniquenessConstraint( 11, 99 );
-        PropertyConstraint constraint1 = new UniquenessConstraint( 11, 66 );
+        PropertyConstraint constraint2 = new UniquenessConstraint( 11, properties2 );
+        PropertyConstraint constraint1 = new UniquenessConstraint( 11, properties );
 
         TransactionState txState = new TxState();
         KernelStatement state = mockedState( txState );
-        when( inner.constraintsGetForLabelAndPropertyKey( 10, 66 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 10, properties ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
-        when( inner.constraintsGetForLabelAndPropertyKey( 11, 99 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 11, properties2 ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
         when( inner.constraintsGetForLabel( 10 ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
         when( inner.constraintsGetForLabel( 11 ) )
                 .thenAnswer( invocation -> Iterators.iterator( constraint1 ) );
         StateHandlingStatementOperations context = newTxStateOps( inner );
-        context.uniquePropertyConstraintCreate( state, 10, 66 );
-        context.uniquePropertyConstraintCreate( state, 11, 99 );
+        context.uniquePropertyConstraintCreate( state, 10, properties );
+        context.uniquePropertyConstraintCreate( state, 11, properties2 );
 
         // when
         Set<NodePropertyConstraint> result = Iterables.asSet( asIterable( context.constraintsGetForLabel( state, 11 ) ) );
@@ -176,19 +179,19 @@ public class StateHandlingStatementOperationsTest
     public void shouldGetAllConstraints() throws Exception
     {
         // given
-        PropertyConstraint constraint1 = new UniquenessConstraint( 10, 66 );
-        PropertyConstraint constraint2 = new UniquenessConstraint( 11, 99 );
+        PropertyConstraint constraint1 = new UniquenessConstraint( 10, properties );
+        PropertyConstraint constraint2 = new UniquenessConstraint( 11, properties2 );
 
         TransactionState txState = new TxState();
         KernelStatement state = mockedState( txState );
-        when( inner.constraintsGetForLabelAndPropertyKey( 10, 66 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 10, properties ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
-        when( inner.constraintsGetForLabelAndPropertyKey( 11, 99 ) )
+        when( inner.constraintsGetForLabelAndPropertyKey( 11, properties2 ) )
                 .thenAnswer( invocation -> Iterators.emptyIterator() );
         when( inner.constraintsGetAll() )
                 .thenAnswer( invocation -> Iterators.iterator( constraint2 ) );
         StateHandlingStatementOperations context = newTxStateOps( inner );
-        context.uniquePropertyConstraintCreate( state, 10, 66 );
+        context.uniquePropertyConstraintCreate( state, 10, properties );
 
         // when
         Set<PropertyConstraint> result = Iterables.asSet( asIterable( context.constraintsGetAll( state ) ) );

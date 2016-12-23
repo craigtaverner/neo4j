@@ -44,7 +44,8 @@ public class UniqueLuceneIndexPopulator extends LuceneIndexPopulator
     public UniqueLuceneIndexPopulator( SchemaIndex index, IndexDescriptor descriptor )
     {
         super( index );
-        this.propertyKeyId = descriptor.getPropertyKeyId();
+        //TODO: Composite index make lucene handel Composite indexes
+        this.propertyKeyId = descriptor.getPropertyKeyIds()[0];
         this.sampler = new UniqueIndexSampler();
     }
 

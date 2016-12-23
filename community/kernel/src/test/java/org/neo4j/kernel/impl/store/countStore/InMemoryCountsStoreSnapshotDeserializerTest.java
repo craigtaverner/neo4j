@@ -163,7 +163,7 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putLong( 1 );
 
         //WHEN
-        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( 1, 1 );
+        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( 1, new int[]{1} );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN
@@ -185,7 +185,7 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putLong( 1 );
 
         //WHEN
-        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( 1, 1 );
+        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( 1, new int[]{1} );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN

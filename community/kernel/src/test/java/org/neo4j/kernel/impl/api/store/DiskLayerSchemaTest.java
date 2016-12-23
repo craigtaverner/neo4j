@@ -45,7 +45,7 @@ public class DiskLayerSchemaTest extends DiskLayerTest
         Set<PropertyConstraint> constraints = asSet( disk.constraintsGetAll() );
 
         // Then
-        int propKeyId = propertyKeyId( propertyKey );
+        int[] propKeyId = propertyKeyId( propertyKey );
 
         Set<?> expectedConstraints = asSet(
                 new UniquenessConstraint( labelId( label1 ), propKeyId ),

@@ -210,16 +210,17 @@ public class LockingStatementOperationsTest
     public void shouldAcquireSchemaWriteLockBeforeAddingIndexRule() throws Exception
     {
         // given
+        int[] properties= new int[]{456};
         IndexDescriptor rule = mock( IndexDescriptor.class );
-        when( schemaWriteOps.indexCreate( state, 123, 456 ) ).thenReturn( rule );
+        when( schemaWriteOps.indexCreate( state, 123,properties ) ).thenReturn( rule );
 
         // when
-        IndexDescriptor result = lockingOps.indexCreate( state, 123, 456 );
+        IndexDescriptor result = lockingOps.indexCreate( state, 123, properties );
 
         // then
         assertSame( rule, result );
         order.verify( locks ).acquireExclusive( ResourceTypes.SCHEMA, schemaResource() );
-        order.verify( schemaWriteOps ).indexCreate( state, 123, 456 );
+        order.verify( schemaWriteOps ).indexCreate( state, 123, properties );
     }
 
     @Test
@@ -256,23 +257,24 @@ public class LockingStatementOperationsTest
     public void shouldAcquireSchemaWriteLockBeforeCreatingUniquenessConstraint() throws Exception
     {
         // given
-        UniquenessConstraint constraint = new UniquenessConstraint( 0, 0 );
-        when( schemaWriteOps.uniquePropertyConstraintCreate( state, 123, 456 ) ).thenReturn( constraint );
+        int[] properties= new int[]{456};
+        UniquenessConstraint constraint = new UniquenessConstraint( 0, new int[]{0} );
+        when( schemaWriteOps.uniquePropertyConstraintCreate( state, 123, properties ) ).thenReturn( constraint );
 
         // when
-        PropertyConstraint result = lockingOps.uniquePropertyConstraintCreate( state, 123, 456 );
+        PropertyConstraint result = lockingOps.uniquePropertyConstraintCreate( state, 123, properties );
 
         // then
         assertSame( constraint, result );
         order.verify( locks ).acquireExclusive( ResourceTypes.SCHEMA, schemaResource() );
-        order.verify( schemaWriteOps ).uniquePropertyConstraintCreate( state, 123, 456 );
+        order.verify( schemaWriteOps ).uniquePropertyConstraintCreate( state, 123, properties );
     }
 
     @Test
     public void shouldAcquireSchemaWriteLockBeforeDroppingConstraint() throws Exception
     {
         // given
-        UniquenessConstraint constraint = new UniquenessConstraint( 1, 2 );
+        UniquenessConstraint constraint = new UniquenessConstraint( 1, new int[]{2});
 
         // when
         lockingOps.constraintDrop( state, constraint );
@@ -286,16 +288,17 @@ public class LockingStatementOperationsTest
     public void shouldAcquireSchemaReadLockBeforeGettingConstraintsByLabelAndProperty() throws Exception
     {
         // given
+        int[] properties= new int[]{456};
         Iterator<NodePropertyConstraint> constraints = Collections.emptyIterator();
-        when( schemaReadOps.constraintsGetForLabelAndPropertyKey( state, 123, 456 ) ).thenReturn( constraints );
+        when( schemaReadOps.constraintsGetForLabelAndPropertyKey( state, 123, properties ) ).thenReturn( constraints );
 
         // when
-        Iterator<NodePropertyConstraint> result = lockingOps.constraintsGetForLabelAndPropertyKey( state, 123, 456 );
+        Iterator<NodePropertyConstraint> result = lockingOps.constraintsGetForLabelAndPropertyKey( state, 123, properties );
 
         // then
         assertSame( constraints, result );
         order.verify( locks ).acquireShared( ResourceTypes.SCHEMA, schemaResource() );
-        order.verify( schemaReadOps ).constraintsGetForLabelAndPropertyKey( state, 123, 456 );
+        order.verify( schemaReadOps ).constraintsGetForLabelAndPropertyKey( state, 123, properties );
     }
 
     @Test

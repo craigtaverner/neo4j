@@ -19,8 +19,12 @@
  */
 package org.neo4j.kernel.impl.enterprise;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
+import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.cursor.Cursor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -59,7 +63,7 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
     }
 
     @Override
-    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int type, int propertyKey )
+    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int type, int[] propertyKey )
     {
         return nodePropertyExistenceConstraintRule( ruleId, type, propertyKey );
     }
@@ -71,17 +75,23 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
     }
 
     @Override
-    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int propertyKey )
+    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int[] propertyKeys )
             throws CreateConstraintFailureException
     {
         while ( allNodes.next() )
         {
             NodeItem node = allNodes.get();
-            if ( !node.hasProperty( propertyKey ) )
+
+            List<Integer> l=new ArrayList<>();
+            PrimitiveIntIterator itr=node.getPropertyKeys().iterator();
+            while(itr.hasNext()){
+                l.add(itr.next());
+            }
+            if ( !Arrays.equals(l.stream().mapToInt(i -> i).toArray(), propertyKeys ) )
             {
                 throw createConstraintFailure(
                         new NodePropertyExistenceConstraintVerificationFailedKernelException(
-                                new NodePropertyExistenceConstraint( label,propertyKey ), node.id() ) );
+                                new NodePropertyExistenceConstraint( label,propertyKeys ), node.id() ) );
             }
         }
     }

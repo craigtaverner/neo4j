@@ -95,7 +95,7 @@ public class IndexStatisticsIT
 
         // where ALIEN and SPECIMEN are both the first ids of their kind
         int labelId = labelId( ALIEN );
-        int pkId = pkId( SPECIMEN );
+        int[] pkId = {pkId( SPECIMEN )};
 
         // for which we don't have index counts
         resetIndexCounts( labelId, pkId );
@@ -187,7 +187,7 @@ public class IndexStatisticsIT
         }
     }
 
-    private void resetIndexCounts( int labelId, int pkId )
+    private void resetIndexCounts( int labelId, int[] pkId )
     {
         try ( CountsAccessor.IndexStatsUpdater updater = neoStores().getCounts().updateIndexCounts() )
         {

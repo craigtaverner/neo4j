@@ -425,15 +425,13 @@ public class CountsRotationTest
             }
 
             @Override
-            public void visitIndexStatistics( int labelId, int propertyKeyId, long updates, long size )
-            {
-                records.add( Pair.of( CountsKeyFactory.indexStatisticsKey( labelId, propertyKeyId ), size ) );
+            public void visitIndexStatistics(int labelId, int[] propertyKeyIds, long updates, long size) {
+                records.add( Pair.of( CountsKeyFactory.indexStatisticsKey( labelId, propertyKeyIds ), size ) );
             }
 
             @Override
-            public void visitIndexSample( int labelId, int propertyKeyId, long unique, long size )
-            {
-                records.add( Pair.of( CountsKeyFactory.indexSampleKey( labelId, propertyKeyId ), size ) );
+            public void visitIndexSample(int labelId, int[] propertyKeyIds, long unique, long size) {
+                records.add( Pair.of( CountsKeyFactory.indexSampleKey( labelId, propertyKeyIds ), size ) );
             }
         } );
         return records;

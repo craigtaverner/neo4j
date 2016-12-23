@@ -81,8 +81,8 @@ public class CountsTrackerTest
             CountsOracle.Node a = oracle.node( 1 );
             CountsOracle.Node b = oracle.node( 1 );
             oracle.relationship( a, 1, b );
-            oracle.indexSampling( 1, 1, 2, 2 );
-            oracle.indexUpdatesAndSize( 1, 1, 10, 2 );
+            oracle.indexSampling( 1, new int[]{1}, 2, 2 );
+            oracle.indexUpdatesAndSize( 1,  new int[]{1}, 10, 2 );
         }
 
         // when
@@ -100,11 +100,11 @@ public class CountsTrackerTest
         // when
         try ( CountsAccessor.IndexStatsUpdater updater = tracker.updateIndexCounts() )
         {
-            updater.incrementIndexUpdates( 1, 1, 2 );
+            updater.incrementIndexUpdates( 1, new int[]{1}, 2 );
         }
 
         // then
-        oracle.indexUpdatesAndSize( 1, 1, 12, 2 );
+        oracle.indexUpdatesAndSize( 1,  new int[]{1}, 12, 2 );
         oracle.verify( tracker );
 
         // when
@@ -271,7 +271,7 @@ public class CountsTrackerTest
         File before = tracker.currentFile();
         try ( CountsAccessor.IndexStatsUpdater updater = tracker.updateIndexCounts() )
         {
-            updater.incrementIndexUpdates( 7, 8, 100 );
+            updater.incrementIndexUpdates( 7, new int[]{8}, 100 );
         }
 
         // when
@@ -364,8 +364,8 @@ public class CountsTrackerTest
         oracle.relationship( n1, 1, n3 );
         oracle.relationship( n1, 1, n2 );
         oracle.relationship( n0, 1, n3 );
-        oracle.indexUpdatesAndSize( 1, 2, 0L, 50L );
-        oracle.indexSampling( 1, 2, 25L, 50L );
+        oracle.indexUpdatesAndSize( 1,  new int[]{2}, 0L, 50L );
+        oracle.indexSampling( 1,  new int[]{2}, 25L, 50L );
         return oracle;
     }
 

@@ -133,7 +133,7 @@ public class DbStructureInvocationTracingAcceptanceTest
         visitor.apply( null ).visitRelationshipType( 1, "REJECTS" );
         visitor.apply( null ).visitIndex( new IndexDescriptor( 0, 1 ), ":Person(age)", 0.5d, 1L );
         visitor.apply( null ).visitUniqueIndex( new IndexDescriptor( 0, 0 ), ":Person(name)", 0.5d, 1L );
-        visitor.apply( null ).visitUniqueConstraint( new UniquenessConstraint( 1, 0 ), ":Party(name)" );
+        visitor.apply( null ).visitUniqueConstraint( new UniquenessConstraint( 1, new int[]{0} ), ":Party(name)" );
         visitor.apply( null ).visitAllNodesCount( 55 );
         visitor.apply( null ).visitNodeCount( 0, "Person", 50 );
         visitor.apply( null ).visitNodeCount( 0, "Party", 5 );

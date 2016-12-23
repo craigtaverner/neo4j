@@ -221,12 +221,12 @@ public class GraphDbStructureGuideTest
 
     private IndexDescriptor createSchemaIndex( int labelId, int pkId ) throws Exception
     {
-        return schemaWrite().indexCreate( labelId, pkId );
+        return schemaWrite().indexCreate( labelId, new int[]{pkId} );
     }
 
     private UniquenessConstraint createUniqueConstraint( int labelId, int pkId ) throws Exception
     {
-        return schemaWrite().uniquePropertyConstraintCreate( labelId, pkId );
+        return schemaWrite().uniquePropertyConstraintCreate( labelId, new int[]{pkId} );
     }
 
     private int createLabeledNodes( String labelName, int amount ) throws Exception

@@ -186,13 +186,13 @@ public class IndexStatisticsTest
         catch ( IndexNotFoundKernelException e )
         {
             DoubleLongRegister actual = getTracker()
-                    .indexSample( index.getLabelId(), index.getPropertyKeyId(), Registers.newDoubleLongRegister() );
+                    .indexSample( index.getLabelId(), index.getPropertyKeyIds(), Registers.newDoubleLongRegister() );
             assertDoubleLongEquals( 0L, 0L, actual );
         }
 
         // and then index size and index updates are zero on disk
         DoubleLongRegister actual = getTracker()
-                .indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyId(), Registers.newDoubleLongRegister() );
+                .indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyIds(), Registers.newDoubleLongRegister() );
         assertDoubleLongEquals( 0L, 0L, actual );
     }
 
@@ -490,7 +490,7 @@ public class IndexStatisticsTest
             Statement statement = bridge.get();
             int labelId = statement.tokenWriteOperations().labelGetOrCreateForName( labelName );
             int propertyKeyId = statement.tokenWriteOperations().propertyKeyGetOrCreateForName( propertyKeyName );
-            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, propertyKeyId );
+            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, new int[]{propertyKeyId} );
             tx.success();
             return index;
         }

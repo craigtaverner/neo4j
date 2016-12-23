@@ -114,6 +114,12 @@ public class DataIntegrityValidatingStatementOperations implements
         checkIndexExistence( state, OperationContext.INDEX_CREATION, labelId, propertyKeys );
         return schemaWriteDelegate.indexCreate( state, labelId, propertyKeys );
     }
+    public IndexDescriptor indexCreate( KernelStatement state, int labelId, int propertyKeys )
+            throws AlreadyIndexedException, AlreadyConstrainedException
+    {
+        checkIndexExistence( state, OperationContext.INDEX_CREATION, labelId, new int[]{propertyKeys});
+        return schemaWriteDelegate.indexCreate( state, labelId, new int[]{propertyKeys});
+    }
 
     @Override
     public void indexDrop( KernelStatement state, IndexDescriptor descriptor ) throws DropIndexFailureException

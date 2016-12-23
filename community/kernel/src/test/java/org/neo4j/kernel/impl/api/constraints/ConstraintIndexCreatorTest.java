@@ -82,7 +82,7 @@ public class ConstraintIndexCreatorTest
         ConstraintIndexCreator creator = new ConstraintIndexCreator( () -> kernel, indexingService );
 
         // when
-        long indexId = creator.createUniquenessConstraintIndex( state, constraintCreationContext.schemaReadOperations(), 123, 456 );
+        long indexId = creator.createUniquenessConstraintIndex( state, constraintCreationContext.schemaReadOperations(), 123, new int[]{456} );
 
         // then
         assertEquals( 2468L, indexId );
@@ -119,7 +119,7 @@ public class ConstraintIndexCreatorTest
         // when
         try
         {
-            creator.createUniquenessConstraintIndex( state, constraintCreationContext.schemaReadOperations(), 123, 456 );
+            creator.createUniquenessConstraintIndex( state, constraintCreationContext.schemaReadOperations(), 123, new int[]{456} );
 
             fail( "expected exception" );
         }

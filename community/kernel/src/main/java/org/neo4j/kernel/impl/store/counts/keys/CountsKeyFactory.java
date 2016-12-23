@@ -40,4 +40,5 @@ public class CountsKeyFactory
     {
         return new IndexSampleKey( labelId, propertyKeyIds );
     }
+
 }

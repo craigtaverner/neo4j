@@ -85,12 +85,12 @@ public class ResampleIndexProcedureTest
     {
         when( operations.labelGetForName( anyString() ) ).thenReturn( 123 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 456 );
-        when( operations.indexGetForLabelAndPropertyKey( anyInt(), anyInt() ) )
+        when( operations.indexGetForLabelAndPropertyKey( anyInt(), new int[]{anyInt()} ) )
                 .thenReturn( new IndexDescriptor( 0, 0 ) );
 
         procedure.resampleIndex( ":Person(name)" );
 
-        verify( operations ).indexGetForLabelAndPropertyKey( 123, 456 );
+        verify( operations ).indexGetForLabelAndPropertyKey( 123,new int[]{ 456} );
     }
 
     @Test
@@ -100,8 +100,8 @@ public class ResampleIndexProcedureTest
     {
         when( operations.labelGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 0 );
-        when( operations.indexGetForLabelAndPropertyKey( anyInt(), anyInt() ) )
-                .thenThrow( new IndexSchemaRuleNotFoundException( -1, -1 ) );
+        when( operations.indexGetForLabelAndPropertyKey( anyInt(), new int[]{anyInt()} ) )
+                .thenThrow( new IndexSchemaRuleNotFoundException( -1,new int[]{ -1} ) );
 
         try
         {
@@ -118,7 +118,7 @@ public class ResampleIndexProcedureTest
     public void shouldTriggerResampling() throws SchemaRuleNotFoundException, ProcedureException
     {
         IndexDescriptor index = new IndexDescriptor( 123, 456 );
-        when( operations.indexGetForLabelAndPropertyKey( anyInt(), anyInt() ) ).thenReturn( index );
+        when( operations.indexGetForLabelAndPropertyKey( anyInt(), new int[]{anyInt()} ) ).thenReturn( index );
 
         procedure.resampleIndex( ":Person(name)" );
 
