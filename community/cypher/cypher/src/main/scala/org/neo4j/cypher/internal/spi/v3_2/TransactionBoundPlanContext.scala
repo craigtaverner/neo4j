@@ -46,7 +46,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper, logger: Inter
     val labelId = tc.statement.readOperations().labelGetForName(labelName)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
-    getOnlineIndex(tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, propertyKeyId))
+    getOnlineIndex(tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)))
   }
 
   def hasIndexRule(labelName: String): Boolean = {
@@ -63,7 +63,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper, logger: Inter
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
     // here we do not need to use getOnlineIndex method because uniqueness constraint creation is synchronous
-    Some(tc.statement.readOperations().uniqueIndexGetForLabelAndPropertyKey(labelId, propertyKeyId))
+    Some(tc.statement.readOperations().uniqueIndexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)))
   }
 
   private def evalOrNone[T](f: => Option[T]): Option[T] =
@@ -84,7 +84,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper, logger: Inter
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
     import scala.collection.JavaConverters._
-    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(labelId, propertyKeyId).asScala.collectFirst {
+    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)).asScala.collectFirst {
       case unique: UniquenessConstraint => unique
     }
   } catch {
@@ -95,7 +95,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper, logger: Inter
     val labelId = tc.statement.readOperations().labelGetForName(labelName)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
-    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(labelId, propertyKeyId).hasNext
+    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)).hasNext
   }
 
   def checkNodeIndex(idxName: String) {

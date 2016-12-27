@@ -223,7 +223,7 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
 
   private def indexSeekByStringRange(index: IndexDescriptor, range: InequalitySeekRange[String]): scala.Iterator[Node] = {
     val readOps = tc.statement.readOperations()
-    val propertyKeyId = index.getPropertyKeyId
+    val propertyKeyId = index.getPropertyKeyIds
     val matchingNodes: PrimitiveLongIterator = range match {
 
       case rangeLessThan: RangeLessThan[String] =>
@@ -456,10 +456,10 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
   }
 
   def addIndexRule(labelId: Int, propertyKeyId: Int): IdempotentResult[IndexDescriptor] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(labelId, propertyKeyId))
+    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(labelId, Array(propertyKeyId)))
   } catch {
     case _: AlreadyIndexedException =>
-      val indexDescriptor = tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, propertyKeyId)
+      val indexDescriptor = tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId))
       if (tc.statement.readOperations().indexGetState(indexDescriptor) == InternalIndexState.FAILED)
         throw new FailedIndexException(indexDescriptor.userDescription(tokenNameLookup))
       IdempotentResult(indexDescriptor, wasCreated = false)
@@ -469,25 +469,25 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
     tc.statement.schemaWriteOperations().indexDrop(new IndexDescriptor(labelId, propertyKeyId))
 
   def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(labelId, propertyKeyId))
+    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(labelId, Array(propertyKeyId)))
   } catch {
     case existing: AlreadyConstrainedException =>
       IdempotentResult(existing.constraint().asInstanceOf[UniquenessConstraint], wasCreated = false)
   }
 
   def dropUniqueConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(labelId, propertyKeyId))
+    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(labelId, Array(propertyKeyId)))
 
   def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint] =
     try {
-      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(labelId, propertyKeyId))
+      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(labelId, Array(propertyKeyId)))
     } catch {
       case existing: AlreadyConstrainedException =>
         IdempotentResult(existing.constraint().asInstanceOf[NodePropertyExistenceConstraint], wasCreated = false)
     }
 
   def dropNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(labelId, propertyKeyId))
+    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(labelId, Array(propertyKeyId)))
 
   def createRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int): IdempotentResult[RelationshipPropertyExistenceConstraint] =
     try {

@@ -43,7 +43,7 @@ trait QueryContextAdaptation {
 
   override def dropRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int): Unit = ???
 
-  override def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = ???
+  //override def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = ???
 
   override def getOrCreateRelTypeId(relTypeName: String): Int = ???
 
@@ -79,7 +79,7 @@ trait QueryContextAdaptation {
 
   override def getLabelsForNode(node: Long): scala.Iterator[Int] = ???
 
-  override def dropUniqueConstraint(labelId: Int, propertyKeyId: Int): Unit = ???
+  override def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]): Unit = ???
 
   // Check if a runtime value is a node, relationship, path or some such value returned from
   override def isGraphKernelResultValue(v: Any): Boolean = ???
@@ -112,7 +112,7 @@ trait QueryContextAdaptation {
 
   override def relationshipEndNode(rel: Relationship): Node = ???
 
-  override def dropIndexRule(labelId: Int, propertyKeyId: Int): Unit = ???
+  override def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): Unit = ???
 
   override def lockNodes(nodeIds: Long*): Unit = ???
 
@@ -145,7 +145,7 @@ trait QueryContextAdaptation {
 
   override def nodeCountByCountStore(labelId: Int): Long = ???
 
-  override def addIndexRule(labelId: Int, propertyKeyId: Int): IdempotentResult[IndexDescriptor] = ???
+  override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[IndexDescriptor] = ???
 
   override def getOptRelTypeId(relType: String): Option[Int] = ???
 

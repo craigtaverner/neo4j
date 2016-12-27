@@ -96,7 +96,7 @@ trait LogicalPlanningTestSupport2 extends CypherTestSupport with AstConstruction
         if (config.uniqueIndexes((labelName, propertyKey)))
           Some(new UniquenessConstraint(
             semanticTable.resolvedLabelIds(labelName).id,
-            semanticTable.resolvedPropertyKeyNames(propertyKey).id
+            Array(semanticTable.resolvedPropertyKeyNames(propertyKey).id)
           ))
         else
           None

@@ -235,7 +235,7 @@ final class TransactionBoundQueryContext(val transactionalContext: Transactional
 
   private def indexSeekByStringRange(index: IndexDescriptor, range: InequalitySeekRange[String]): scala.Iterator[Node] = {
     val readOps = transactionalContext.statement.readOperations()
-    val propertyKeyId = index.getPropertyKeyId
+    val propertyKeyId = index.getPropertyKeyIds
     val matchingNodes: PrimitiveLongIterator = range match {
 
       case rangeLessThan: RangeLessThan[String] =>
@@ -488,7 +488,7 @@ final class TransactionBoundQueryContext(val transactionalContext: Transactional
 
   override def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint] =
     try {
-      IdempotentResult(transactionalContext.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(labelId, propertyKeyId))
+      IdempotentResult(transactionalContext.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(labelId, Array(propertyKeyId)))
     } catch {
       case existing: AlreadyConstrainedException =>
         IdempotentResult(existing.constraint().asInstanceOf[NodePropertyExistenceConstraint], wasCreated = false)
@@ -506,7 +506,7 @@ final class TransactionBoundQueryContext(val transactionalContext: Transactional
     }
 
   override def dropRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int) =
-    transactionalContext.statement.schemaWriteOperations().constraintDrop(new RelationshipPropertyExistenceConstraint(relTypeId, Array(propertyKeyId)))
+    transactionalContext.statement.schemaWriteOperations().constraintDrop(new RelationshipPropertyExistenceConstraint(relTypeId, propertyKeyId))
 
   override def getImportURL(url: URL): Either[String,URL] = transactionalContext.graph match {
     case db: GraphDatabaseQueryService =>

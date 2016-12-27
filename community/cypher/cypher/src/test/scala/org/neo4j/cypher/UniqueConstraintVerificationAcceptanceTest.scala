@@ -40,7 +40,7 @@ class UniqueConstraintVerificationAcceptanceTest
         val prop = context.propertyKeyGetForName("propertyKey")
         val label = context.labelGetForName("Label")
 
-        val constraints = context.constraintsGetForLabelAndPropertyKey(label, prop).asScala
+        val constraints = context.constraintsGetForLabelAndPropertyKey(label, Array(prop)).asScala
 
         constraints should have size 1
     }
@@ -59,7 +59,7 @@ class UniqueConstraintVerificationAcceptanceTest
         val prop = context.propertyKeyGetForName("name")
         val label = context.labelGetForName("Person")
 
-        val constraints = context.constraintsGetForLabelAndPropertyKey(label, prop).asScala
+        val constraints = context.constraintsGetForLabelAndPropertyKey(label, Array(prop)).asScala
 
         constraints should have size 1
     }
@@ -80,7 +80,7 @@ class UniqueConstraintVerificationAcceptanceTest
         val prop = context.propertyKeyGetForName("name")
         val label = context.labelGetForName("Person")
 
-        val constraints = context.constraintsGetForLabelAndPropertyKey(label, prop).asScala
+        val constraints = context.constraintsGetForLabelAndPropertyKey(label, Array(prop)).asScala
 
         constraints should have size 1
     }
@@ -99,7 +99,7 @@ class UniqueConstraintVerificationAcceptanceTest
         val prop = context.propertyKeyGetForName("propertyKey")
         val label = context.labelGetForName("Label")
 
-        val constraints = context.constraintsGetForLabelAndPropertyKey(label, prop).asScala
+        val constraints = context.constraintsGetForLabelAndPropertyKey(label, Array(prop)).asScala
 
         constraints shouldBe empty
     }
@@ -128,7 +128,7 @@ class UniqueConstraintVerificationAcceptanceTest
         val prop = context.propertyKeyGetForName("id")
         val label = context.labelGetForName("Person")
 
-        val constraints = context.constraintsGetForLabelAndPropertyKey(label, prop).asScala
+        val constraints = context.constraintsGetForLabelAndPropertyKey(label, Array(prop)).asScala
 
         constraints shouldBe empty
     }

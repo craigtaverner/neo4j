@@ -38,7 +38,7 @@ class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSuppo
 
   val label = LabelToken(LabelName("LabelName") _, LabelId(11))
   val propertyKey = Seq(PropertyKeyToken(PropertyKeyName("PropertyName") _, PropertyKeyId(10)))
-  val descriptor = new IndexDescriptor(label.nameId.id, JavaConversionSupport.asJavaIntArray(propertyKey.map(_.nameId.id)))
+  val descriptor = new IndexDescriptor(label.nameId.id, (propertyKey.map(_.nameId.id).toArray))
   val node = mock[Node]
   val node2 = mock[Node]
 

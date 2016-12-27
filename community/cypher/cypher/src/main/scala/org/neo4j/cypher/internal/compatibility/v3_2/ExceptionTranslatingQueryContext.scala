@@ -90,11 +90,11 @@ class ExceptionTranslatingQueryContext(val inner: QueryContext) extends QueryCon
   override def getOrCreatePropertyKeyId(propertyKey: String): Int =
     translateException(inner.getOrCreatePropertyKeyId(propertyKey))
 
-  override def addIndexRule(labelId: Int, propertyKeyId: Int) =
-    translateException(inner.addIndexRule(labelId, propertyKeyId))
+  override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) =
+    translateException(inner.addIndexRule(labelId, propertyKeyIds))
 
-  override def dropIndexRule(labelId: Int, propertyKeyId: Int) =
-    translateException(inner.dropIndexRule(labelId, propertyKeyId))
+  override def dropIndexRule(labelId: Int,propertyKeyIds: Seq[Int]) =
+    translateException(inner.dropIndexRule(labelId, propertyKeyIds))
 
   override def indexSeek(index: IndexDescriptor, value: Any): Iterator[Node] =
     translateException(inner.indexSeek(index, value))
@@ -111,11 +111,11 @@ class ExceptionTranslatingQueryContext(val inner: QueryContext) extends QueryCon
   override def getOrCreateFromSchemaState[K, V](key: K, creator: => V): V =
     translateException(inner.getOrCreateFromSchemaState(key, creator))
 
-  override def createUniqueConstraint(labelId: Int, propertyKeyId: Int) =
-    translateException(inner.createUniqueConstraint(labelId, propertyKeyId))
+  override def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) =
+    translateException(inner.createUniqueConstraint(labelId, propertyKeyIds))
 
-  override def dropUniqueConstraint(labelId: Int, propertyKeyId: Int) =
-    translateException(inner.dropUniqueConstraint(labelId, propertyKeyId))
+  override def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) =
+    translateException(inner.dropUniqueConstraint(labelId, propertyKeyIds))
 
   override def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int) =
     translateException(inner.createNodePropertyExistenceConstraint(labelId, propertyKeyId))

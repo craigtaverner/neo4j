@@ -36,7 +36,7 @@ case class NodeIndexSeekPipe(ident: String,
                             (implicit pipeMonitor: PipeMonitor)
   extends Pipe {
 
-  private val propertyIds: Array[Int] = seqAsJavaList(propertyKeys.map(_.nameId.id)).toArray(Array[Int]())
+  private val propertyIds: Array[Int] = propertyKeys.map(_.nameId.id).toArray
 
   private val descriptor = new IndexDescriptor(label.nameId.id, propertyIds)
 
