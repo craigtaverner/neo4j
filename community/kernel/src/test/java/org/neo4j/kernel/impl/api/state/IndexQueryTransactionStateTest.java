@@ -21,8 +21,11 @@ package org.neo4j.kernel.impl.api.state;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.internal.matchers.Any;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
@@ -191,6 +194,8 @@ public class IndexQueryTransactionStateTest
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         Cursors.<LabelItem>empty() ) );
 
+        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -214,7 +219,8 @@ public class IndexQueryTransactionStateTest
                 asNodeCursor( nodeId,
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         Cursors.<LabelItem>empty() ) );
-
+        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -236,7 +242,8 @@ public class IndexQueryTransactionStateTest
                 asNodeCursor( nodeId,
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         asLabelCursor() ) );
-
+        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -259,6 +266,8 @@ public class IndexQueryTransactionStateTest
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         asLabelCursor() ) );
 
+        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When

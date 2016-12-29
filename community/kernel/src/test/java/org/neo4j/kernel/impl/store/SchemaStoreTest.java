@@ -43,6 +43,7 @@ import org.neo4j.test.rule.fs.EphemeralFileSystemRule;
 
 import static java.nio.ByteBuffer.wrap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.Iterators.asCollection;
 import static org.neo4j.kernel.impl.api.index.TestSchemaIndexProviderDescriptor.PROVIDER_DESCRIPTOR;
 
@@ -102,7 +103,7 @@ public class SchemaStoreTest
         assertEquals( indexRule.getId(), readIndexRule.getId() );
         assertEquals( indexRule.getKind(), readIndexRule.getKind() );
         assertEquals( indexRule.getLabel(), readIndexRule.getLabel() );
-        assertEquals( indexRule.getPropertyKeys(), readIndexRule.getPropertyKeys() );
+        assertTrue( Arrays.equals( indexRule.getPropertyKeys(), readIndexRule.getPropertyKeys() ) );
         assertEquals( indexRule.getProviderDescriptor(), readIndexRule.getProviderDescriptor() );
     }
 

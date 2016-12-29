@@ -158,6 +158,7 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         writeSimpleHeader( logChannel );
         logChannel.put( INDEX_SAMPLE.code );
         logChannel.putInt( 1 );
+        logChannel.putShort( (short) 1 );
         logChannel.putInt( 1 );
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );
@@ -180,6 +181,7 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         writeSimpleHeader( logChannel );
         logChannel.put( INDEX_STATISTICS.code );
         logChannel.putInt( 1 );
+        logChannel.putShort( (short) 1 );
         logChannel.putInt( 1 );
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );

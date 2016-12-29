@@ -20,10 +20,12 @@
 package org.neo4j.kernel.impl.api.state;
 
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
@@ -70,6 +72,7 @@ import static org.neo4j.kernel.impl.api.StatementOperationsTestHelper.mockedStat
 import static org.neo4j.kernel.impl.api.state.StubCursors.asNodeCursor;
 import static org.neo4j.kernel.impl.api.state.StubCursors.asPropertyCursor;
 import static org.neo4j.test.MockedNeoStores.basicMockedNeoStores;
+import static org.neo4j.test.mockito.answer.Neo4jMockitoAnswers.answerAsIteratorFrom;
 
 public class StateHandlingStatementOperationsTest
 {
@@ -91,6 +94,8 @@ public class StateHandlingStatementOperationsTest
         when( state.txState() ).thenReturn( new TxState() );
         StoreStatement storeStatement = mock( StoreStatement.class );
         when( state.getStoreStatement() ).thenReturn( storeStatement );
+        Iterator<IndexDescriptor> itr = Collections.singletonList( new IndexDescriptor( 0, 0 ) ).iterator();
+        when( inner.indexesGetForLabel( 0 ) ).thenReturn( itr );
         when( storeStatement.acquireSingleNodeCursor( anyLong() ) ).
                 thenReturn( asNodeCursor( 0 ) );
 

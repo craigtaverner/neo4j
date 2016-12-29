@@ -21,11 +21,13 @@ package org.neo4j.kernel.impl.api.state;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.neo4j.collection.primitive.PrimitiveIntCollections;
@@ -166,6 +168,9 @@ public class LabelTransactionStateTest
                 labels( 2, 1, 3 ) );
 
         // WHEN
+        List<IndexDescriptor> tmp = Collections.singletonList( new IndexDescriptor( 2,2 ) );
+        when( store.indexesGetForLabel( 2 ) ).thenReturn( tmp.iterator() );
+
         txContext.nodeAddLabel( state, 2, 2 );
 
         // THEN

@@ -172,8 +172,8 @@ public class IndexIT extends KernelIntegrationTest
         // then
         catch ( SchemaKernelException e )
         {
-            assertEquals( "Unable to drop index on :label[" + labelId + "](property[" + propertyKeyIds + "]): " +
-                          "No such INDEX ON :label[" + labelId + "](property[" + propertyKeyIds + "]).", e.getMessage() );
+            assertEquals( "Unable to drop index on :label[" + labelId + "](property[" + propertyKeyIds[0] + "]): " +
+                          "No such INDEX ON :label[" + labelId + "](property[" + propertyKeyIds[0] + "]).", e.getMessage() );
         }
     }
 

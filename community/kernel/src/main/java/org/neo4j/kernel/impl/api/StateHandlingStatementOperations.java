@@ -407,7 +407,11 @@ public class StateHandlingStatementOperations implements
             {
                 PrimitiveIntCollection propertyKeyIds = node.getPropertyKeys();
                 HashSet<Integer> nodeProperties = new HashSet<Integer>();
-                propertyKeyIds.visitKeys( k -> nodeProperties.add(k) );
+                PrimitiveIntIterator itr = propertyKeyIds.iterator();
+                while(itr.hasNext()){
+                    nodeProperties.add(itr.next());
+                }
+                //propertyKeyIds.visitKeys( k -> nodeProperties.add(k) );
                 while ( indexes.hasNext() )
                 {
                     IndexDescriptor descriptor = indexes.next();

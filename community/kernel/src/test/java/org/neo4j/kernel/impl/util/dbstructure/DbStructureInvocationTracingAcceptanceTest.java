@@ -83,7 +83,6 @@ public class DbStructureInvocationTracingAcceptanceTest
         StringBuilder output = new StringBuilder();
         InvocationTracer<DbStructureVisitor> tracer =
             new InvocationTracer<>( "Test", packageName, className, DbStructureVisitor.class, DbStructureArgumentFormatter.INSTANCE, output );
-
         exerciseVisitor( from -> tracer.newProxy() );
         tracer.close();
         final Visitable<DbStructureVisitor> visitable = compileVisitable( classNameWithPackage, output.toString() );

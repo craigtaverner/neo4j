@@ -70,7 +70,8 @@ public class DbStructureArgumentFormatterTest
     @Test
     public void shouldFormatUniquenessConstraints()
     {
-        assertEquals( "new UniquenessConstraint( 23, 42 )", formatArgument( new UniquenessConstraint( 23, new int[]{42} ) ) );
+        assertEquals( "new UniquenessConstraint( 23, new int[]{42} )",
+                formatArgument( new UniquenessConstraint( 23, new int[]{42} ) ) );
     }
 
     private String formatArgument( Object arg )

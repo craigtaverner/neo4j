@@ -92,7 +92,8 @@ public enum DbStructureArgumentFormatter implements ArgumentFormatter
             UniquenessConstraint constraint = (UniquenessConstraint) arg;
             int labelId = constraint.label();
             int[] propertyKeyIds = constraint.getPropertyKeyIds();
-            builder.append( format( "new UniquenessConstraint( %s, %s )", labelId, IndexDescriptor.propertyIdText( propertyKeyIds ) ) );
+            builder.append( format( "new UniquenessConstraint( %s, new int[]{%s} )", labelId, IndexDescriptor
+                    .propertyIdText( propertyKeyIds ) ) );
         }
         else if ( arg instanceof NodePropertyExistenceConstraint )
         {

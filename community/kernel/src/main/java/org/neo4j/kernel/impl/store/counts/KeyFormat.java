@@ -122,7 +122,7 @@ class KeyFormat implements CountsVisitor
         {
             buffer.putInt( 10 + 4 * i, propertyKeyIds[i] );
         }
-        buffer.putByte( 10 + 4 * propertyKeyIds.length + 3, indexKey );
+        buffer.putByte( 10 + 4 * propertyKeyIds.length, indexKey );
     }
 
     public static CountsKey readKey( ReadableBuffer key ) throws UnknownKey
@@ -141,7 +141,7 @@ class KeyFormat implements CountsVisitor
             {
                 propertyKeyIds[i] = key.getInt( 10 + 4 * i );
             }
-            byte indexKeyByte = key.getByte( 10 + 4 * propertyKeyIds.length + 3 );
+            byte indexKeyByte = key.getByte( 10 + 4 * propertyKeyIds.length );
             switch ( indexKeyByte )
             {
             case KeyFormat.INDEX_STATS:

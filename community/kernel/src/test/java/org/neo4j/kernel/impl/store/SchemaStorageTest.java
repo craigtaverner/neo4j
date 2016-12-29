@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +62,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.Iterators.asSet;
 import static org.neo4j.kernel.impl.api.index.inmemory.InMemoryIndexProviderFactory.PROVIDER_DESCRIPTOR;
 import static org.neo4j.kernel.impl.store.record.UniquePropertyConstraintRule.uniquenessConstraintRule;
@@ -108,7 +110,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
+        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
         assertEquals( SchemaRule.Kind.INDEX_RULE, rule.getKind() );
     }
 
@@ -140,7 +142,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
+        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
         assertEquals( SchemaRule.Kind.CONSTRAINT_INDEX_RULE, rule.getKind() );
     }
 
@@ -218,7 +220,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertEquals( propId( PROP1 ), rule.getPropertyKeys() );
+        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
         assertEquals( SchemaRule.Kind.UNIQUENESS_CONSTRAINT, rule.getKind() );
     }
 

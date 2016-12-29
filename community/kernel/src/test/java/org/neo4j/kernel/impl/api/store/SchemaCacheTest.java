@@ -47,6 +47,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.Iterators.asSet;
 import static org.neo4j.kernel.impl.api.index.TestSchemaIndexProviderDescriptor.PROVIDER_DESCRIPTOR;
 import static org.neo4j.kernel.impl.store.record.NodePropertyExistenceConstraintRule.nodePropertyExistenceConstraintRule;
@@ -199,7 +200,7 @@ public class SchemaCacheTest
 
         // Then
         assertEquals( 1, descriptor.getLabelId() );
-        assertEquals( new int[]{3}, descriptor.getPropertyKeyIds() );
+        assertTrue( Arrays.equals( new int[]{3}, descriptor.getPropertyKeyIds() ));
     }
 
     @Test

@@ -111,8 +111,8 @@ public class ConstraintIndexCreatorTest
         IndexProxy indexProxy = mock( IndexProxy.class );
         when( indexingService.getIndexProxy( 2468L ) ).thenReturn( indexProxy );
         PreexistingIndexEntryConflictException cause = new PreexistingIndexEntryConflictException("a", 2, 1);
-        doThrow( new IndexPopulationFailedKernelException( descriptor, "some index", cause) )
-                .when(indexProxy).awaitStoreScanCompleted();
+        IndexPopulationFailedKernelException tmp =new IndexPopulationFailedKernelException( descriptor, "some index", cause );
+        doThrow( tmp ).when(indexProxy).awaitStoreScanCompleted();
 
         ConstraintIndexCreator creator = new ConstraintIndexCreator( () -> kernel, indexingService );
 
