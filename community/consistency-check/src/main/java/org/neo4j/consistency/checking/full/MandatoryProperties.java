@@ -66,7 +66,7 @@ public class MandatoryProperties
                 storage = nodes;
                 NodePropertyExistenceConstraintRule nodeRule = (NodePropertyExistenceConstraintRule) rule;
                 labelOrRelType = nodeRule.getLabel();
-                propertyKey = nodeRule.getPropertyKey();
+                propertyKey = nodeRule.getPropertyKeys()[0];
                 break;
 
             case RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT:

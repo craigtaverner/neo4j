@@ -67,7 +67,7 @@ public class NodeCorrectlyIndexedCheck implements RecordCheck<NodeRecord, Consis
             }
 
             List<PropertyBlock> properties = propertyReader.propertyBlocks( record );
-            PropertyBlock property = propertyWithKey( properties, indexRule.getPropertyKey() );
+            PropertyBlock property = propertyWithKey( properties, indexRule.getPropertyKeys()[0] );
 
             if ( property == null )
             {

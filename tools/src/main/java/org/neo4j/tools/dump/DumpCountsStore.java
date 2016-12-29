@@ -149,18 +149,18 @@ public class DumpCountsStore implements CountsVisitor, MetadataVisitor, UnknownK
     }
 
     @Override
-    public void visitIndexStatistics( int labelId, int propertyKeyId, long updates, long size )
+    public void visitIndexStatistics( int labelId, int[] propertyKeyIds, long updates, long size )
     {
         out.printf( "\tIndexStatistics[(%s {%s})]:\tupdates=%d, size=%d%n",
-                    label( labelId ), propertyKey( propertyKeyId ),
+                    label( labelId ), propertyKey( propertyKeyIds[0] ),
                     updates, size );
     }
 
     @Override
-    public void visitIndexSample( int labelId, int propertyKeyId, long unique, long size )
+    public void visitIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
     {
         out.printf( "\tIndexSample[(%s {%s})]:\tunique=%d, size=%d%n",
-                    label( labelId ), propertyKey( propertyKeyId ),
+                    label( labelId ), propertyKey( propertyKeyIds[0] ),
                     unique, size );
     }
 

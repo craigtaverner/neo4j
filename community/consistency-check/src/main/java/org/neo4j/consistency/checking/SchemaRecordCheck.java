@@ -153,7 +153,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkIndexRule( IndexRule rule, DynamicRecord record, RecordAccess records,
                 CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKey(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
 
             if ( rule.isConstraintIndex() && rule.getOwningConstraint() != null )
             {
@@ -169,7 +169,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkUniquenessConstraintRule( UniquePropertyConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKey(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
 
             DynamicRecord previousObligation = indexObligations.put( rule.getOwnedIndex(), record.clone() );
             if ( previousObligation != null )
@@ -182,7 +182,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkNodePropertyExistenceRule( NodePropertyExistenceConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKey(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
         }
 
         @Override

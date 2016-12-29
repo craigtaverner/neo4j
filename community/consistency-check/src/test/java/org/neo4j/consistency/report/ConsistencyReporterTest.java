@@ -332,7 +332,8 @@ public class ConsistencyReporterTest
             }
             if ( type == IndexRule.class )
             {
-                return IndexRule.indexRule( 1, 2, 3, new SchemaIndexProvider.Descriptor( "provider", "version" ) );
+                return IndexRule.indexRule( 1, 2, new int[]{3},
+                        new SchemaIndexProvider.Descriptor( "provider", "version" ) );
             }
             if ( type == RelationshipGroupRecord.class )
             {

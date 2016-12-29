@@ -412,7 +412,7 @@ public class FullCheckIntegrationTest
         while ( rules.hasNext() )
         {
             IndexRule rule = rules.next();
-            IndexDescriptor descriptor = new IndexDescriptor( rule.getLabel(), rule.getPropertyKey() );
+            IndexDescriptor descriptor = new IndexDescriptor( rule.getLabel(), rule.getPropertyKeys() );
             IndexConfiguration indexConfig = IndexConfiguration.NON_UNIQUE;
             IndexSamplingConfig samplingConfig = new IndexSamplingConfig( Config.empty() );
             IndexPopulator populator =
@@ -942,7 +942,7 @@ public class FullCheckIntegrationTest
                 DynamicRecord schemaBefore = schema.clone();
 
                 schema.setNextBlock( next.schema() ); // Point to a record that isn't in use.
-                IndexRule rule = IndexRule.indexRule( schema.getId(), label1, key, DESCRIPTOR );
+                IndexRule rule = IndexRule.indexRule( schema.getId(), label1, new int[]{key}, DESCRIPTOR );
                 schema.setData( new RecordSerializer().append( rule ).serialize() );
 
                 tx.createSchema( asList( schemaBefore ), asList( schema ), rule );
@@ -970,15 +970,15 @@ public class FullCheckIntegrationTest
                 int ruleId1 = (int) next.schema();
                 int ruleId2 = (int) next.schema();
                 int labelId = next.label();
-                int propertyKeyId = next.propertyKey();
+                int[] propertyKeyIds = new int[]{next.propertyKey()};
 
                 DynamicRecord record1 = new DynamicRecord( ruleId1 );
                 DynamicRecord record2 = new DynamicRecord( ruleId2 );
                 DynamicRecord record1Before = record1.clone();
                 DynamicRecord record2Before = record2.clone();
 
-                IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyId, DESCRIPTOR, (long) ruleId1 );
-                IndexRule rule2 = IndexRule.constraintIndexRule( ruleId2, labelId, propertyKeyId, DESCRIPTOR, (long) ruleId1 );
+                IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds, DESCRIPTOR, (long) ruleId1 );
+                IndexRule rule2 = IndexRule.constraintIndexRule( ruleId2, labelId, propertyKeyIds, DESCRIPTOR, (long) ruleId1 );
 
                 Collection<DynamicRecord> records1 = serializeRule( rule1, record1 );
                 Collection<DynamicRecord> records2 = serializeRule( rule2, record2 );
@@ -987,7 +987,7 @@ public class FullCheckIntegrationTest
                 assertEquals( asList( record2 ), records2 );
 
                 tx.nodeLabel( labelId, "label" );
-                tx.propertyKey( propertyKeyId, "property" );
+                tx.propertyKey( propertyKeyIds[0], "property" );
 
                 tx.createSchema( asList(record1Before), records1, rule1 );
                 tx.createSchema( asList(record2Before), records2, rule2 );
@@ -1015,16 +1015,17 @@ public class FullCheckIntegrationTest
                 int ruleId1 = (int) next.schema();
                 int ruleId2 = (int) next.schema();
                 int labelId = next.label();
-                int propertyKeyId = next.propertyKey();
+                int[] propertyKeyIds = new int[]{next.propertyKey()};
 
                 DynamicRecord record1 = new DynamicRecord( ruleId1 );
                 DynamicRecord record2 = new DynamicRecord( ruleId2 );
                 DynamicRecord record1Before = record1.clone();
                 DynamicRecord record2Before = record2.clone();
 
-                IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyId, DESCRIPTOR, (long) ruleId2 );
+                IndexRule rule1 = IndexRule.constraintIndexRule(
+                        ruleId1, labelId, propertyKeyIds, DESCRIPTOR, (long) ruleId2 );
                 UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule
-                        .uniquenessConstraintRule( ruleId2, labelId, propertyKeyId, ruleId2 );
+                        .uniquenessConstraintRule( ruleId2, labelId, propertyKeyIds, ruleId2 );
 
                 Collection<DynamicRecord> records1 = serializeRule( rule1, record1 );
                 Collection<DynamicRecord> records2 = serializeRule( rule2, record2 );
@@ -1033,7 +1034,7 @@ public class FullCheckIntegrationTest
                 assertEquals( asList( record2 ), records2 );
 
                 tx.nodeLabel( labelId, "label" );
-                tx.propertyKey( propertyKeyId, "property" );
+                tx.propertyKey( propertyKeyIds[0], "property" );
 
                 tx.createSchema( asList(record1Before), records1, rule1 );
                 tx.createSchema( asList(record2Before), records2, rule2 );
@@ -2058,7 +2059,9 @@ public class FullCheckIntegrationTest
                 DynamicRecord recordBefore = new DynamicRecord( id );
                 DynamicRecord recordAfter = recordBefore.clone();
 
-                IndexRule rule = IndexRule.indexRule( id, labelId, propertyKeyId, DESCRIPTOR );
+                int[] propertyKeyIds = {propertyKeyId};
+
+                IndexRule rule = IndexRule.indexRule( id, labelId, propertyKeyIds, DESCRIPTOR );
                 Collection<DynamicRecord> records = serializeRule( rule, recordAfter );
 
                 tx.createSchema( singleton( recordBefore ), records, rule );
@@ -2082,10 +2085,12 @@ public class FullCheckIntegrationTest
                 DynamicRecord record1Before = record1.clone();
                 DynamicRecord record2Before = record2.clone();
 
-                IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyId, DESCRIPTOR,
+                int[] propertyKeyIds = {propertyKeyId};
+
+                IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds, DESCRIPTOR,
                         (long) ruleId2 );
                 UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId2,
-                        labelId, propertyKeyId, ruleId1 );
+                        labelId, propertyKeyIds, ruleId1 );
 
                 Collection<DynamicRecord> records1 = serializeRule( rule1, record1 );
                 Collection<DynamicRecord> records2 = serializeRule( rule2, record2 );
@@ -2101,8 +2106,10 @@ public class FullCheckIntegrationTest
 
     private void createNodePropertyExistenceConstraint( int labelId, int propertyKeyId )
     {
+        int[] propertyKeyIds = {propertyKeyId};
+
         SchemaStore schemaStore = (SchemaStore) fixture.directStoreAccess().nativeStores().getSchemaStore();
-        SchemaRule rule = nodePropertyExistenceConstraintRule( schemaStore.nextId(), labelId, propertyKeyId );
+        SchemaRule rule = nodePropertyExistenceConstraintRule( schemaStore.nextId(), labelId, propertyKeyIds );
         Collection<DynamicRecord> records = schemaStore.allocateFrom( rule );
         for ( DynamicRecord record : records )
         {

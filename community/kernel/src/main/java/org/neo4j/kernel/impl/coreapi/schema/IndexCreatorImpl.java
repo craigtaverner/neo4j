@@ -38,7 +38,7 @@ public class IndexCreatorImpl implements IndexCreator
 
     public IndexCreatorImpl( InternalSchemaActions actions, Label label )
     {
-        this( actions, label, new ArrayList<String>() );
+        this( actions, label, new ArrayList<>() );
     }
 
     private IndexCreatorImpl( InternalSchemaActions actions, Label label, Collection<String> propertyKeys )
@@ -54,6 +54,10 @@ public class IndexCreatorImpl implements IndexCreator
     public IndexCreator on( String propertyKey )
     {
         assertInUnterminatedTransaction();
+
+        if ( !propertyKeys.isEmpty() )
+            throw new UnsupportedOperationException(
+                    "Compound indexes are not yet supported, only one property per index is allowed." );
 
         return
             new IndexCreatorImpl( actions, label,
