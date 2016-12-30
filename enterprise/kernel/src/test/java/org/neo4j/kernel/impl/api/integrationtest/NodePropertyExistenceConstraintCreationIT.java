@@ -53,7 +53,7 @@ public class NodePropertyExistenceConstraintCreationIT
     }
 
     @Override
-    NodePropertyExistenceConstraint createConstraint( SchemaWriteOperations writeOps, int type, int property )
+    NodePropertyExistenceConstraint createConstraint( SchemaWriteOperations writeOps, int type, int[] property )
             throws Exception
     {
         return writeOps.nodePropertyExistenceConstraintCreate( type, property );
@@ -66,7 +66,7 @@ public class NodePropertyExistenceConstraintCreationIT
     }
 
     @Override
-    NodePropertyExistenceConstraint newConstraintObject( int type, int property )
+    NodePropertyExistenceConstraint newConstraintObject( int type, int[] property )
     {
         return new NodePropertyExistenceConstraint( type, property );
     }
@@ -104,7 +104,7 @@ public class NodePropertyExistenceConstraintCreationIT
         UniquenessConstraint constraint;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            constraint = statement.uniquePropertyConstraintCreate( typeId, propertyKeyId );
+            constraint = statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
             commit();
         }
 
@@ -113,7 +113,7 @@ public class NodePropertyExistenceConstraintCreationIT
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
             statement.constraintDrop(
-                    new NodePropertyExistenceConstraint( constraint.label(), constraint.propertyKey() ) );
+                    new NodePropertyExistenceConstraint( constraint.label(), constraint.getPropertyKeyIds() ) );
 
             fail( "expected exception" );
         }
@@ -132,7 +132,7 @@ public class NodePropertyExistenceConstraintCreationIT
             ReadOperations statement = readOperationsInNewTransaction();
 
             Iterator<NodePropertyConstraint> constraints =
-                    statement.constraintsGetForLabelAndPropertyKey( typeId, propertyKeyId );
+                    statement.constraintsGetForLabelAndPropertyKey( typeId, propertyKeyIds );
 
             assertEquals( constraint, single( constraints ) );
         }

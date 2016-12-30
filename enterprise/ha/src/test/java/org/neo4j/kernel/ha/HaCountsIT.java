@@ -182,7 +182,7 @@ public class HaCountsIT
             Statement statement = statement( db );
             int labelId = statement.tokenWriteOperations().labelGetOrCreateForName( label.name() );
             int propertyKeyId = statement.tokenWriteOperations().propertyKeyGetOrCreateForName( propertyName );
-            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, propertyKeyId );
+            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, new int[]{propertyKeyId} );
             tx.success();
             return index;
         }
@@ -206,7 +206,7 @@ public class HaCountsIT
     {
         CountsTracker counts = counts( db );
         int labelId = indexDescriptor.getLabelId();
-        int propertyKeyId = indexDescriptor.getPropertyKeyId();
+        int[] propertyKeyId = indexDescriptor.getPropertyKeyIds();
         assertDoubleLongEquals( expectedIndexUpdates, expectedIndexSize,
                 counts.indexUpdatesAndSize( labelId, propertyKeyId, newDoubleLongRegister() ) );
         assertDoubleLongEquals( expectedUniqueValues, expectedSampleSize,

@@ -40,9 +40,9 @@ public class RelationshipPropertyExistenceConstraintCreationIT
 
     @Override
     RelationshipPropertyExistenceConstraint createConstraint( SchemaWriteOperations writeOps, int type,
-            int property ) throws Exception
+            int[] property ) throws Exception
     {
-        return writeOps.relationshipPropertyExistenceConstraintCreate( type, property );
+        return writeOps.relationshipPropertyExistenceConstraintCreate( type, property[0] );
     }
 
     @Override
@@ -52,9 +52,9 @@ public class RelationshipPropertyExistenceConstraintCreationIT
     }
 
     @Override
-    RelationshipPropertyExistenceConstraint newConstraintObject( int type, int property )
+    RelationshipPropertyExistenceConstraint newConstraintObject( int type, int[] property )
     {
-        return new RelationshipPropertyExistenceConstraint( type, property );
+        return new RelationshipPropertyExistenceConstraint( type, property[0] );
     }
 
     @Override

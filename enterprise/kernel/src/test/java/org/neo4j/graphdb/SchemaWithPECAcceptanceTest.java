@@ -122,13 +122,15 @@ public class SchemaWithPECAcceptanceTest
     {
         SchemaHelper.createUniquenessConstraint( db, label, propertyKey );
         SchemaHelper.awaitIndexes( db );
-        return new UniquenessConstraintDefinition( mock( InternalSchemaActions.class ), label, propertyKey );
+        return new UniquenessConstraintDefinition( mock( InternalSchemaActions.class ), label,
+                new String[]{propertyKey} );
     }
 
     private ConstraintDefinition createNodePropertyExistenceConstraint( Label label, String propertyKey )
     {
         SchemaHelper.createNodePropertyExistenceConstraint( db, label, propertyKey );
-        return new NodePropertyExistenceConstraintDefinition( mock( InternalSchemaActions.class ), label, propertyKey );
+        return new NodePropertyExistenceConstraintDefinition( mock( InternalSchemaActions.class ), label,
+                new String[]{propertyKey} );
     }
 
     private ConstraintDefinition createRelationshipPropertyExistenceConstraint( Types type, String propertyKey )

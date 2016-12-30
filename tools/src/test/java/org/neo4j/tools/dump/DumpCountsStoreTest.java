@@ -60,7 +60,7 @@ public class DumpCountsStoreTest
     private static final int TYPE_ID = 1;
     private static final String TYPE_LABEL = "testType";
 
-    private static final int INDEX_PROPERTY_KEY_ID = 1;
+    private static final int[] INDEX_PROPERTY_KEY_ID = new int[]{1};
     private static final String INDEX_PROPERTY = "indexProperty";
 
     @Rule
@@ -160,7 +160,7 @@ public class DumpCountsStoreTest
 
     private List<Token> getPropertyTokens()
     {
-        return Collections.singletonList( new Token( INDEX_PROPERTY, INDEX_PROPERTY_KEY_ID ) );
+        return Collections.singletonList( new Token( INDEX_PROPERTY, INDEX_PROPERTY_KEY_ID[0] ) );
     }
 
     private List<RelationshipTypeToken> getTypeTokes()

@@ -76,7 +76,7 @@ public class PropertyExistenceConstraintValidationIT
         {
             DataWriteOperations dataWrite = dataWriteOperationsInNewTransaction();
             int label = dataWrite.labelGetOrCreateForName( key );
-            int propertyKey = dataWrite.propertyKeyGetOrCreateForName( property );
+            int[] propertyKey = new int[]{dataWrite.propertyKeyGetOrCreateForName( property )};
             commit();
 
             SchemaWriteOperations schemaWrite = schemaWriteOperationsInNewTransaction();

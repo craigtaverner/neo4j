@@ -68,7 +68,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
     }
 
     @Override
-    UniquenessConstraint createConstraint( SchemaWriteOperations writeOps, int type, int property ) throws Exception
+    UniquenessConstraint createConstraint( SchemaWriteOperations writeOps, int type, int[] property ) throws Exception
     {
         return writeOps.uniquePropertyConstraintCreate( type, property );
     }
@@ -80,7 +80,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
     }
 
     @Override
-    UniquenessConstraint newConstraintObject( int type, int property )
+    UniquenessConstraint newConstraintObject( int type, int[] property )
     {
         return new UniquenessConstraint( type, property );
     }
@@ -139,14 +139,14 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         try
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( foo, name );
+            statement.uniquePropertyConstraintCreate( foo, new int[]{name} );
 
             fail( "expected exception" );
         }
         // then
         catch ( CreateConstraintFailureException ex )
         {
-            assertEquals( new UniquenessConstraint( foo, name ), ex.constraint() );
+            assertEquals( new UniquenessConstraint( foo, new int[]{name} ), ex.constraint() );
             Throwable cause = ex.getCause();
             assertThat( cause, instanceOf( ConstraintVerificationFailedKernelException.class ) );
 
@@ -164,14 +164,14 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         // when
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( typeId, propertyKeyId );
+            statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
             commit();
         }
 
         // then
         {
             ReadOperations statement = readOperationsInNewTransaction();
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyId ) ),
+            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
         }
     }
@@ -182,8 +182,8 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         // given
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( typeId, propertyKeyId );
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyId ) ),
+            statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
+            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
         }
 
@@ -206,7 +206,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         NodePropertyExistenceConstraint constraint;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            constraint = statement.nodePropertyExistenceConstraintCreate( typeId, propertyKeyId );
+            constraint = statement.nodePropertyExistenceConstraintCreate( typeId, propertyKeyIds );
             commit();
         }
 
@@ -214,7 +214,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         try
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.constraintDrop( new UniquenessConstraint( constraint.label(), constraint.propertyKey() ) );
+            statement.constraintDrop( new UniquenessConstraint( constraint.label(), constraint.getPropertyKeyIds() ) );
 
             fail( "expected exception" );
         }
@@ -233,7 +233,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
             ReadOperations statement = readOperationsInNewTransaction();
 
             Iterator<NodePropertyConstraint> constraints =
-                    statement.constraintsGetForLabelAndPropertyKey( typeId, propertyKeyId );
+                    statement.constraintsGetForLabelAndPropertyKey( typeId, propertyKeyIds );
 
             assertEquals( constraint, single( constraints ) );
         }
@@ -244,13 +244,13 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
     {
         // when
         SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-        statement.uniquePropertyConstraintCreate( typeId, propertyKeyId );
+        statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
         commit();
 
         // then
         SchemaStorage schema = new SchemaStorage( neoStores().getSchemaStore() );
-        IndexRule indexRule = schema.indexRule( typeId, propertyKeyId );
-        UniquePropertyConstraintRule constraintRule = schema.uniquenessConstraint( typeId, propertyKeyId );
+        IndexRule indexRule = schema.indexRule( typeId, propertyKeyIds );
+        UniquePropertyConstraintRule constraintRule = schema.uniquenessConstraint( typeId, propertyKeyIds );
         assertEquals( constraintRule.getId(), indexRule.getOwningConstraint().longValue() );
         assertEquals( indexRule.getId(), constraintRule.getOwnedIndex() );
     }
@@ -267,8 +267,8 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         UniquenessConstraint constraint;
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            constraint = statement.uniquePropertyConstraintCreate( typeId, propertyKeyId );
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyId ) ),
+            constraint = statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
+            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
             commit();
         }

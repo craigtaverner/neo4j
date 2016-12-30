@@ -401,33 +401,24 @@ public class StateHandlingStatementOperations implements
             }
 
             state.txState().nodeDoAddLabel( labelId, node.id() );
-
-            Iterator<IndexDescriptor> indexes = this.indexesGetForLabel( state, labelId );
-            if ( indexes.hasNext() )
+            try ( Cursor<PropertyItem> properties = node.properties() )
             {
-                PrimitiveIntCollection propertyKeyIds = node.getPropertyKeys();
-                HashSet<Integer> nodeProperties = new HashSet<Integer>();
-                PrimitiveIntIterator itr = propertyKeyIds.iterator();
-                while(itr.hasNext()){
-                    nodeProperties.add(itr.next());
-                }
-                //propertyKeyIds.visitKeys( k -> nodeProperties.add(k) );
-                while ( indexes.hasNext() )
+                while ( properties.next() )
                 {
-                    IndexDescriptor descriptor = indexes.next();
-                    int[] properties = descriptor.getPropertyKeyIds();
-                    if ( Arrays.stream( properties ).allMatch( p -> nodeProperties.contains( p ) ) )
+                    PropertyItem propertyItem = properties.get();
+                    IndexDescriptor descriptor = indexGetForLabelAndPropertyKey( state, labelId,
+                            new int[]{propertyItem.propertyKeyId()} );
+                    if ( descriptor != null )
                     {
-                        //TODO: Send combined properties updates instead of individual for composite index
-                        for ( int property : properties )
-                        {
-                            DefinedProperty after = Property.property( property, node.getProperty( property ) );
-                            state.txState().indexDoUpdateProperty( descriptor, node.id(), null, after );
-                        }
+                        DefinedProperty after = Property.property( propertyItem.propertyKeyId(),
+                                propertyItem.value() );
+
+                        state.txState().indexDoUpdateProperty( descriptor, node.id(), null, after );
                     }
                 }
+
+                return true;
             }
-            return true;
         }
     }
 

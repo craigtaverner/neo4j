@@ -88,13 +88,13 @@ case object ProcedureCallOrSchemaCommandPlanBuilder extends Phase {
       // CREATE INDEX ON :LABEL(prop)
       case CreateIndex(label, prop) =>
         Some(PureSideEffectExecutionPlan("CreateIndex", SCHEMA_WRITE, (ctx) => {
-          (ctx.addIndexRule _).tupled(labelProp(ctx)(label, prop))
+          (ctx.addIndexRule _).tupled(labelProps(ctx)(label, prop))
         }))
 
       // DROP INDEX ON :LABEL(prop)
       case DropIndex(label, prop) =>
         Some(PureSideEffectExecutionPlan("DropIndex", SCHEMA_WRITE, (ctx) => {
-          (ctx.dropIndexRule _).tupled(labelProp(ctx)(label, prop))
+          (ctx.dropIndexRule _).tupled(labelProps(ctx)(label, prop))
         }))
 
       case _ => None

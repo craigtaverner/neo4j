@@ -40,7 +40,8 @@ public class NodePropertyExistenceConstraintViolationKernelException extends Con
     }
     public NodePropertyExistenceConstraintViolationKernelException( int labelId, int[] propertyKeyId, long nodeId )
     {
-        super( "Node %d with label %d must have the property %d", nodeId, labelId, IndexDescriptor.propertyIdText(propertyKeyId));
+        super( "Node %d with label %d must have the property %s", nodeId, labelId,
+                IndexDescriptor.propertyIdText( propertyKeyId ) );
         this.labelId = labelId;
         this.propertyKeyId = propertyKeyId;
         this.nodeId = nodeId;
