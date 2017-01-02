@@ -93,7 +93,7 @@ class ExceptionTranslatingQueryContext(val inner: QueryContext) extends QueryCon
   override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) =
     translateException(inner.addIndexRule(labelId, propertyKeyIds))
 
-  override def dropIndexRule(labelId: Int,propertyKeyIds: Seq[Int]) =
+  override def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) =
     translateException(inner.dropIndexRule(labelId, propertyKeyIds))
 
   override def indexSeek(index: IndexDescriptor, value: Any): Iterator[Node] =

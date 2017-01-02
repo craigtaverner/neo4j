@@ -200,7 +200,7 @@ public class SchemaCacheTest
 
         // Then
         assertEquals( 1, descriptor.getLabelId() );
-        assertTrue( Arrays.equals( new int[]{3}, descriptor.getPropertyKeyIds() ));
+        assertTrue( Arrays.equals( new int[]{3}, descriptor.getPropertyKeyIds() ) );
     }
 
     @Test

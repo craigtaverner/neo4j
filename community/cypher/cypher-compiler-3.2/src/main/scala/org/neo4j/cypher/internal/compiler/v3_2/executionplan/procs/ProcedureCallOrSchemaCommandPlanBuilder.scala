@@ -103,9 +103,6 @@ case object ProcedureCallOrSchemaCommandPlanBuilder extends Phase {
     from.copy(maybeExecutionPlan = maybeExecutionPlan)
   }
 
-  private def labelPropSeq(ctx: QueryContext)(label: LabelName, prop: PropertyKeyName) =
-    (ctx.getOrCreateLabelId(label.name), Seq(ctx.getOrCreatePropertyKeyId(prop.name)))
-
   private def labelProp(ctx: QueryContext)(label: LabelName, prop: PropertyKeyName) =
     (ctx.getOrCreateLabelId(label.name), ctx.getOrCreatePropertyKeyId(prop.name))
 

@@ -94,8 +94,8 @@ public class StateHandlingStatementOperationsTest
         when( state.txState() ).thenReturn( new TxState() );
         StoreStatement storeStatement = mock( StoreStatement.class );
         when( state.getStoreStatement() ).thenReturn( storeStatement );
-        Iterator<IndexDescriptor> itr = Collections.singletonList( new IndexDescriptor( 0, 0 ) ).iterator();
-        when( inner.indexesGetForLabel( 0 ) ).thenReturn( itr );
+        Iterator<IndexDescriptor> indexesIterator = Collections.singletonList( new IndexDescriptor( 0, 0 ) ).iterator();
+        when( inner.indexesGetForLabel( 0 ) ).thenReturn( indexesIterator );
         when( storeStatement.acquireSingleNodeCursor( anyLong() ) ).
                 thenReturn( asNodeCursor( 0 ) );
 

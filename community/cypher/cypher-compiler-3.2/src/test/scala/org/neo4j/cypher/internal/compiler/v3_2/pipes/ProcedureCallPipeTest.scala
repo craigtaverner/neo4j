@@ -132,12 +132,5 @@ class ProcedureCallPipeTest
       result(args)
     }
 
-    override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[IndexDescriptor] = ???
-
-    override def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): Unit = ???
-
-    override def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[UniquenessConstraint] = ???
-
-    override def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]): Unit = ???
   }
 }

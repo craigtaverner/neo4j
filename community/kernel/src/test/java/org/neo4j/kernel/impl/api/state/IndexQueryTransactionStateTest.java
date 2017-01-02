@@ -194,8 +194,8 @@ public class IndexQueryTransactionStateTest
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         Cursors.<LabelItem>empty() ) );
 
-        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
-        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
+        List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -219,8 +219,8 @@ public class IndexQueryTransactionStateTest
                 asNodeCursor( nodeId,
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         Cursors.<LabelItem>empty() ) );
-        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
-        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
+        List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -242,8 +242,8 @@ public class IndexQueryTransactionStateTest
                 asNodeCursor( nodeId,
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         asLabelCursor() ) );
-        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
-        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
+        List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When
@@ -266,8 +266,8 @@ public class IndexQueryTransactionStateTest
                         asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
                         asLabelCursor() ) );
 
-        List<IndexDescriptor> tmp = Collections.singletonList( indexDescriptor );
-        when( store.indexesGetForLabel( labelId ) ).thenReturn( tmp.iterator() );
+        List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
+        when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
         txContext.nodeAddLabel( state, nodeId, labelId );
 
         // When

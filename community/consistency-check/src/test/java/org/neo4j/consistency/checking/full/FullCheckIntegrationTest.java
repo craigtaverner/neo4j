@@ -1022,8 +1022,8 @@ public class FullCheckIntegrationTest
                 DynamicRecord record1Before = record1.clone();
                 DynamicRecord record2Before = record2.clone();
 
-                IndexRule rule1 = IndexRule.constraintIndexRule(
-                        ruleId1, labelId, propertyKeyIds, DESCRIPTOR, (long) ruleId2 );
+                IndexRule rule1 =IndexRule.constraintIndexRule( ruleId1, labelId,
+                        propertyKeyIds, DESCRIPTOR, (long) ruleId2 );
                 UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule
                         .uniquenessConstraintRule( ruleId2, labelId, propertyKeyIds, ruleId2 );
 
@@ -2060,7 +2060,6 @@ public class FullCheckIntegrationTest
                 DynamicRecord recordAfter = recordBefore.clone();
 
                 int[] propertyKeyIds = {propertyKeyId};
-
                 IndexRule rule = IndexRule.indexRule( id, labelId, propertyKeyIds, DESCRIPTOR );
                 Collection<DynamicRecord> records = serializeRule( rule, recordAfter );
 
@@ -2086,7 +2085,6 @@ public class FullCheckIntegrationTest
                 DynamicRecord record2Before = record2.clone();
 
                 int[] propertyKeyIds = {propertyKeyId};
-
                 IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds, DESCRIPTOR,
                         (long) ruleId2 );
                 UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId2,
@@ -2107,7 +2105,6 @@ public class FullCheckIntegrationTest
     private void createNodePropertyExistenceConstraint( int labelId, int propertyKeyId )
     {
         int[] propertyKeyIds = {propertyKeyId};
-
         SchemaStore schemaStore = (SchemaStore) fixture.directStoreAccess().nativeStores().getSchemaStore();
         SchemaRule rule = nodePropertyExistenceConstraintRule( schemaStore.nextId(), labelId, propertyKeyIds );
         Collection<DynamicRecord> records = schemaStore.allocateFrom( rule );

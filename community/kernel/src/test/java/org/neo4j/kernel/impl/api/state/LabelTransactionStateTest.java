@@ -168,9 +168,8 @@ public class LabelTransactionStateTest
                 labels( 2, 1, 3 ) );
 
         // WHEN
-        List<IndexDescriptor> tmp = Collections.singletonList( new IndexDescriptor( 2,2 ) );
-        when( store.indexesGetForLabel( 2 ) ).thenReturn( tmp.iterator() );
-
+        List<IndexDescriptor> indexes = Collections.singletonList( new IndexDescriptor( 2, 2 ) );
+        when( store.indexesGetForLabel( 2 ) ).thenReturn( indexes.iterator() );
         txContext.nodeAddLabel( state, 2, 2 );
 
         // THEN

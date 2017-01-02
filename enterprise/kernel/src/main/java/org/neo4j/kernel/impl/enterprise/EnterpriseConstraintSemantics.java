@@ -82,16 +82,16 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
         {
             NodeItem node = allNodes.get();
 
-            List<Integer> l=new ArrayList<>();
-            PrimitiveIntIterator itr=node.getPropertyKeys().iterator();
-            while(itr.hasNext()){
-                l.add(itr.next());
-            }
-            if ( !Arrays.equals(l.stream().mapToInt(i -> i).toArray(), propertyKeys ) )
+            List<Integer> l = new ArrayList<>();
+            PrimitiveIntIterator itr = node.getPropertyKeys().iterator();
+            while ( itr.hasNext() )
             {
-                throw createConstraintFailure(
-                        new NodePropertyExistenceConstraintVerificationFailedKernelException(
-                                new NodePropertyExistenceConstraint( label,propertyKeys ), node.id() ) );
+                l.add( itr.next() );
+            }
+            if ( !Arrays.equals( l.stream().mapToInt( i -> i ).toArray(), propertyKeys ) )
+            {
+                throw createConstraintFailure( new NodePropertyExistenceConstraintVerificationFailedKernelException(
+                        new NodePropertyExistenceConstraint( label, propertyKeys ), node.id() ) );
             }
         }
     }

@@ -155,8 +155,8 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule1 = IndexRule.constraintIndexRule(
-                ruleId1, labelId, propertyKeyIds, providerDescriptor, (long) ruleId2 );
+        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId2 );
         UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule
                 .uniquenessConstraintRule( ruleId2, labelId, propertyKeyIds, ruleId2 );
 
@@ -189,7 +189,8 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule = IndexRule.constraintIndexRule( ruleId, labelId, propertyKeyIds, providerDescriptor, null );
+        IndexRule rule = IndexRule.constraintIndexRule( ruleId, labelId, propertyKeyIds,
+                providerDescriptor, null );
 
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId ) ).thenReturn( rule );
 
@@ -277,8 +278,8 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds, providerDescriptor, (long)
-                ruleId1 );
+        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId1 );
         UniquePropertyConstraintRule rule2 = UniquePropertyConstraintRule
                 .uniquenessConstraintRule( ruleId2, labelId, propertyKeyIds, ruleId1 );
 
@@ -313,10 +314,10 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds, providerDescriptor, (long)
-                ruleId1 );
-        IndexRule rule2 = IndexRule.constraintIndexRule( ruleId2, labelId, propertyKeyIds, providerDescriptor, (long)
-                ruleId1 );
+        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId1 );
+        IndexRule rule2 = IndexRule.constraintIndexRule( ruleId2, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId1 );
 
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId1 ) ).thenReturn( rule1 );
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId2 ) ).thenReturn( rule2 );
@@ -344,8 +345,8 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule =
-                IndexRule.constraintIndexRule( ruleId, labelId, propertyKeyIds, providerDescriptor, (long) ruleId );
+        IndexRule rule = IndexRule.constraintIndexRule( ruleId, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId );
 
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId ) ).thenReturn( rule );
 
@@ -375,10 +376,10 @@ public class SchemaRecordCheckTest
 
         SchemaIndexProvider.Descriptor providerDescriptor = new SchemaIndexProvider.Descriptor( "in-memory", "1.0" );
 
-        IndexRule rule1 = IndexRule.constraintIndexRule(
-                ruleId1, labelId, propertyKeyIds, providerDescriptor, (long) ruleId1 );
-        IndexRule rule2 = IndexRule.constraintIndexRule(
-                ruleId2, labelId, propertyKeyIds, providerDescriptor, (long) ruleId2 );
+        IndexRule rule1 = IndexRule.constraintIndexRule( ruleId1, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId1 );
+        IndexRule rule2 = IndexRule.constraintIndexRule( ruleId2, labelId, propertyKeyIds,
+                providerDescriptor, (long) ruleId2 );
 
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId1 ) ).thenReturn( rule1 );
         when( checker().ruleAccess.loadSingleSchemaRule( ruleId2 ) ).thenReturn( rule2 );

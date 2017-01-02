@@ -283,10 +283,8 @@ public class MultiIndexPopulationConcurrentUpdatesIT
 
     private IndexRule[] createIndexRules( Map<String,Integer> labelNameIdMap, int propertyId )
     {
-        return labelNameIdMap.values().stream()
-                .map( index -> new IndexRule( index, index, new int[]{propertyId},
-                        new SchemaIndexProvider.Descriptor( "lucene", "version" ), null ) )
-                .toArray( IndexRule[]::new );
+        return labelNameIdMap.values().stream().map( index -> new IndexRule( index, index, new int[]{propertyId},
+                new SchemaIndexProvider.Descriptor( "lucene", "version" ), null ) ).toArray( IndexRule[]::new );
     }
 
     private List<IndexRule> getIndexRules( NeoStores neoStores )

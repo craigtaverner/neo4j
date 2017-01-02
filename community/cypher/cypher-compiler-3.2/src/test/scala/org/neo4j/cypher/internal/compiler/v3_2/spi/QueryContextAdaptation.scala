@@ -43,7 +43,8 @@ trait QueryContextAdaptation {
 
   override def dropRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int): Unit = ???
 
-  //override def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = ???
+  override def createUniqueConstraint(labelId: Int, propertyKeyId: Seq[Int]):
+  IdempotentResult[UniquenessConstraint] = ???
 
   override def getOrCreateRelTypeId(relTypeName: String): Int = ???
 

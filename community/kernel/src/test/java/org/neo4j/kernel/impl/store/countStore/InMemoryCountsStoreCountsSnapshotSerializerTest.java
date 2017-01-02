@@ -147,8 +147,8 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
     {
         //GIVEN
         int serializedLength = Long.BYTES + Integer.BYTES //Serialization Prefix
-                + Byte.BYTES + Short.BYTES + (2 * Integer.BYTES) + (2 * Long.BYTES); //A single INDEX_SAMPLE from
-        // count store.
+                + Byte.BYTES + Short.BYTES + (2 * Integer.BYTES) +
+                (2 * Long.BYTES); //A single INDEX_SAMPLE from count store.
         writeAndSerializeIndexSample( 1, 1, 1 );
         initializeBuffers( serializedLength );
         expectedBytes.put( INDEX_SAMPLE.code );
@@ -170,8 +170,8 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
     {
         //GIVEN
         int serializedLength = Long.BYTES + Integer.BYTES //Serialization Prefix
-                + Byte.BYTES + Short.BYTES + (2 * Integer.BYTES) + (2 * Long.BYTES); //A single INDEX_STATISTICS from
-        // count store.
+                + Byte.BYTES + Short.BYTES + (2 * Integer.BYTES) +
+                (2 * Long.BYTES); //A single INDEX_STATISTICS from count store.
         writeAndSerializeIndexStatistics( 1, 1, 1 );
         initializeBuffers( serializedLength );
         expectedBytes.put( INDEX_STATISTICS.code );

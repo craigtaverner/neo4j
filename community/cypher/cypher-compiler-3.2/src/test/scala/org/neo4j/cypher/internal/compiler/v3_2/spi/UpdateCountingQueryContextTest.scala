@@ -57,7 +57,7 @@ class UpdateCountingQueryContextTest extends CypherFunSuite {
     }
   } )
 
-  when( inner.createUniqueConstraint(anyInt(), Array(anyInt())) )
+  when(inner.createUniqueConstraint(anyInt(), Array(anyInt())))
     .thenReturn(IdempotentResult(mock[UniquenessConstraint]))
 
   when( inner.createNodePropertyExistenceConstraint(anyInt(), anyInt()) )
@@ -66,7 +66,7 @@ class UpdateCountingQueryContextTest extends CypherFunSuite {
   when( inner.createRelationshipPropertyExistenceConstraint(anyInt(), anyInt()) )
     .thenReturn(IdempotentResult(mock[RelationshipPropertyExistenceConstraint]))
 
-  when( inner.addIndexRule(anyInt(), Array(anyInt())) )
+  when(inner.addIndexRule(anyInt(), Array(anyInt())))
     .thenReturn(IdempotentResult(mock[IndexDescriptor]))
 
   var context: UpdateCountingQueryContext = null

@@ -131,16 +131,16 @@ class PropertyExistenceEnforcer extends TxStateVisitor.Delegator
                         }
 
                         // Check if this node has the mandatory property set
-                        int[] propertyKeyIds= constraint.getPropertyKeyIds();
-                        for(int i: propertyKeyIds){
-                            if ( !this.propertyKeyIds.contains( i) )
+                        int[] propertyKeyIds = constraint.getPropertyKeyIds();
+                        for ( int i : propertyKeyIds )
+                        {
+                            if ( !this.propertyKeyIds.contains( i ) )
                             {
                                 throw new NodePropertyExistenceConstraintViolationKernelException(
                                         ((NodePropertyExistenceConstraint) constraint).label(),
                                         constraint.getPropertyKeyIds(), nodeId );
                             }
                         }
-
                     }
                 }
             }
