@@ -19,16 +19,16 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
  * Description of constraint enforcing nodes to contain a certain property.
  */
 public class NodePropertyExistenceConstraint extends NodePropertyConstraint
 {
-    public NodePropertyExistenceConstraint( IndexDescriptor descriptor )
+    public NodePropertyExistenceConstraint( NodePropertyDescriptor descriptor )
     {
         super( descriptor );
     }

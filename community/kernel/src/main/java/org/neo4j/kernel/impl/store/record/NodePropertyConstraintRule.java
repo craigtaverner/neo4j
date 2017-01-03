@@ -21,26 +21,26 @@ package org.neo4j.kernel.impl.store.record;
 
 import java.util.Arrays;
 
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
 {
-    protected final int label;
-    protected final int[] propertyKeyIds;
+    protected final NodePropertyDescriptor descriptor;
 
-    public NodePropertyConstraintRule( long id, int label, int[] propertyKeyIds, Kind kind )
+    public NodePropertyConstraintRule( long id, NodePropertyDescriptor descriptor, Kind kind )
     {
         super( id, kind );
-        this.label = label;
-        this.propertyKeyIds = propertyKeyIds;
+        this.descriptor = descriptor;
     }
 
     @Override
     public final int getLabel()
     {
-        return label;
+        return descriptor.getLabelId();
     }
 
     @Override
@@ -51,19 +51,19 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
 
     public int[] getPropertyKeys()
     {
-        return propertyKeyIds;
+        return descriptor.getPropertyKeyIds();
     }
 
     @Override
     public boolean containsPropertyKeyId( int propertyKeyId )
     {
-        return this.propertyKeyIds.length == 1 && propertyKeyId == this.propertyKeyIds[0];
+        return this.descriptor.getPropertyKeyId() == propertyKeyId;
     }
 
     @Override
     public boolean containsPropertyKeyIds( int[] propertyKeyIds )
     {
-        return Arrays.equals(propertyKeyIds, this.propertyKeyIds);
+        return Arrays.equals( propertyKeyIds, this.descriptor.getPropertyKeyIds() );
     }
 
     @Override
@@ -84,13 +84,12 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
         {
             return false;
         }
-        return label == ((NodePropertyConstraintRule) o).label &&
-               containsPropertyKeyIds( ((NodePropertyConstraintRule) o).propertyKeyIds );
+        return descriptor.equals( ((NodePropertyConstraintRule) o).descriptor );
     }
 
     @Override
     public int hashCode()
     {
-        return IndexDescriptor.hashcode( 31 * super.hashCode() + label, propertyKeyIds );
+        return 31 * super.hashCode() + descriptor.hashCode();
     }
 }

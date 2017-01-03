@@ -19,10 +19,7 @@
  */
 package org.neo4j.kernel.api.index;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
 import static java.lang.String.format;
@@ -32,97 +29,10 @@ import static java.lang.String.format;
  *
  * @see SchemaRule
  */
-public class CompositeIndexDescriptor extends IndexDescriptor
+public class CompositeIndexDescriptor extends NodeMultiPropertyDescriptor
 {
-    private final int[] propertyKeyIds;
-
     public CompositeIndexDescriptor( int labelId, int[] propertyKeyIds )
     {
-        super( labelId, -1 );
-        this.propertyKeyIds = propertyKeyIds;
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj != null && getClass() == obj.getClass() )
-        {
-            CompositeIndexDescriptor that = (CompositeIndexDescriptor) obj;
-            return this.getLabelId() == that.getLabelId() &&
-                   Arrays.equals( this.propertyKeyIds, that.propertyKeyIds );
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return hashcode( getLabelId(), propertyKeyIds );
-    }
-
-    /**
-     * @return property key token id this index is for.
-     */
-    public int getPropertyKeyId()
-    {
-        throw new UnsupportedOperationException( "Cannot get single property Id of composite index" );
-    }
-
-    /**
-     * @return property key token ids this index is for.
-     */
-    public int[] getPropertyKeyIds()
-    {
-        return propertyKeyIds;
-    }
-
-    @Override
-    public String propertyIdText()
-    {
-        return propertyIdText( propertyKeyIds );
-    }
-
-    public String propertyNameText( TokenNameLookup tokenNameLookup )
-    {
-        return propertyNameText( tokenNameLookup, propertyKeyIds );
-    }
-
-    /**
-     * @param tokenNameLookup used for looking up names for token ids.
-     * @return a user friendly description of what this index indexes.
-     */
-    public String userDescription( TokenNameLookup tokenNameLookup )
-    {
-        return format( ":%s(%s)", tokenNameLookup.labelGetName( getLabelId() ),
-                propertyNameText( tokenNameLookup, propertyKeyIds ) );
-    }
-
-    //TODO: remove and inline above
-    public static String propertyNameText( TokenNameLookup tokenNameLookup, int[] propertyKeyIds )
-    {
-        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
-                tokenNameLookup.propertyKeyGetName( id ) ).collect( Collectors.joining( "," ) );
-    }
-
-    //TODO: remove and inline above
-    public static String propertyIdText( int[] propertyKeyIds )
-    {
-        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
-                Integer.toString( id ) ).collect( Collectors.joining( "," ) );
-    }
-
-    //TODO: remove and inline above
-    public static int hashcode( int labelId, int[] propertyKeyIds )
-    {
-        int result = labelId;
-        for ( int element : propertyKeyIds )
-        {
-            result = 31 * result + element;
-        }
-        return result;
+        super( labelId, propertyKeyIds );
     }
 }
