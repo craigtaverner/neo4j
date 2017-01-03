@@ -19,18 +19,17 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
  * Description of uniqueness constraint over nodes given a label and a property key id.
  */
 public class UniquenessConstraint extends NodePropertyConstraint
 {
-    public UniquenessConstraint( IndexDescriptor index )
+    public UniquenessConstraint( NodePropertyDescriptor descriptor )
     {
-        super( index );
+        super( descriptor );
     }
 
     @Override

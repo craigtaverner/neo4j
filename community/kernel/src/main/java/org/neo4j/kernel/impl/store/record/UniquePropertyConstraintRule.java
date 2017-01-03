@@ -22,6 +22,8 @@ package org.neo4j.kernel.impl.store.record;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 
 import static org.neo4j.kernel.impl.util.IoPrimitiveUtils.safeCastLongToInt;
@@ -30,29 +32,31 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
 {
     private final long ownedIndexRule;
 
-    public static UniquePropertyConstraintRule uniquenessConstraintRule( long id, int labelId, int[] propertyKeyIds,
+    public static UniquePropertyConstraintRule uniquenessConstraintRule( long id, NodePropertyDescriptor descriptor,
                                                                          long ownedIndexRule )
     {
-        return new UniquePropertyConstraintRule( id, labelId, propertyKeyIds, ownedIndexRule );
+        return new UniquePropertyConstraintRule( id, descriptor, ownedIndexRule );
     }
 
     public static UniquePropertyConstraintRule readUniquenessConstraintRule( long id, int labelId, ByteBuffer buffer )
     {
-        return new UniquePropertyConstraintRule( id, labelId, readPropertyKeys( buffer ), readOwnedIndexRule( buffer ) );
+        return new UniquePropertyConstraintRule( id, new NodeMultiPropertyDescriptor( labelId, readPropertyKeys( buffer ) ),
+                readOwnedIndexRule( buffer ) );
     }
 
-    private UniquePropertyConstraintRule( long id, int labelId, int[] propertyKeyIds, long ownedIndexRule )
+    private UniquePropertyConstraintRule( long id, NodePropertyDescriptor descriptor, long ownedIndexRule )
     {
-        super( id, labelId, propertyKeyIds, Kind.UNIQUENESS_CONSTRAINT );
+        super( id, descriptor, Kind.UNIQUENESS_CONSTRAINT );
         this.ownedIndexRule = ownedIndexRule;
-        assert propertyKeyIds.length == 1; // Only uniqueness of a single property supported for now
+        //TODO: Find a better way of asserting this
+//        assert propertyKeyIds.length == 1; // Only uniqueness of a single property supported for now
     }
 
     @Override
     public String toString()
     {
-        return "UniquePropertyConstraintRule[id=" + id + ", label=" + label + ", kind=" + kind +
-               ", propertyKeys=" + Arrays.toString( propertyKeyIds ) + ", ownedIndex=" + ownedIndexRule + "]";
+        return "UniquePropertyConstraintRule[id=" + id + ", label=" + descriptor.getLabelId() + ", kind=" + kind +
+               ", propertyKeys=" + descriptor.propertyIdText() + ", ownedIndex=" + ownedIndexRule + "]";
     }
 
     @Override
@@ -61,14 +65,15 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
         return 4 /* label */ +
                1 /* kind id */ +
                1 +  /* the number of properties that form a unique tuple */
-               8 * propertyKeyIds.length + /* the property keys themselves */
+               8 * descriptor.getPropertyKeyIds().length + /* the property keys themselves */
                8; /* owned index rule */
     }
 
     @Override
     public void serialize( ByteBuffer target )
     {
-        target.putInt( label );
+        int[] propertyKeyIds = descriptor.getPropertyKeyIds();
+        target.putInt( descriptor.getLabelId() );
         target.put( kind.id() );
         target.put( (byte) propertyKeyIds.length );
         for ( int propertyKeyId : propertyKeyIds )
@@ -101,7 +106,7 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
     @Override
     public UniquenessConstraint toConstraint()
     {
-        return new UniquenessConstraint( getLabel(), propertyKeyIds );
+        return new UniquenessConstraint( descriptor );
     }
 
 }

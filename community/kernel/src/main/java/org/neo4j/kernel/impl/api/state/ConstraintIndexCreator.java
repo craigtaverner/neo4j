@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import org.neo4j.kernel.api.KernelAPI;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.exceptions.TransactionFailureException;
@@ -58,12 +59,12 @@ public class ConstraintIndexCreator
      * You MUST hold a schema write lock before you call this method.
      */
     public long createUniquenessConstraintIndex( KernelStatement state, SchemaReadOperations schema,
-            int labelId, int[] propertyKeyId )
+            IndexDescriptor descriptor )
             throws ConstraintVerificationFailedKernelException, TransactionFailureException,
             CreateConstraintFailureException, DropIndexFailureException
     {
-        IndexDescriptor descriptor = createConstraintIndex( labelId, propertyKeyId );
-        UniquenessConstraint constraint = new UniquenessConstraint( labelId, propertyKeyId );
+        createConstraintIndex( descriptor );
+        UniquenessConstraint constraint = new UniquenessConstraint( descriptor );
 
         boolean success = false;
         try
@@ -140,7 +141,7 @@ public class ConstraintIndexCreator
         }
     }
 
-    public IndexDescriptor createConstraintIndex( final int labelId, final int[] propertyKeyId )
+    public IndexDescriptor createConstraintIndex( final IndexDescriptor descriptor )
     {
         try ( KernelTransaction transaction =
                       kernelSupplier.get().newTransaction( KernelTransaction.Type.implicit, AUTH_DISABLED );
@@ -150,7 +151,6 @@ public class ConstraintIndexCreator
             // write lock. It is assumed that the transaction that invoked this "inner" transaction
             // holds a schema write lock, and that it will wait for this inner transaction to do its
             // work.
-            IndexDescriptor descriptor = new IndexDescriptor( labelId, propertyKeyId );
             // TODO (Ben+Jake): The Transactor is really part of the kernel internals, so it needs access to the
             // internal implementation of Statement. However it is currently used by the external
             // RemoveOrphanConstraintIndexesOnStartup job. This needs revisiting.

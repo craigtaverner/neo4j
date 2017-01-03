@@ -22,36 +22,38 @@ package org.neo4j.kernel.impl.store.record;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 
 public class RelationshipPropertyExistenceConstraintRule extends RelationshipPropertyConstraintRule
 {
-    private final int propertyKeyId;
+    private final RelationshipPropertyDescriptor descriptor;
 
     public static RelationshipPropertyExistenceConstraintRule relPropertyExistenceConstraintRule( long id,
-            int relTypeId, int propertyKeyId )
+            RelationshipPropertyDescriptor descriptor )
     {
-        return new RelationshipPropertyExistenceConstraintRule( id, relTypeId, propertyKeyId );
+        return new RelationshipPropertyExistenceConstraintRule( id, descriptor );
     }
 
     public static RelationshipPropertyExistenceConstraintRule readRelPropertyExistenceConstraintRule( long id,
             int relTypeId, ByteBuffer buffer )
     {
-        return new RelationshipPropertyExistenceConstraintRule( id, relTypeId, readPropertyKey( buffer ) );
+        return new RelationshipPropertyExistenceConstraintRule( id,
+                new RelationshipPropertyDescriptor( relTypeId, readPropertyKey( buffer ) ) );
     }
 
-    private RelationshipPropertyExistenceConstraintRule( long id, int relTypeId, int propertyKeyId )
+    private RelationshipPropertyExistenceConstraintRule( long id, RelationshipPropertyDescriptor descriptor )
     {
-        super( id, relTypeId, Kind.RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT );
-        this.propertyKeyId = propertyKeyId;
+        super( id, descriptor.getRelationshipTypeId(), Kind.RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT );
+        this.descriptor = descriptor;
     }
 
     @Override
     public String toString()
     {
         return "RelationshipPropertyExistenceConstraint" + id + ", relationshipType=" + relationshipType +
-               ", kind=" + kind + ", propertyKeyId=" + propertyKeyId + "]";
+               ", kind=" + kind + ", propertyKeyId=" + descriptor.propertyIdText() + "]";
     }
 
     @Override
@@ -67,7 +69,7 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
     {
         target.putInt( relationshipType );
         target.put( kind.id() );
-        target.putInt( propertyKeyId );
+        target.putInt( descriptor.getPropertyKeyId() );
     }
 
     private static int readPropertyKey( ByteBuffer buffer )
@@ -77,25 +79,25 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
 
     public int getPropertyKey()
     {
-        return propertyKeyId;
+        return descriptor.getPropertyKeyId();
     }
 
     @Override
     public RelationshipPropertyConstraint toConstraint()
     {
-        return new RelationshipPropertyExistenceConstraint( getRelationshipType(), getPropertyKey() );
+        return new RelationshipPropertyExistenceConstraint( descriptor );
     }
 
     @Override
     public boolean containsPropertyKeyIds( int[] propertyKeyIds )
     {
-        return propertyKeyIds.length == 1 && propertyKeyId == propertyKeyIds[0];
+        return propertyKeyIds.length == 1 && descriptor.getPropertyKeyId() == propertyKeyIds[0];
     }
 
     @Override
     public boolean containsPropertyKeyId( int propertyKeyId )
     {
-        return propertyKeyId == this.propertyKeyId;
+        return propertyKeyId == descriptor.getPropertyKeyId();
     }
 
     @Override
@@ -113,12 +115,12 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
         {
             return false;
         }
-        return propertyKeyId == ((RelationshipPropertyExistenceConstraintRule) o).propertyKeyId;
+        return descriptor.equals( ((RelationshipPropertyExistenceConstraintRule) o).descriptor );
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + propertyKeyId;
+        return 31 * super.hashCode() + descriptor.hashCode();
     }
 }
