@@ -399,14 +399,14 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropIndexDefinitions( Label label, String[] propertyKeys )
+        public void dropIndexDefinitions( IndexDefinition indexDefinition )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
                     statement.schemaWriteOperations()
-                            .indexDrop( getIndexDescriptor( statement.readOperations(), label, propertyKeys ) );
+                            .indexDrop( getIndexDescriptor( statement.readOperations(), indexDefinition ) );
                 }
                 catch ( NotFoundException e )
                 {
@@ -425,17 +425,19 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String[] propertyKeys )
+        public ConstraintDefinition createPropertyUniquenessConstraint( IndexDefinition indexDefinition )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
-                    int labelId = statement.schemaWriteOperations().labelGetOrCreateForName( label.name() );
-                    int[] propertyKeyIds = getOrCreatePropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    int labelId = statement.schemaWriteOperations()
+                            .labelGetOrCreateForName( indexDefinition.getLabel().name() );
+                    int[] propertyKeyIds =
+                            getOrCreatePropertyKeyIds( statement.schemaWriteOperations(), indexDefinition );
                     statement.schemaWriteOperations()
                             .uniquePropertyConstraintCreate( labelId, propertyKeyIds );
-                    return new UniquenessConstraintDefinition( this, label, propertyKeys );
+                    return new UniquenessConstraintDefinition( this, indexDefinition );
                 }
                 catch ( AlreadyConstrainedException | CreateConstraintFailureException | AlreadyIndexedException e )
                 {
@@ -520,14 +522,14 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropPropertyUniquenessConstraint( Label label, String[] propertyKeys )
+        public void dropPropertyUniquenessConstraint( IndexDefinition indexDefinition )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
-                    int labelId = statement.schemaWriteOperations().labelGetForName( label.name() );
-                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    int labelId = statement.schemaWriteOperations().labelGetForName( indexDefinition.getLabel().name() );
+                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), indexDefinition );
                     NodePropertyConstraint constraint = new UniquenessConstraint( labelId, propertyKeyIds );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }
@@ -544,14 +546,14 @@ public class SchemaImpl implements Schema
         }
 
         @Override
-        public void dropNodePropertyExistenceConstraint( Label label, String[] propertyKeys )
+        public void dropNodePropertyExistenceConstraint( IndexDefinition indexDefinition )
         {
             try ( Statement statement = ctxSupplier.get() )
             {
                 try
                 {
-                    int labelId = statement.schemaWriteOperations().labelGetForName( label.name() );
-                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), propertyKeys );
+                    int labelId = statement.schemaWriteOperations().labelGetForName( indexDefinition.getLabel().name() );
+                    int[] propertyKeyIds = getPropertyKeyIds( statement.schemaWriteOperations(), indexDefinition );
                     NodePropertyConstraint constraint = new NodePropertyExistenceConstraint( labelId, propertyKeyIds );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }

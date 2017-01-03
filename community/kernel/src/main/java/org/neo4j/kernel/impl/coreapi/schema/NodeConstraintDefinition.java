@@ -19,11 +19,14 @@
  */
 package org.neo4j.kernel.impl.coreapi.schema;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.schema.IndexDefinition;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,6 +38,12 @@ abstract class NodeConstraintDefinition extends MultiPropertyConstraintDefinitio
     {
         super( actions, propertyKeys );
         this.label = requireNonNull( label );
+    }
+
+    protected NodeConstraintDefinition( InternalSchemaActions actions, IndexDefinition indexDefinition )
+    {
+        super( actions, indexDefinition );
+        this.label = requireNonNull( indexDefinition.getLabel() );
     }
 
     @Override

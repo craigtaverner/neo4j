@@ -54,8 +54,9 @@ public class NodePropertyUniqueConstraintCreator extends BaseNodeConstraintCreat
 
         try
         {
-            return actions.createPropertyUniquenessConstraint( label,
-                    propertyKeys.toArray( new String[propertyKeys.size()] ) );
+
+            return actions.createPropertyUniquenessConstraint( actions.createIndexDefinition( label,propertyKeys
+                    .toArray( new String[propertyKeys.size()] ) ));
         }
         catch ( KernelException e )
         {

@@ -20,6 +20,7 @@
 package org.neo4j.kernel.impl.coreapi.schema;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.NotFoundException;
@@ -131,6 +132,14 @@ public class PropertyNameUtils
         return propertyKeyIds;
     }
 
+    public static int[] getPropertyKeyIds( ReadOperations statement, IndexDefinition indexDefinition )
+    {
+        ArrayList<Integer> propertyKeyIds = new ArrayList<>();
+        indexDefinition.getPropertyKeys()
+                .forEach( index -> propertyKeyIds.add( statement.propertyKeyGetForName( index ) ) );
+        return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
+    }
+
     public static int[] getOrCreatePropertyKeyIds( SchemaWriteOperations statement, String[] propertyKeys )
             throws IllegalTokenNameException
     {
@@ -140,5 +149,17 @@ public class PropertyNameUtils
             propertyKeyIds[i] = statement.propertyKeyGetOrCreateForName( propertyKeys[i] );
         }
         return propertyKeyIds;
+    }
+
+    public static int[] getOrCreatePropertyKeyIds( SchemaWriteOperations statement, IndexDefinition indexDefinition )
+            throws IllegalTokenNameException
+    {
+        ArrayList<Integer> propertyKeyIds = new ArrayList<>();
+        Iterator<String> indexIterator = indexDefinition.getPropertyKeys().iterator();
+        while ( indexIterator.hasNext() )
+        {
+            propertyKeyIds.add( statement.propertyKeyGetOrCreateForName( indexIterator.next() ) );
+        }
+     return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
     }
 }

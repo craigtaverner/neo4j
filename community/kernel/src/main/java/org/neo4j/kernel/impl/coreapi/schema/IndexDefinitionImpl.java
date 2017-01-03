@@ -76,7 +76,7 @@ public class IndexDefinitionImpl implements IndexDefinition
                                              "instead drop the owning uniqueness constraint." );
         }
 
-        actions.dropIndexDefinitions( label, propertyKeys );
+        actions.dropIndexDefinitions( this );
     }
 
     @Override
