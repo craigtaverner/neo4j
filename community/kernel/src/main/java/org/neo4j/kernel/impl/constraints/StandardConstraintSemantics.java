@@ -20,10 +20,12 @@
 package org.neo4j.kernel.impl.constraints;
 
 import org.neo4j.cursor.Cursor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.impl.store.record.PropertyConstraintRule;
 import org.neo4j.kernel.impl.store.record.UniquePropertyConstraintRule;
 import org.neo4j.storageengine.api.NodeItem;
@@ -37,17 +39,18 @@ public class StandardConstraintSemantics implements ConstraintSemantics
     public static final String ERROR_MESSAGE = "Property existence constraint requires Neo4j Enterprise Edition";
 
     @Override
-    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int[] propertyKeys )
+    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, IndexDescriptor indexdescriptor )
             throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKeys ) );
+        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( indexdescriptor ) );
     }
 
     @Override
     public void validateRelationshipPropertyExistenceConstraint( Cursor<RelationshipItem> allRels, int type,
             int key ) throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new RelationshipPropertyExistenceConstraint( type, key ) );
+        throw propertyExistenceConstraintsNotAllowed(
+                new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor( type, key ) ) );
     }
 
     @Override
@@ -73,23 +76,25 @@ public class StandardConstraintSemantics implements ConstraintSemantics
     }
 
     @Override
-    public PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, int label, int[] propertyKeys, long indexId )
+    public PropertyConstraintRule writeUniquePropertyConstraint( long ruleId, IndexDescriptor indexDescriptor,
+            long indexId )
     {
-        return UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId, label, propertyKeys, indexId );
+        return UniquePropertyConstraintRule.uniquenessConstraintRule( ruleId, indexDescriptor, indexId );
     }
 
     @Override
-    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int label, int[] propertyKeys )
+    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, IndexDescriptor indexDescriptor  )
             throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( label, propertyKeys ) );
+        throw propertyExistenceConstraintsNotAllowed( new NodePropertyExistenceConstraint( indexDescriptor ) );
     }
 
     @Override
     public PropertyConstraintRule writeRelationshipPropertyExistenceConstraint( long ruleId, int type, int key )
             throws CreateConstraintFailureException
     {
-        throw propertyExistenceConstraintsNotAllowed( new RelationshipPropertyExistenceConstraint( type, key ) );
+        throw propertyExistenceConstraintsNotAllowed(
+                new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor( type, key ) ) );
     }
 
     @Override

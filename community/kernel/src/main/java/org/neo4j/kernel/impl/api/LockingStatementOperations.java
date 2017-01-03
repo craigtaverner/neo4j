@@ -126,12 +126,12 @@ public class LockingStatementOperations implements
     }
 
     @Override
-    public IndexDescriptor indexCreate( KernelStatement state, int labelId, int[] propertyKeys )
+    public IndexDescriptor indexCreate( KernelStatement state, IndexDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         acquireExclusiveSchemaLock( state );
         state.assertOpen();
-        return schemaWriteDelegate.indexCreate( state, labelId, propertyKeys );
+        return schemaWriteDelegate.indexCreate( state, descriptor );
     }
 
     @Override
@@ -343,21 +343,21 @@ public class LockingStatementOperations implements
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, int labelId, int[] propertyKeyIds )
+    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, IndexDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
     {
         acquireExclusiveSchemaLock( state );
         state.assertOpen();
-        return schemaWriteDelegate.uniquePropertyConstraintCreate( state, labelId, propertyKeyIds );
+        return schemaWriteDelegate.uniquePropertyConstraintCreate( state, descriptor );
     }
 
     @Override
-    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state, int labelId,
-            int[] propertyKeyIds ) throws AlreadyConstrainedException, CreateConstraintFailureException
+    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state,
+            IndexDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         acquireExclusiveSchemaLock( state );
         state.assertOpen();
-        return schemaWriteDelegate.nodePropertyExistenceConstraintCreate( state, labelId, propertyKeyIds );
+        return schemaWriteDelegate.nodePropertyExistenceConstraintCreate( state, descriptor );
     }
 
     @Override
@@ -371,12 +371,11 @@ public class LockingStatementOperations implements
 
     @Override
     public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( KernelStatement state,
-            int labelId,
-            int[] propertyKeyIds )
+            IndexDescriptor descriptor )
     {
         acquireSharedSchemaLock( state );
         state.assertOpen();
-        return schemaReadDelegate.constraintsGetForLabelAndPropertyKey( state, labelId, propertyKeyIds );
+        return schemaReadDelegate.constraintsGetForLabelAndPropertyKey( state, descriptor );
     }
 
     @Override

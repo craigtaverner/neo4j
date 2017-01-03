@@ -38,7 +38,7 @@ public interface SchemaWriteOperations
      * Creates an index, indexing properties with the given {@code propertyKeyId} for nodes with the given
      * {@code labelId}.
      */
-    IndexDescriptor indexCreate( KernelStatement state, int labelId, int[] propertyKeyIds )
+    IndexDescriptor indexCreate( KernelStatement state, IndexDescriptor indexdescriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException;
 
     /** Drops a {@link IndexDescriptor} from the database */
@@ -50,12 +50,11 @@ public interface SchemaWriteOperations
      */
     void uniqueIndexDrop( KernelStatement state, IndexDescriptor descriptor ) throws DropIndexFailureException;
 
-    UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, int labelId, int[] propertyKeyIds )
+    UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, IndexDescriptor indexdescriptor )
             throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException;
 
-    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state, int labelId,
-            int[] propertyKeyIds )
-            throws AlreadyConstrainedException, CreateConstraintFailureException;
+    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state,
+            IndexDescriptor indexdescriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException;
 
     RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( KernelStatement state,
             int relTypeId, int propertyKeyId ) throws AlreadyConstrainedException, CreateConstraintFailureException;

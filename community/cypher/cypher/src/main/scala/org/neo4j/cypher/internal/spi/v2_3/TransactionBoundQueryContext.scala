@@ -456,10 +456,12 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
   }
 
   def addIndexRule(labelId: Int, propertyKeyId: Int): IdempotentResult[IndexDescriptor] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(labelId, Array(propertyKeyId)))
+    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(new IndexDescriptor(labelId, propertyKeyId)))
   } catch {
     case _: AlreadyIndexedException =>
+
       val indexDescriptor = tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId))
+
       if (tc.statement.readOperations().indexGetState(indexDescriptor) == InternalIndexState.FAILED)
         throw new FailedIndexException(indexDescriptor.userDescription(tokenNameLookup))
       IdempotentResult(indexDescriptor, wasCreated = false)
@@ -469,25 +471,29 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
     tc.statement.schemaWriteOperations().indexDrop(new IndexDescriptor(labelId, propertyKeyId))
 
   def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(labelId, Array(propertyKeyId)))
+    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(new IndexDescriptor(labelId,
+      propertyKeyId)))
   } catch {
     case existing: AlreadyConstrainedException =>
       IdempotentResult(existing.constraint().asInstanceOf[UniquenessConstraint], wasCreated = false)
   }
 
   def dropUniqueConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(labelId, Array(propertyKeyId)))
+    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(new IndexDescriptor(labelId,
+      propertyKeyId)))
 
   def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint] =
     try {
-      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(labelId, Array(propertyKeyId)))
+      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(new IndexDescriptor(labelId,
+        propertyKeyId)))
     } catch {
       case existing: AlreadyConstrainedException =>
         IdempotentResult(existing.constraint().asInstanceOf[NodePropertyExistenceConstraint], wasCreated = false)
     }
 
   def dropNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(labelId, Array(propertyKeyId)))
+    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(new IndexDescriptor(labelId,
+      propertyKeyId)))
 
   def createRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int): IdempotentResult[RelationshipPropertyExistenceConstraint] =
     try {
@@ -498,7 +504,8 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
     }
 
   def dropRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new RelationshipPropertyExistenceConstraint(relTypeId, propertyKeyId))
+    tc.statement.schemaWriteOperations().constraintDrop(new RelationshipPropertyExistenceConstraint(new
+        RelationshipPropertyDescriptor(relTypeId,propertyKeyId)))
 
   override def getImportURL(url: URL): Either[String,URL] = tc.graph match {
     case db: GraphDatabaseQueryService =>

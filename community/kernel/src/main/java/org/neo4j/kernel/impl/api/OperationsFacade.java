@@ -1098,34 +1098,34 @@ public class OperationsFacade
 
     // <SchemaWrite>
     @Override
-    public IndexDescriptor indexCreate( int labelId, int[] propertyKeyIds )
+    public IndexDescriptor indexCreate( Indexdescriptor indexdescriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().indexCreate( statement, labelId, propertyKeyIds );
+        return schemaWrite().indexCreate( statement, indexdescriptor );
     }
 
     @Override
-    public void indexDrop( IndexDescriptor descriptor ) throws DropIndexFailureException
+    public void indexDrop( IndexDescriptor indexdescriptor ) throws DropIndexFailureException
     {
         statement.assertOpen();
-        schemaWrite().indexDrop( statement, descriptor );
+        schemaWrite().indexDrop( statement, indexdescriptor );
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( int labelId, int[] propertyKeyIds )
+    public UniquenessConstraint uniquePropertyConstraintCreate( IndexDescriptor indexdescriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
     {
         statement.assertOpen();
-        return schemaWrite().uniquePropertyConstraintCreate( statement, labelId, propertyKeyIds );
+        return schemaWrite().uniquePropertyConstraintCreate( statement, indexdescriptor );
     }
 
     @Override
-    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( int labelId, int[] propertyKeyIds )
+    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( IndexDescriptor indexdescriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, labelId, propertyKeyIds );
+        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, indexdescriptor );
     }
 
     @Override
