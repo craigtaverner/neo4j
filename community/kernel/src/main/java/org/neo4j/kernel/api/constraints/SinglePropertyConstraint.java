@@ -31,7 +31,7 @@ public abstract class SinglePropertyConstraint implements PropertyConstraint
         this.propertyKeyId = propertyKeyId;
     }
 
-    public int getPropertyKeyId()
+    public int propertyKey()
     {
         return propertyKeyId;
     }

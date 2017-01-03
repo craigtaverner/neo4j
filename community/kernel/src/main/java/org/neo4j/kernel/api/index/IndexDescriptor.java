@@ -19,88 +19,20 @@
  */
 package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
 import static java.lang.String.format;
 
 /**
- * Description of a single index.
+ * Description of a single index based on one label and one property.
  *
  * @see SchemaRule
  */
-public class IndexDescriptor implements DescriptorWithProperties
+public class IndexDescriptor extends NodePropertyDescriptor
 {
-    protected final int labelId;
-    private final int propertyKeyId;
-
     public IndexDescriptor( int labelId, int propertyKeyId )
     {
-        this.labelId = labelId;
-        this.propertyKeyId = propertyKeyId;
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj != null && getClass() == obj.getClass() )
-        {
-            IndexDescriptor that = (IndexDescriptor) obj;
-            return this.labelId == that.labelId &&
-                    this.propertyKeyId == that.propertyKeyId;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = labelId;
-        result = 31 * result + propertyKeyId;
-        return result;
-    }
-
-    /**
-     * @return label token id this index is for.
-     */
-    public int getLabelId()
-    {
-        return labelId;
-    }
-
-    /**
-     * @return property key token id this index is for.
-     */
-    public int getPropertyKeyId()
-    {
-        return propertyKeyId;
-    }
-
-    /**
-     * @return property key token ids this index is for.
-     */
-    public int[] getPropertyKeyIds()
-    {
-        throw new UnsupportedOperationException( "Cannot get multiple property Ids of single property index" );
-    }
-
-    @Override
-    public String toString()
-    {
-        return format( ":label[%d](property[%d])", labelId, propertyKeyId );
-    }
-
-    /**
-     * @param tokenNameLookup used for looking up names for token ids.
-     * @return a user friendly description of what this index indexes.
-     */
-    public String userDescription( TokenNameLookup tokenNameLookup )
-    {
-        return format( ":%s(%s)",
-                tokenNameLookup.labelGetName( labelId ), tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+        super(labelId, propertyKeyId);
     }
 }

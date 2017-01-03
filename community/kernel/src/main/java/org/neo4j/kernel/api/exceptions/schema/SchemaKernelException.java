@@ -22,6 +22,7 @@ package org.neo4j.kernel.api.exceptions.schema;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -53,26 +54,27 @@ public abstract class SchemaKernelException extends KernelException
         super( statusCode, message );
     }
 
+    //TODO: Remove this pre-composite index API
     protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
             int labelId, int propertyKeyId )
     {
-        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, labelId, new int[]{propertyKeyId} );
+        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, new IndexDescriptor( labelId, propertyKeyId) );
     }
 
     protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
-            int labelId, int[] propertyKeyIds )
+            NodePropertyDescriptor descriptor )
     {
         if ( tokenNameLookup != null )
         {
             return String.format( formatString,
-                    tokenNameLookup.labelGetName( labelId ),
-                    IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
+                    tokenNameLookup.labelGetName( descriptor.getLabelId() ),
+                    descriptor.propertyNameText( tokenNameLookup ) );
         }
         else
         {
             return String.format( formatString,
-                    "label[" + labelId + "]",
-                    "key[" + IndexDescriptor.propertyIdText( propertyKeyIds ) + "]" );
+                    "label[" + descriptor.getLabelId() + "]",
+                    "key[" + descriptor.propertyIdText() + "]" );
         }
     }
 }

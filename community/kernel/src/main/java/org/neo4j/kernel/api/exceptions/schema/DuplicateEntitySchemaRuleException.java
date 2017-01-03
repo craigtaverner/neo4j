@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.storageengine.api.EntityType;
@@ -27,45 +28,22 @@ import static java.lang.String.format;
 
 public class DuplicateEntitySchemaRuleException extends DuplicateSchemaRuleException
 {
-    private static final String DUPLICATE_NODE_RULE_MESSAGE_TEMPLATE =
-            "Multiple %s found for label '%s' and property '%s'.";
-    private static final String DUPLICATED_RELATIONSHIP_RULE_MESSAGE_TEMPLATE =
-            "Multiple %s found for relationship type '%s' and property '%s'.";
-
-    private final EntityType entityType;
-
-    public DuplicateEntitySchemaRuleException( EntityType entityType, int entityId, int[] propertyKeyIds )
+    public DuplicateEntitySchemaRuleException( EntityPropertyDescriptor descriptor )
     {
-        this( entityType, entityId, propertyKeyIds, false );
+        this( descriptor, false );
     }
 
-    public DuplicateEntitySchemaRuleException( EntityType entityType, int ruleEntityId, int[] propertyKeyIds,
-            boolean unique )
+    public DuplicateEntitySchemaRuleException( EntityPropertyDescriptor descriptor, boolean unique )
     {
-        super( getMessageTemplate( entityType ), ruleEntityId, propertyKeyIds,
+        super( "Multiple %s found for %s '%s' and property '%s'.", descriptor,
                 unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
-        this.entityType = entityType;
     }
 
     @Override
     public String getUserMessage( TokenNameLookup tokenNameLookup )
     {
-        String entityName = EntityType.NODE == entityType ? tokenNameLookup.labelGetName( ruleEntityId ) :
-                            tokenNameLookup.relationshipTypeGetName( ruleEntityId );
-        return format( messageTemplate, messagePrefix, entityName,
-                IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
-    }
-
-    private static String getMessageTemplate( EntityType entityType )
-    {
-        switch ( entityType )
-        {
-        case NODE:
-            return DUPLICATE_NODE_RULE_MESSAGE_TEMPLATE;
-        case RELATIONSHIP:
-            return DUPLICATED_RELATIONSHIP_RULE_MESSAGE_TEMPLATE;
-        default:
-            throw new IllegalArgumentException( "Schema rules for specified entityType not supported." );
-        }
+        return format( messageTemplate, messagePrefix, descriptor.entityType().getTypeDescriptor(),
+                descriptor.entityNameText( tokenNameLookup ),
+                descriptor.propertyNameText( tokenNameLookup ) );
     }
 }

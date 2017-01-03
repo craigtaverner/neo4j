@@ -28,11 +28,13 @@ import java.util.function.Predicate;
 import org.neo4j.function.Predicates;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.PrefetchingIterator;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateEntitySchemaRuleException;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateSchemaRuleException;
 import org.neo4j.kernel.api.exceptions.schema.EntitySchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.MalformedSchemaRuleException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 import org.neo4j.kernel.impl.store.record.AbstractSchemaRule;
 import org.neo4j.kernel.impl.store.record.DynamicRecord;
 import org.neo4j.kernel.impl.store.record.IndexRule;
@@ -288,14 +290,14 @@ public class SchemaStorage implements SchemaRuleAccess
                                                                 item.containsPropertyKeyIds( propertyKeyIds ) );
         if ( !rules.hasNext() )
         {
-            throw new EntitySchemaRuleNotFoundException( EntityType.NODE, labelId, propertyKeyIds );
+            throw new EntitySchemaRuleNotFoundException( new CompositeIndexDescriptor( labelId, propertyKeyIds ) );
         }
 
         Rule rule = rules.next();
 
         if ( rules.hasNext() )
         {
-            throw new DuplicateEntitySchemaRuleException( EntityType.NODE, labelId, propertyKeyIds );
+            throw new DuplicateEntitySchemaRuleException( new CompositeIndexDescriptor( labelId, propertyKeyIds ) );
         }
         return rule;
     }
@@ -309,14 +311,16 @@ public class SchemaStorage implements SchemaRuleAccess
                         item.containsPropertyKeyId( propertyKeyId ) );
         if ( !rules.hasNext() )
         {
-            throw new EntitySchemaRuleNotFoundException( EntityType.RELATIONSHIP, relationshipTypeId, new int[]{propertyKeyId} );
+            throw new EntitySchemaRuleNotFoundException(
+                    new RelationshipPropertyDescriptor( relationshipTypeId, propertyKeyId ) );
         }
 
         Rule rule = rules.next();
 
         if ( rules.hasNext() )
         {
-            throw new DuplicateEntitySchemaRuleException( EntityType.RELATIONSHIP, relationshipTypeId, new int[]{propertyKeyId} );
+            throw new DuplicateEntitySchemaRuleException(
+                    new RelationshipPropertyDescriptor( relationshipTypeId, propertyKeyId ) );
         }
         return rule;
     }

@@ -31,7 +31,7 @@ import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.PropertyKeyIdNotFoundKernelException;
 import org.neo4j.kernel.api.exceptions.schema.IllegalTokenNameException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
-import org.neo4j.kernel.api.index.DescriptorWithProperties;
+import org.neo4j.kernel.api.DescriptorWithProperties;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.impl.api.operations.KeyReadOperations;
 

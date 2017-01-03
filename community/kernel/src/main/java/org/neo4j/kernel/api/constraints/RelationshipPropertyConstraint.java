@@ -19,22 +19,24 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
+
 /**
  * Base class describing property constraint on relationships.
  */
 public abstract class RelationshipPropertyConstraint extends SinglePropertyConstraint
 {
-    protected final int relationshipTypeId;
+    protected final RelationshipPropertyDescriptor descriptor;
 
-    public RelationshipPropertyConstraint( int relationshipTypeId, int propertyKeyId )
+    public RelationshipPropertyConstraint( RelationshipPropertyDescriptor descriptor )
     {
-        super( propertyKeyId );
-        this.relationshipTypeId = relationshipTypeId;
+        super( descriptor.getPropertyKeyId() );
+        this.descriptor = descriptor;
     }
 
     public final int relationshipType()
     {
-        return relationshipTypeId;
+        return descriptor.getRelationshipTypeId();
     }
 
     @Override
@@ -49,13 +51,13 @@ public abstract class RelationshipPropertyConstraint extends SinglePropertyConst
             return false;
         }
         RelationshipPropertyConstraint that = (RelationshipPropertyConstraint) o;
-        return propertyKeyId == that.propertyKeyId && relationshipTypeId == that.relationshipTypeId;
+        return propertyKeyId == that.propertyKeyId && relationshipType() == that.relationshipType();
 
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * propertyKeyId + relationshipTypeId;
+        return 31 * propertyKeyId + relationshipType();
     }
 }

@@ -47,11 +47,9 @@ public class AlreadyIndexedException extends SchemaKernelException
         switch ( context )
         {
             case INDEX_CREATION:
-                return messageWithLabelAndPropertyName( tokenNameLookup, INDEX_CONTEXT_FORMAT,
-                        descriptor.getLabelId(), descriptor.getPropertyKeyIds() );
+                return messageWithLabelAndPropertyName( tokenNameLookup, INDEX_CONTEXT_FORMAT, descriptor );
             case CONSTRAINT_CREATION:
-                return messageWithLabelAndPropertyName( tokenNameLookup, CONSTRAINT_CONTEXT_FORMAT,
-                        descriptor.getLabelId(), descriptor.getPropertyKeyIds() );
+                return messageWithLabelAndPropertyName( tokenNameLookup, CONSTRAINT_CONTEXT_FORMAT, descriptor );
             default:
                 return String.format( NO_CONTEXT_FORMAT, descriptor );
         }

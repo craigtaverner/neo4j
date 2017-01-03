@@ -19,9 +19,7 @@
  */
 package org.neo4j.kernel.api.constraints;
 
-import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
-import org.neo4j.kernel.api.index.DescriptorWithProperties;
+import org.neo4j.kernel.api.DescriptorWithProperties;
 
 /**
  * Base class describing a property constraint on multiple properties.

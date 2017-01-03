@@ -71,6 +71,7 @@ import org.neo4j.kernel.api.exceptions.schema.IndexBrokenKernelException;
 import org.neo4j.kernel.api.exceptions.schema.IndexSchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.proc.BasicContext;
@@ -697,7 +698,7 @@ public class OperationsFacade
         IndexDescriptor descriptor = schemaRead().indexGetForLabelAndPropertyKey( statement, labelId, propertyKeyId );
         if ( descriptor == null )
         {
-            throw new IndexSchemaRuleNotFoundException( labelId, propertyKeyId );
+            throw new IndexSchemaRuleNotFoundException( descriptor );
         }
         return descriptor;
     }
@@ -734,14 +735,14 @@ public class OperationsFacade
                 }
                 else
                 {
-                    throw new DuplicateIndexSchemaRuleException( labelId, propertyKeyIds, true );
+                    throw new DuplicateIndexSchemaRuleException( index, true );
                 }
             }
         }
 
         if ( null == result )
         {
-            throw new IndexSchemaRuleNotFoundException( labelId, propertyKeyIds, true );
+            throw new IndexSchemaRuleNotFoundException( new CompositeIndexDescriptor( labelId, propertyKeyIds ), true );
         }
 
         return result;

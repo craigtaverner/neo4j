@@ -228,8 +228,9 @@ public class BuiltInProceduresTest
         int labelId = token( label, labels );
         int propId = token( propKey, propKeys );
 
-        uniqueIndexes.add( new IndexDescriptor( labelId, propId )  );
-        constraints.add( new UniquenessConstraint( labelId, new int[]{propId }) );
+        IndexDescriptor index = new IndexDescriptor( labelId, propId );
+        uniqueIndexes.add( index );
+        constraints.add( new UniquenessConstraint( index ) );
     }
 
     private void givenNodePropExistenceConstraint( String label, String propKey )
@@ -237,7 +238,7 @@ public class BuiltInProceduresTest
         int labelId = token( label, labels );
         int propId = token( propKey, propKeys );
 
-        constraints.add( new NodePropertyExistenceConstraint( labelId, new int[]{propId} ) );
+        constraints.add( new NodePropertyExistenceConstraint( new IndexDescriptor( labelId, propId ) ) );
     }
 
     private void givenPropertyKeys( String ... keys )

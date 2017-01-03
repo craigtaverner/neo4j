@@ -21,25 +21,32 @@ package org.neo4j.kernel.api.constraints;
 
 import java.util.Arrays;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
+import org.neo4j.kernel.api.DescriptorWithProperties;
 
 /**
  * Base class describing property constraint on nodes.
  */
 public abstract class NodePropertyConstraint extends MultiPropertyConstraint
 {
-    protected final int labelId;
+    protected final NodePropertyDescriptor descriptor;
 
-    public NodePropertyConstraint( int labelId, int[] propertyKeyIds )
+    public NodePropertyConstraint( NodePropertyDescriptor descriptor )
     {
-        super( propertyKeyIds );
-        this.labelId = labelId;
+        super( descriptor instanceof DescriptorWithProperties ? descriptor.getPropertyKeyIds()
+                                                              : new int[]{descriptor.getPropertyKeyId()} );
+        this.descriptor = descriptor;
     }
 
     public final int label()
     {
-        return labelId;
+        return descriptor.getLabelId();
+    }
+
+    public NodePropertyDescriptor descriptor()
+    {
+        return descriptor;
     }
 
     @Override
@@ -54,13 +61,14 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint
             return false;
         }
         NodePropertyConstraint that = (NodePropertyConstraint) o;
-        return Arrays.equals( propertyKeyIds, that.propertyKeyIds ) && labelId == that.labelId;
+        return Arrays.equals( propertyKeyIds, that.propertyKeyIds ) &&
+               descriptor.getLabelId() == that.descriptor.getLabelId();
 
     }
 
     protected String labelName( TokenNameLookup tokenNameLookup)
     {
-        String labelName = tokenNameLookup.labelGetName( labelId );
+        String labelName = tokenNameLookup.labelGetName( descriptor.getLabelId() );
         //if the labelName contains a `:` we must escape it to avoid disambiguation,
         //e.g. CONSTRAINT on foo:bar:foo:bar
         if (labelName.contains( ":" )) {
@@ -80,6 +88,6 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint
     @Override
     public int hashCode()
     {
-        return CompositeIndexDescriptor.hashcode( labelId, propertyKeyIds );
+        return descriptor.hashCode();
     }
 }

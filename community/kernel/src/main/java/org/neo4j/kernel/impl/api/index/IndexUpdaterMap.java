@@ -63,7 +63,7 @@ class IndexUpdaterMap implements AutoCloseable, Iterable<IndexUpdater>
 
     List<IndexUpdater> getUpdaters( int labelId, int propertyKeyId )
     {
-        IndexDescriptor key = new IndexDescriptor( labelId, new int[]{propertyKeyId} );
+        IndexDescriptor key = new IndexDescriptor( labelId, propertyKeyId );
         IndexUpdater updater = getUpdater( key );
         if ( updater != null )
         {

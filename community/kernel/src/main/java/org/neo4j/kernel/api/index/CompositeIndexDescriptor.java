@@ -52,7 +52,7 @@ public class CompositeIndexDescriptor extends IndexDescriptor
         if ( obj != null && getClass() == obj.getClass() )
         {
             CompositeIndexDescriptor that = (CompositeIndexDescriptor) obj;
-            return this.labelId == that.labelId &&
+            return this.getLabelId() == that.getLabelId() &&
                    Arrays.equals( this.propertyKeyIds, that.propertyKeyIds );
         }
         return false;
@@ -61,15 +61,7 @@ public class CompositeIndexDescriptor extends IndexDescriptor
     @Override
     public int hashCode()
     {
-        return hashcode( labelId, propertyKeyIds );
-    }
-
-    /**
-     * @return label token id this index is for.
-     */
-    public int getLabelId()
-    {
-        return labelId;
+        return hashcode( getLabelId(), propertyKeyIds );
     }
 
     /**
@@ -89,9 +81,14 @@ public class CompositeIndexDescriptor extends IndexDescriptor
     }
 
     @Override
-    public String toString()
+    public String propertyIdText()
     {
-        return format( ":label[%d](property[%s])", labelId, propertyIdText( propertyKeyIds ) );
+        return propertyIdText( propertyKeyIds );
+    }
+
+    public String propertyNameText( TokenNameLookup tokenNameLookup )
+    {
+        return propertyNameText( tokenNameLookup, propertyKeyIds );
     }
 
     /**
@@ -100,22 +97,25 @@ public class CompositeIndexDescriptor extends IndexDescriptor
      */
     public String userDescription( TokenNameLookup tokenNameLookup )
     {
-        return format( ":%s(%s)", tokenNameLookup.labelGetName( labelId ),
+        return format( ":%s(%s)", tokenNameLookup.labelGetName( getLabelId() ),
                 propertyNameText( tokenNameLookup, propertyKeyIds ) );
     }
 
+    //TODO: remove and inline above
     public static String propertyNameText( TokenNameLookup tokenNameLookup, int[] propertyKeyIds )
     {
         return Arrays.stream( propertyKeyIds ).mapToObj( id ->
                 tokenNameLookup.propertyKeyGetName( id ) ).collect( Collectors.joining( "," ) );
     }
 
+    //TODO: remove and inline above
     public static String propertyIdText( int[] propertyKeyIds )
     {
         return Arrays.stream( propertyKeyIds ).mapToObj( id ->
                 Integer.toString( id ) ).collect( Collectors.joining( "," ) );
     }
 
+    //TODO: remove and inline above
     public static int hashcode( int labelId, int[] propertyKeyIds )
     {
         int result = labelId;

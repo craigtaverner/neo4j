@@ -19,16 +19,17 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public abstract class SchemaRuleNotFoundException extends SchemaRuleException
 {
     protected static final String UNIQUE_CONSTRAINT_PREFIX = "Uniqueness constraint";
     protected static final String CONSTRAINT_PREFIX = "Constraint";
 
-    protected SchemaRuleNotFoundException( String messageTemplate, int ruleEntityId, int[] propertyKeyId,
-            String messagePrefix )
+    protected SchemaRuleNotFoundException( String messageTemplate, EntityPropertyDescriptor descriptor, String messagePrefix )
     {
-        super( Status.Schema.SchemaRuleAccessFailed, messageTemplate, ruleEntityId, propertyKeyId, messagePrefix );
+        super( Status.Schema.SchemaRuleAccessFailed, messageTemplate, descriptor, messagePrefix );
     }
 }

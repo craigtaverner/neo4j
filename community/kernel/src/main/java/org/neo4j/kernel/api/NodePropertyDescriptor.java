@@ -17,19 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.api.exceptions.schema;
+package org.neo4j.kernel.api;
 
 import org.neo4j.kernel.api.EntityPropertyDescriptor;
-import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.storageengine.api.EntityType;
+import org.neo4j.storageengine.api.schema.SchemaRule;
 
-public abstract class DuplicateSchemaRuleException extends SchemaRuleException
+import static java.lang.String.format;
+
+/**
+ * Description of a combination of a relationship type and one property.
+ */
+public class NodePropertyDescriptor extends EntityPropertyDescriptor
 {
-    protected static final String UNIQUE_CONSTRAINT_PREFIX = "uniqueness constraints";
-    protected static final String CONSTRAINT_PREFIX = "constraints";
-
-    protected DuplicateSchemaRuleException( String messageTemplate, EntityPropertyDescriptor descriptor, String
-            messagePrefix )
+    public NodePropertyDescriptor( int labelId, int propertyKeyId )
     {
-        super( Status.Schema.SchemaRuleDuplicateFound, messageTemplate, descriptor, messagePrefix );
+        super(labelId, propertyKeyId);
     }
+
+    public int getLabelId()
+    {
+        return getEntityId();
+    }
+
+    @Override
+    public String entityNameText( TokenNameLookup tokenNameLookup )
+    {
+        return tokenNameLookup.labelGetName( getPropertyKeyId() );
+    }
+
+    public EntityType entityType()
+    {
+        return EntityType.NODE;
+    }
+
 }

@@ -19,49 +19,30 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.storageengine.api.EntityType;
 
 public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundException
 {
-    private static final String NODE_RULE_NOT_FOUND_MESSAGE_TEMPLATE =
-            "%s for label '%s' and property '%s' not found.";
-    private static final String RELATIONSHIP_RULE_NOT_FOUND_MESSAGE_TEMPLATE =
-            "%s for relationship type '%s' and property '%s' not found.";
-    private final EntityType entityType;
-
-    public EntitySchemaRuleNotFoundException( EntityType entityType, int labelId, int[] propertyKeyIds )
+    public EntitySchemaRuleNotFoundException( EntityPropertyDescriptor descriptor )
     {
-        this( entityType, labelId, propertyKeyIds, false );
+        this( descriptor, false );
     }
 
-    public EntitySchemaRuleNotFoundException( EntityType entityType, int entityId, int[] propertyKeyIds, boolean unique )
+    public EntitySchemaRuleNotFoundException( EntityPropertyDescriptor descriptor, boolean unique )
     {
-        super( getMessageTemplate( entityType ), entityId, propertyKeyIds,
+        super( "%s for %s '%s' and property '%s' not found.", descriptor,
                 unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
-        this.entityType = entityType;
     }
 
     @Override
     public String getUserMessage( TokenNameLookup tokenNameLookup )
     {
-        String entityName = EntityType.NODE == entityType ? tokenNameLookup.labelGetName( ruleEntityId ) :
-                            tokenNameLookup.relationshipTypeGetName( ruleEntityId );
-        return String.format( messageTemplate, messagePrefix, entityName,
-                IndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
-    }
-
-    private static String getMessageTemplate( EntityType entityType )
-    {
-        switch ( entityType )
-        {
-        case NODE:
-            return NODE_RULE_NOT_FOUND_MESSAGE_TEMPLATE;
-        case RELATIONSHIP:
-            return RELATIONSHIP_RULE_NOT_FOUND_MESSAGE_TEMPLATE;
-        default:
-            throw new IllegalArgumentException( "Schema rules for specified entityType not supported." );
-        }
+        return String
+                .format( messageTemplate, messagePrefix, descriptor.entityType().getTypeDescriptor(),
+                        descriptor.entityNameText( tokenNameLookup ),
+                        descriptor.propertyNameText( tokenNameLookup ) );
     }
 }
