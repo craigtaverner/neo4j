@@ -19,45 +19,23 @@
  */
 package org.neo4j.kernel.impl.coreapi.schema;
 
-import org.neo4j.graphdb.schema.ConstraintDefinition;
-import org.neo4j.graphdb.schema.ConstraintType;
-
-import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 
-abstract class PropertyConstraintDefinition implements ConstraintDefinition
+abstract class SinglePropertyConstraintDefinition extends PropertyConstraintDefinition
 {
-    protected final InternalSchemaActions actions;
+    protected final String propertyKey;
 
-    protected PropertyConstraintDefinition( InternalSchemaActions actions )
+    protected SinglePropertyConstraintDefinition( InternalSchemaActions actions, String propertyKey )
     {
-        this.actions = requireNonNull( actions );
+        super( actions );
+        this.propertyKey = requireNonNull( propertyKey );
     }
 
     @Override
-    public abstract Iterable<String> getPropertyKeys();
-
-    @Override
-    public boolean isConstraintType( ConstraintType type )
+    public Iterable<String> getPropertyKeys()
     {
         assertInUnterminatedTransaction();
-        return getConstraintType().equals( type );
-    }
-
-    @Override
-    public abstract boolean equals( Object o );
-
-    @Override
-    public abstract int hashCode();
-
-    /**
-     * Returned string is used in shell's constraint listing.
-     */
-    @Override
-    public abstract String toString();
-
-    protected void assertInUnterminatedTransaction()
-    {
-        actions.assertInOpenTransaction();
+        return singleton( propertyKey );
     }
 }

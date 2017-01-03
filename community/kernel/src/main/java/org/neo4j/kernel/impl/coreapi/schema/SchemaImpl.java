@@ -328,19 +328,23 @@ public class SchemaImpl implements Schema
         // constraint type introduced to mimic the public ConstraintType, but that would be a duplicate of it
         // essentially. Checking instanceof here is OKish since the objects it checks here are part of the
         // internal storage engine API.
-        if ( constraint instanceof NodePropertyExistenceConstraint )
+        if ( constraint instanceof NodePropertyConstraint )
         {
-            StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
-            return new NodePropertyExistenceConstraintDefinition( actions,
-                    Label.label( lookup.labelGetName( ((NodePropertyConstraint) constraint).label() ) ),
-                    getPropertyKeys( lookup, constraint ) );
-        }
-        else if ( constraint instanceof UniquenessConstraint )
-        {
-            StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
-            return new UniquenessConstraintDefinition( actions,
-                    Label.label( lookup.labelGetName( ((NodePropertyConstraint) constraint).label() ) ),
-                    getPropertyKeys( lookup, constraint ) );
+            NodePropertyConstraint nodePropertyConstraint = (NodePropertyConstraint) constraint;
+            if ( constraint instanceof NodePropertyExistenceConstraint )
+            {
+                StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
+                return new NodePropertyExistenceConstraintDefinition( actions,
+                        Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
+                        getPropertyKeys( lookup, nodePropertyConstraint ) );
+            }
+            else if ( constraint instanceof UniquenessConstraint )
+            {
+                StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
+                return new UniquenessConstraintDefinition( actions,
+                        Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
+                        getPropertyKeys( lookup, nodePropertyConstraint ) );
+            }
         }
         else if ( constraint instanceof RelationshipPropertyExistenceConstraint )
         {
@@ -348,7 +352,7 @@ public class SchemaImpl implements Schema
             RelationshipPropertyConstraint relConstraint = (RelationshipPropertyConstraint) constraint;
             return new RelationshipPropertyExistenceConstraintDefinition( actions,
                     RelationshipType.withName( lookup.relationshipTypeGetName( relConstraint.relationshipType() ) ),
-                    lookup.propertyKeyGetName( relConstraint.propertyKey() ) );
+                    lookup.propertyKeyGetName( relConstraint.getPropertyKeyId() ) );
         }
         throw new IllegalArgumentException( "Unknown constraint " + constraint );
     }

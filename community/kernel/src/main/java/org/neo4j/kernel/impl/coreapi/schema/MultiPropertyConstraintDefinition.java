@@ -25,39 +25,35 @@ import org.neo4j.graphdb.schema.ConstraintType;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
-abstract class PropertyConstraintDefinition implements ConstraintDefinition
+abstract class MultiPropertyConstraintDefinition extends PropertyConstraintDefinition
 {
-    protected final InternalSchemaActions actions;
+    protected final String[] propertyKeys;
 
-    protected PropertyConstraintDefinition( InternalSchemaActions actions )
+    protected MultiPropertyConstraintDefinition( InternalSchemaActions actions, String[] propertyKeys )
     {
-        this.actions = requireNonNull( actions );
+        super( actions );
+        this.propertyKeys = requireNonEmpty( propertyKeys );
+    }
+
+    private static String[] requireNonEmpty( String[] array )
+    {
+        requireNonNull( array );
+        if ( array.length < 1 )
+        {
+            throw new IllegalArgumentException( "Property constraint must have at least one property" );
+        }
+        for ( String field : array )
+        {
+            if ( field == null )
+            { throw new NullPointerException(); }
+        }
+        return array;
     }
 
     @Override
-    public abstract Iterable<String> getPropertyKeys();
-
-    @Override
-    public boolean isConstraintType( ConstraintType type )
+    public Iterable<String> getPropertyKeys()
     {
         assertInUnterminatedTransaction();
-        return getConstraintType().equals( type );
-    }
-
-    @Override
-    public abstract boolean equals( Object o );
-
-    @Override
-    public abstract int hashCode();
-
-    /**
-     * Returned string is used in shell's constraint listing.
-     */
-    @Override
-    public abstract String toString();
-
-    protected void assertInUnterminatedTransaction()
-    {
-        actions.assertInOpenTransaction();
+        return asList( propertyKeys );
     }
 }

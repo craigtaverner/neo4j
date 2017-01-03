@@ -50,13 +50,13 @@ public class RelationshipPropertyExistenceConstraint extends RelationshipPropert
         String typeName = tokenNameLookup.relationshipTypeGetName( relationshipTypeId );
         String boundIdentifier = typeName.toLowerCase();
         return String.format( "CONSTRAINT ON ()-[ %s:%s ]-() ASSERT exists(%s.%s)",
-                boundIdentifier, typeName, boundIdentifier, tokenNameLookup.propertyKeyGetName( propertyKeyIds[0] ) );
+                boundIdentifier, typeName, boundIdentifier, tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
     }
 
     @Override
     public String toString()
     {
         return String.format( "CONSTRAINT ON ()-[ n:relationshipType[%s] ]-() ASSERT exists(n.property[%s])",
-                relationshipTypeId, propertyKeyIds[0] );
+                relationshipTypeId, propertyKeyId );
     }
 }

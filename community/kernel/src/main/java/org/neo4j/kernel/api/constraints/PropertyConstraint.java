@@ -21,14 +21,13 @@ package org.neo4j.kernel.api.constraints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
-import org.neo4j.kernel.api.index.DescriptorWithProperties;
 
 /**
- * Base class describing a property constraint.
+ * Interface describing a property constraint.
  */
-public abstract class PropertyConstraint implements DescriptorWithProperties
+public interface PropertyConstraint
 {
-    public interface ChangeVisitor
+    interface ChangeVisitor
     {
         void visitAddedUniquePropertyConstraint( UniquenessConstraint constraint );
 
@@ -45,30 +44,18 @@ public abstract class PropertyConstraint implements DescriptorWithProperties
         void visitRemovedRelationshipPropertyExistenceConstraint( RelationshipPropertyExistenceConstraint constraint );
     }
 
-    protected final int[] propertyKeyIds;
+    void added( ChangeVisitor visitor ) throws CreateConstraintFailureException;
 
-    public PropertyConstraint( int[] propertyKeyIds )
-    {
-        this.propertyKeyIds = propertyKeyIds;
-    }
+    void removed( ChangeVisitor visitor );
 
-    public abstract void added( ChangeVisitor visitor ) throws CreateConstraintFailureException;
-
-    public abstract void removed( ChangeVisitor visitor );
-
-    public int[] getPropertyKeyIds()
-    {
-        return propertyKeyIds;
-    }
-
-    public abstract String userDescription( TokenNameLookup tokenNameLookup );
+    String userDescription( TokenNameLookup tokenNameLookup );
 
     @Override
-    public abstract boolean equals( Object o );
+    boolean equals( Object o );
 
     @Override
-    public abstract int hashCode();
+    int hashCode();
 
     @Override
-    public abstract String toString();
+    String toString();
 }

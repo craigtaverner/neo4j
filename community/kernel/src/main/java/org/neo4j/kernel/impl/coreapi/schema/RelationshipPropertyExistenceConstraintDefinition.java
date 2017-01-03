@@ -36,7 +36,7 @@ public class RelationshipPropertyExistenceConstraintDefinition extends Relations
     public void drop()
     {
         assertInUnterminatedTransaction();
-        actions.dropRelationshipPropertyExistenceConstraint( relationshipType, getPropertyKey() );
+        actions.dropRelationshipPropertyExistenceConstraint( relationshipType, propertyKey );
     }
 
     @Override
@@ -49,6 +49,6 @@ public class RelationshipPropertyExistenceConstraintDefinition extends Relations
     public String toString()
     {
         return format( "ON ()-[%1$s:%2$s]-() ASSERT exists(%1$s.%3$s)",
-                relationshipType.name().toLowerCase(), relationshipType.name(), getPropertyKey() );
+                relationshipType.name().toLowerCase(), relationshipType.name(), propertyKey );
     }
 }

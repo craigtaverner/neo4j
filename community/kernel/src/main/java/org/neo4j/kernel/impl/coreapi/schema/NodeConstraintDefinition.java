@@ -24,11 +24,10 @@ import java.util.stream.Collectors;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 import static java.util.Objects.requireNonNull;
 
-abstract class NodeConstraintDefinition extends PropertyConstraintDefinition
+abstract class NodeConstraintDefinition extends MultiPropertyConstraintDefinition
 {
     protected final Label label;
 
@@ -71,7 +70,7 @@ abstract class NodeConstraintDefinition extends PropertyConstraintDefinition
     protected String propertyText()
     {
         String nodeVariable = label.name().toLowerCase();
-        if(propertyKeys.length == 1)
+        if ( propertyKeys.length == 1 )
         {
             return nodeVariable + "." + propertyKeys[0];
         }

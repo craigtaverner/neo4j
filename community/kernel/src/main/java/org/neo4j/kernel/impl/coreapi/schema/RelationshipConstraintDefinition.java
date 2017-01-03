@@ -24,15 +24,14 @@ import org.neo4j.graphdb.RelationshipType;
 
 import static java.util.Objects.requireNonNull;
 
-abstract class RelationshipConstraintDefinition extends PropertyConstraintDefinition
+abstract class RelationshipConstraintDefinition extends SinglePropertyConstraintDefinition
 {
     protected final RelationshipType relationshipType;
 
     protected RelationshipConstraintDefinition( InternalSchemaActions actions, RelationshipType relationshipType,
             String propertyKey )
     {
-        //TODO: Refactor to split class hierarchy for SinglePropertyConstraintDefinition and MultPropertyConstraintDefinition
-        super( actions, new String[]{propertyKey} );
+        super( actions, propertyKey );
         this.relationshipType = requireNonNull( relationshipType );
     }
 
@@ -50,11 +49,6 @@ abstract class RelationshipConstraintDefinition extends PropertyConstraintDefini
         return relationshipType;
     }
 
-    public String getPropertyKey()
-    {
-        return propertyKeys[0];
-    }
-
     @Override
     public boolean equals( Object o )
     {
@@ -67,13 +61,13 @@ abstract class RelationshipConstraintDefinition extends PropertyConstraintDefini
             return false;
         }
         RelationshipConstraintDefinition that = (RelationshipConstraintDefinition) o;
-        return relationshipType.name().equals( that.relationshipType.name() ) && getPropertyKey().equals( that.getPropertyKey() );
+        return relationshipType.name().equals( that.relationshipType.name() ) && propertyKey.equals( that.propertyKey );
 
     }
 
     @Override
     public int hashCode()
     {
-        return 31 * relationshipType.name().hashCode() + getPropertyKey().hashCode();
+        return 31 * relationshipType.name().hashCode() + propertyKey.hashCode();
     }
 }

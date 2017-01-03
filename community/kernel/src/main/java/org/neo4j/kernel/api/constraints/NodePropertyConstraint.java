@@ -22,12 +22,12 @@ package org.neo4j.kernel.api.constraints;
 import java.util.Arrays;
 
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 
 /**
  * Base class describing property constraint on nodes.
  */
-public abstract class NodePropertyConstraint extends PropertyConstraint
+public abstract class NodePropertyConstraint extends MultiPropertyConstraint
 {
     protected final int labelId;
 
@@ -80,6 +80,6 @@ public abstract class NodePropertyConstraint extends PropertyConstraint
     @Override
     public int hashCode()
     {
-        return IndexDescriptor.hashcode( labelId, propertyKeyIds );
+        return CompositeIndexDescriptor.hashcode( labelId, propertyKeyIds );
     }
 }

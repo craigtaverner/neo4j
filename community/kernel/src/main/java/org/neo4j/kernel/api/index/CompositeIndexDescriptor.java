@@ -19,6 +19,9 @@
  */
 package org.neo4j.kernel.api.index;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
@@ -29,15 +32,14 @@ import static java.lang.String.format;
  *
  * @see SchemaRule
  */
-public class IndexDescriptor implements DescriptorWithProperties
+public class CompositeIndexDescriptor extends IndexDescriptor
 {
-    protected final int labelId;
-    private final int propertyKeyId;
+    private final int[] propertyKeyIds;
 
-    public IndexDescriptor( int labelId, int propertyKeyId )
+    public CompositeIndexDescriptor( int labelId, int[] propertyKeyIds )
     {
-        this.labelId = labelId;
-        this.propertyKeyId = propertyKeyId;
+        super( labelId, -1 );
+        this.propertyKeyIds = propertyKeyIds;
     }
 
     @Override
@@ -49,9 +51,9 @@ public class IndexDescriptor implements DescriptorWithProperties
         }
         if ( obj != null && getClass() == obj.getClass() )
         {
-            IndexDescriptor that = (IndexDescriptor) obj;
+            CompositeIndexDescriptor that = (CompositeIndexDescriptor) obj;
             return this.labelId == that.labelId &&
-                    this.propertyKeyId == that.propertyKeyId;
+                   Arrays.equals( this.propertyKeyIds, that.propertyKeyIds );
         }
         return false;
     }
@@ -59,9 +61,7 @@ public class IndexDescriptor implements DescriptorWithProperties
     @Override
     public int hashCode()
     {
-        int result = labelId;
-        result = 31 * result + propertyKeyId;
-        return result;
+        return hashcode( labelId, propertyKeyIds );
     }
 
     /**
@@ -77,7 +77,7 @@ public class IndexDescriptor implements DescriptorWithProperties
      */
     public int getPropertyKeyId()
     {
-        return propertyKeyId;
+        throw new UnsupportedOperationException( "Cannot get single property Id of composite index" );
     }
 
     /**
@@ -85,13 +85,13 @@ public class IndexDescriptor implements DescriptorWithProperties
      */
     public int[] getPropertyKeyIds()
     {
-        throw new UnsupportedOperationException( "Cannot get multiple property Ids of single property index" );
+        return propertyKeyIds;
     }
 
     @Override
     public String toString()
     {
-        return format( ":label[%d](property[%d])", labelId, propertyKeyId );
+        return format( ":label[%d](property[%s])", labelId, propertyIdText( propertyKeyIds ) );
     }
 
     /**
@@ -100,7 +100,29 @@ public class IndexDescriptor implements DescriptorWithProperties
      */
     public String userDescription( TokenNameLookup tokenNameLookup )
     {
-        return format( ":%s(%s)",
-                tokenNameLookup.labelGetName( labelId ), tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+        return format( ":%s(%s)", tokenNameLookup.labelGetName( labelId ),
+                propertyNameText( tokenNameLookup, propertyKeyIds ) );
+    }
+
+    public static String propertyNameText( TokenNameLookup tokenNameLookup, int[] propertyKeyIds )
+    {
+        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
+                tokenNameLookup.propertyKeyGetName( id ) ).collect( Collectors.joining( "," ) );
+    }
+
+    public static String propertyIdText( int[] propertyKeyIds )
+    {
+        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
+                Integer.toString( id ) ).collect( Collectors.joining( "," ) );
+    }
+
+    public static int hashcode( int labelId, int[] propertyKeyIds )
+    {
+        int result = labelId;
+        for ( int element : propertyKeyIds )
+        {
+            result = 31 * result + element;
+        }
+        return result;
     }
 }

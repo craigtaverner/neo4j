@@ -20,7 +20,7 @@
 package org.neo4j.kernel.api.constraints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 
 /**
  * Description of uniqueness constraint over nodes given a label and a property key id.
@@ -50,13 +50,13 @@ public class UniquenessConstraint extends NodePropertyConstraint
         String labelName = labelName( tokenNameLookup );
         String boundIdentifier = labelName.toLowerCase();
         return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s.%s IS UNIQUE",
-                boundIdentifier, labelName, boundIdentifier, IndexDescriptor.propertyNameText( tokenNameLookup,propertyKeyIds ) );
+                boundIdentifier, labelName, boundIdentifier, CompositeIndexDescriptor.propertyNameText( tokenNameLookup,propertyKeyIds ) );
     }
 
     @Override
     public String toString()
     {
         return String.format( "CONSTRAINT ON ( n:label[%s] ) ASSERT n.property[%s] IS UNIQUE",
-                labelId, IndexDescriptor.propertyIdText( propertyKeyIds ) );
+                labelId, CompositeIndexDescriptor.propertyIdText( propertyKeyIds ) );
     }
 }
