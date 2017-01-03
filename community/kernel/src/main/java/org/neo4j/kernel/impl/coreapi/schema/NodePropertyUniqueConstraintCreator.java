@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.impl.coreapi.schema;
 
+import java.util.ArrayList;
+
 import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
@@ -26,19 +28,23 @@ import org.neo4j.kernel.api.exceptions.KernelException;
 
 public class NodePropertyUniqueConstraintCreator extends BaseNodeConstraintCreator
 {
-    // Only single property key supported a.t.m.
-    protected final String propertyKey;
+    protected final ArrayList<String> propertyKeys = new ArrayList<>();
 
     NodePropertyUniqueConstraintCreator( InternalSchemaActions internalCreator, Label label, String propertyKey )
     {
         super( internalCreator, label );
-        this.propertyKey = propertyKey;
+        this.propertyKeys.add( propertyKey );
     }
 
     @Override
     public final NodePropertyUniqueConstraintCreator assertPropertyIsUnique( String propertyKey )
     {
-        throw new UnsupportedOperationException( "You can only create one unique constraint at a time." );
+        if ( propertyKeys.contains( propertyKey ) )
+        {
+            throw new UnsupportedOperationException( "Constraint already contains property '" + propertyKey + "'" );
+        }
+        this.propertyKeys.add( propertyKey );
+        return this;
     }
 
     @Override
@@ -48,7 +54,8 @@ public class NodePropertyUniqueConstraintCreator extends BaseNodeConstraintCreat
 
         try
         {
-            return actions.createPropertyUniquenessConstraint( label, propertyKey );
+            return actions.createPropertyUniquenessConstraint( label,
+                    propertyKeys.toArray( new String[propertyKeys.size()] ) );
         }
         catch ( KernelException e )
         {

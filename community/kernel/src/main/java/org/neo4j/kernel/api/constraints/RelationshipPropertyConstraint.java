@@ -22,7 +22,7 @@ package org.neo4j.kernel.api.constraints;
 /**
  * Base class describing property constraint on relationships.
  */
-public abstract class RelationshipPropertyConstraint extends PropertyConstraint
+public abstract class RelationshipPropertyConstraint extends SinglePropertyConstraint
 {
     protected final int relationshipTypeId;
 

@@ -21,15 +21,16 @@ package org.neo4j.kernel.api.constraints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 
 /**
  * Description of constraint enforcing nodes to contain a certain property.
  */
 public class NodePropertyExistenceConstraint extends NodePropertyConstraint
 {
-    public NodePropertyExistenceConstraint( int labelId, int propertyKeyId )
+    public NodePropertyExistenceConstraint( int labelId, int[] propertyKeyIds )
     {
-        super( labelId, propertyKeyId );
+        super( labelId, propertyKeyIds );
     }
 
     @Override
@@ -50,13 +51,14 @@ public class NodePropertyExistenceConstraint extends NodePropertyConstraint
         String labelName = labelName( tokenNameLookup );
         String boundIdentifier = labelName.toLowerCase();
         return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT exists(%s.%s)",
-                boundIdentifier, labelName, boundIdentifier, tokenNameLookup.propertyKeyGetName( propertyKeyId ) );
+                boundIdentifier, labelName, boundIdentifier,
+                CompositeIndexDescriptor.propertyNameText( tokenNameLookup, propertyKeyIds ) );
     }
 
     @Override
     public String toString()
     {
         return String.format( "CONSTRAINT ON ( n:label[%s] ) ASSERT exists(n.property[%s])",
-                labelId, propertyKeyId );
+                labelId, CompositeIndexDescriptor.propertyIdText( propertyKeyIds ) );
     }
 }

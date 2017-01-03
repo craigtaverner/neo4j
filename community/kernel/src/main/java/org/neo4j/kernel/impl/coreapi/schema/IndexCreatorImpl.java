@@ -38,7 +38,7 @@ public class IndexCreatorImpl implements IndexCreator
 
     public IndexCreatorImpl( InternalSchemaActions actions, Label label )
     {
-        this( actions, label, new ArrayList<String>() );
+        this( actions, label, new ArrayList<>() );
     }
 
     private IndexCreatorImpl( InternalSchemaActions actions, Label label, Collection<String> propertyKeys )

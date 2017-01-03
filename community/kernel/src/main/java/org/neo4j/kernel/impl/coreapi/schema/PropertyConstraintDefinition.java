@@ -22,25 +22,40 @@ package org.neo4j.kernel.impl.coreapi.schema;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.ConstraintType;
 
-import static java.util.Collections.singleton;
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 abstract class PropertyConstraintDefinition implements ConstraintDefinition
 {
     protected final InternalSchemaActions actions;
-    protected final String propertyKey;
+    protected final String[] propertyKeys;
 
-    protected PropertyConstraintDefinition( InternalSchemaActions actions, String propertyKey )
+    protected PropertyConstraintDefinition( InternalSchemaActions actions, String[] propertyKeys )
     {
         this.actions = requireNonNull( actions );
-        this.propertyKey = requireNonNull( propertyKey );
+        this.propertyKeys = requireNonEmpty( propertyKeys );
+    }
+
+    private static String[] requireNonEmpty(String[] array)
+    {
+        requireNonNull( array );
+        if ( array.length < 1 )
+        {
+            throw new IllegalArgumentException( "Property constraint must have at least one property" );
+        }
+        for ( String field : array )
+        {
+            if ( field == null )
+            { throw new NullPointerException(); }
+        }
+        return array;
     }
 
     @Override
     public Iterable<String> getPropertyKeys()
     {
         assertInUnterminatedTransaction();
-        return singleton( propertyKey );
+        return asList( propertyKeys );
     }
 
     @Override
