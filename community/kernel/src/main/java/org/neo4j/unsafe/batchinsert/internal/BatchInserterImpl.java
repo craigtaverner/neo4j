@@ -58,6 +58,7 @@ import org.neo4j.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.index.IndexEntryConflictException;
 import org.neo4j.kernel.api.exceptions.schema.AlreadyConstrainedException;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
+import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 import org.neo4j.kernel.api.index.IndexConfiguration;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.api.index.IndexPopulator;
@@ -474,7 +475,7 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
             // TODO: Support composite indexes
             propertyKeyIds[i] = propertyKeyId[0];
 
-            IndexDescriptor descriptor = new IndexDescriptor( labelId, propertyKeyId );
+            IndexDescriptor descriptor = new CompositeIndexDescriptor( labelId, propertyKeyId );
             populators[i] = schemaIndexProviders.apply( rule.getProviderDescriptor() )
                                                 .getPopulator( rule.getId(),
                                                         descriptor,
@@ -627,7 +628,7 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
     private void createConstraintRule( RelationshipPropertyExistenceConstraint constraint )
     {
         SchemaRule rule = RelationshipPropertyExistenceConstraintRule.relPropertyExistenceConstraintRule(
-                schemaStore.nextId(), constraint.relationshipType(), constraint.propertyKey() );
+                schemaStore.nextId(), constraint.relationshipType(), constraint.getPropertyKeyId() );
 
         for ( DynamicRecord record : schemaStore.allocateFrom( rule ) )
         {
@@ -1108,14 +1109,17 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
 
     private class BatchSchemaActions implements InternalSchemaActions
     {
+        private int[] getOrCreatePropertyKeyIds( Iterable<String> indexDefinition )
+        {
+            ArrayList<Integer> propertyKeyIds = new ArrayList<>();
+            indexDefinition.forEach( index -> propertyKeyIds.add( getOrCreatePropertyKeyId( index ) ) );
+            return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
+
+        }
         private int[] getOrCreatePropertyKeyIds( String[] propertyKeys )
         {
-            int[] propertyKeyIds = new int[propertyKeys.length];
-            for ( int i = 0; i < propertyKeys.length; i++ )
-            {
-                propertyKeyIds[i] = getOrCreatePropertyKeyId( propertyKeys[i] );
-            }
-            return propertyKeyIds;
+            return getOrCreatePropertyKeyIds( Arrays.asList( propertyKeys ) );
+
         }
 
         @Override
@@ -1131,21 +1135,21 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         }
 
         @Override
-        public void dropIndexDefinitions( Label label, String[] propertyKeys )
+        public void dropIndexDefinitions( IndexDefinition indexDefinition )
         {
             throw unsupportedException();
         }
 
         @Override
-        public ConstraintDefinition createPropertyUniquenessConstraint( Label label, String[] propertyKeys )
+        public ConstraintDefinition createPropertyUniquenessConstraint( IndexDefinition indexDefinition )
         {
-            int labelId = getOrCreateLabelId( label.name() );
-            int[] propertyKeyIds = getOrCreatePropertyKeyIds( propertyKeys );
+            int labelId = getOrCreateLabelId( indexDefinition.getLabel().name() );
+            int[] propertyKeyIds = getOrCreatePropertyKeyIds( indexDefinition.getPropertyKeys() );
 
             validateUniquenessConstraintCanBeCreated( labelId, propertyKeyIds );
 
             createConstraintRule( new UniquenessConstraint( labelId, propertyKeyIds ) );
-            return new UniquenessConstraintDefinition( this, label, propertyKeys );
+            return new UniquenessConstraintDefinition( this, indexDefinition);
         }
 
         @Override
@@ -1174,13 +1178,13 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
         }
 
         @Override
-        public void dropPropertyUniquenessConstraint( Label label, String[] propertyKeys )
+        public void dropPropertyUniquenessConstraint( IndexDefinition indexDefinition )
         {
             throw unsupportedException();
         }
 
         @Override
-        public void dropNodePropertyExistenceConstraint( Label label, String[] propertyKeys )
+        public void dropNodePropertyExistenceConstraint( IndexDefinition indexDefinition )
         {
             throw unsupportedException();
         }

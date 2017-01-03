@@ -19,8 +19,12 @@
  */
 package org.neo4j.kernel.impl.coreapi.schema;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.ConstraintType;
+import org.neo4j.graphdb.schema.IndexDefinition;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -34,6 +38,18 @@ abstract class MultiPropertyConstraintDefinition extends PropertyConstraintDefin
         super( actions );
         this.propertyKeys = requireNonEmpty( propertyKeys );
     }
+
+    protected MultiPropertyConstraintDefinition( InternalSchemaActions actions, IndexDefinition indexDefinition )
+    {
+        super( actions );
+
+        List<String> indexList = new ArrayList<>();
+        indexDefinition.getPropertyKeys().forEach( index -> indexList.add( index ) );
+        String[] propertyKeys = indexList.toArray( new String[indexList.size()] );
+
+        this.propertyKeys = requireNonEmpty( propertyKeys );
+    }
+
 
     private static String[] requireNonEmpty( String[] array )
     {
