@@ -25,14 +25,14 @@ import org.neo4j.storageengine.api.schema.SchemaRule;
 import static java.lang.String.format;
 
 /**
- * Description of a single index based on one label and one property.
+ * Description of a single index based on one label and one or more properties.
  *
  * @see SchemaRule
  */
-public class IndexDescriptor extends NodePropertyDescriptor
+public interface IndexDescriptor
 {
-    public IndexDescriptor( int labelId, int propertyKeyId )
-    {
-        super(labelId, propertyKeyId);
-    }
+    int getLabelId();
+    int getPropertyKeyId();
+    int[] getPropertyKeyIds();
+    boolean isComposite();
 }

@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
@@ -126,7 +128,7 @@ public class LockingStatementOperations implements
     }
 
     @Override
-    public IndexDescriptor indexCreate( KernelStatement state, IndexDescriptor descriptor )
+    public IndexDescriptor indexCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         acquireExclusiveSchemaLock( state );
@@ -343,7 +345,7 @@ public class LockingStatementOperations implements
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, IndexDescriptor descriptor )
+    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state,NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
     {
         acquireExclusiveSchemaLock( state );
@@ -353,7 +355,7 @@ public class LockingStatementOperations implements
 
     @Override
     public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state,
-            IndexDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
+            NodePropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         acquireExclusiveSchemaLock( state );
         state.assertOpen();
@@ -362,16 +364,16 @@ public class LockingStatementOperations implements
 
     @Override
     public RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( KernelStatement state,
-            int relTypeId, int propertyKeyId ) throws AlreadyConstrainedException, CreateConstraintFailureException
+            RelationshipPropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         acquireExclusiveSchemaLock( state );
         state.assertOpen();
-        return schemaWriteDelegate.relationshipPropertyExistenceConstraintCreate( state, relTypeId, propertyKeyId );
+        return schemaWriteDelegate.relationshipPropertyExistenceConstraintCreate( state, descriptor );
     }
 
     @Override
     public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( KernelStatement state,
-            IndexDescriptor descriptor )
+            NodePropertyDescriptor descriptor )
     {
         acquireSharedSchemaLock( state );
         state.assertOpen();

@@ -19,20 +19,17 @@
  */
 package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
-import org.neo4j.storageengine.api.schema.SchemaRule;
-
-import static java.lang.String.format;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 
 /**
- * Description of a single index.
- *
- * @see SchemaRule
+ * Factory methods for creating IndexDescriptors that are either single property or composite.
  */
-public class CompositeIndexDescriptor extends NodeMultiPropertyDescriptor implements IndexDescriptor
+public class IndexDescriptorFactory
 {
-    public CompositeIndexDescriptor( int labelId, int[] propertyKeyIds )
+    public static IndexDescriptor from(NodePropertyDescriptor descriptor)
     {
-        super( labelId, propertyKeyIds );
+        return descriptor.isComposite() ? new CompositeIndexDescriptor( descriptor.getLabelId(),
+                descriptor.getPropertyKeyIds() ) : new SinglePropertyIndexDescriptor( descriptor.getLabelId(),
+                descriptor.getPropertyKeyId() );
     }
 }

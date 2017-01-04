@@ -42,6 +42,7 @@ import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ProcedureCallOperations;
 import org.neo4j.kernel.api.QueryRegistryOperations;
 import org.neo4j.kernel.api.ReadOperations;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
@@ -74,6 +75,7 @@ import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
 import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.proc.BasicContext;
 import org.neo4j.kernel.api.proc.CallableUserAggregationFunction;
@@ -1099,7 +1101,7 @@ public class OperationsFacade
 
     // <SchemaWrite>
     @Override
-    public IndexDescriptor indexCreate( IndexDescriptor descriptor )
+    public IndexDescriptor indexCreate( NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         statement.assertOpen();
@@ -1107,35 +1109,35 @@ public class OperationsFacade
     }
 
     @Override
-    public void indexDrop( IndexDescriptor indexdescriptor ) throws DropIndexFailureException
+    public void indexDrop( NodePropertyDescriptor descriptor ) throws DropIndexFailureException
     {
         statement.assertOpen();
-        schemaWrite().indexDrop( statement, indexdescriptor );
+        schemaWrite().indexDrop( statement, IndexDescriptorFactory.from( descriptor ) );
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( IndexDescriptor indexdescriptor )
+    public UniquenessConstraint uniquePropertyConstraintCreate( NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
     {
         statement.assertOpen();
-        return schemaWrite().uniquePropertyConstraintCreate( statement, indexdescriptor );
+        return schemaWrite().uniquePropertyConstraintCreate( statement, descriptor );
     }
 
     @Override
-    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( IndexDescriptor indexdescriptor )
+    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, indexdescriptor );
+        return schemaWrite().nodePropertyExistenceConstraintCreate( statement, descriptor );
     }
 
     @Override
     public RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate(
-            int relTypeId, int propertyKeyId )
+            RelationshipPropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().relationshipPropertyExistenceConstraintCreate( statement, relTypeId, propertyKeyId );
+        return schemaWrite().relationshipPropertyExistenceConstraintCreate( statement, descriptor );
     }
 
     @Override

@@ -28,6 +28,8 @@ import org.neo4j.cursor.Cursor;
 import org.neo4j.function.Predicates;
 import org.neo4j.helpers.Strings;
 import org.neo4j.helpers.collection.FilteringIterator;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -49,6 +51,7 @@ import org.neo4j.kernel.api.exceptions.schema.IndexBrokenKernelException;
 import org.neo4j.kernel.api.exceptions.schema.UnableToValidateConstraintKernelException;
 import org.neo4j.kernel.api.exceptions.schema.UniquePropertyConstraintViolationKernelException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.properties.DefinedProperty;
 import org.neo4j.kernel.api.properties.Property;
 import org.neo4j.kernel.impl.api.operations.EntityOperations;
@@ -110,7 +113,7 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
                 {
                     // TODO: Support composite indexes
                     validateNoExistingNodeWithLabelAndProperty( state,
-                            new IndexDescriptor( labelId, propertyKeyIds ), constraint.descriptor(), node.id() );
+                            new IndexDescriptorFactory().from( new NodePropertyDescriptor( labelId, propertyKeyIds ) ), propertyValue, node.id() );
                 }
             }
 
@@ -135,11 +138,12 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
                     int propertyKeyId = property.propertyKeyId();
                     Iterator<NodePropertyConstraint> constraintIterator =
                             uniquePropertyConstraints( schemaReadOperations.constraintsGetForLabelAndPropertyKey( state,
-                                    new IndexDescriptor( labelId, propertyKeyId ) ) );
+                                    new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
                     if ( constraintIterator.hasNext() )
                     {
+                        //TODO make sure tht index are araving inset of nodeID and property
                         validateNoExistingNodeWithLabelAndProperty( state,
-                                new IndexDescriptor( labelId, propertyKeyId ), property.value(), node.id() );
+                                new IndexDescriptorFactory().from( new NodePropertyDescriptor( labelId, propertyKeyId ) ), property.value(), node.id() );
                     }
                 }
             }
@@ -532,10 +536,10 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     }
 
     @Override
-    public IndexDescriptor indexCreate( KernelStatement state, IndexDescriptor indexdescriptor )
+    public IndexDescriptor indexCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
-        return schemaWriteOperations.indexCreate( state, indexdescriptor );
+        return schemaWriteOperations.indexCreate( state, descriptor );
     }
 
     @Override
@@ -551,31 +555,31 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     }
 
     @Override
-    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, IndexDescriptor indexdescriptor )
+    public UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException
     {
-        return schemaWriteOperations.uniquePropertyConstraintCreate( state, indexdescriptor );
+        return schemaWriteOperations.uniquePropertyConstraintCreate( state, descriptor );
     }
 
     @Override
-    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state, IndexDescriptor indexdescriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
+    public NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state, NodePropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
-        try ( Cursor<NodeItem> cursor = nodeCursorGetForLabel( state, indexdescriptor.getLabelId() ) )
+        try ( Cursor<NodeItem> cursor = nodeCursorGetForLabel( state, descriptor.getLabelId() ) )
         {
-            constraintSemantics.validateNodePropertyExistenceConstraint( cursor, indexdescriptor);
+            constraintSemantics.validateNodePropertyExistenceConstraint( cursor, descriptor);
         }
-        return schemaWriteOperations.nodePropertyExistenceConstraintCreate( state, indexdescriptor );
+        return schemaWriteOperations.nodePropertyExistenceConstraintCreate( state, descriptor );
     }
 
     @Override
     public RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( KernelStatement state,
-            int relTypeId, int propertyKeyId ) throws AlreadyConstrainedException, CreateConstraintFailureException
+            RelationshipPropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         try ( Cursor<RelationshipItem> cursor = relationshipCursorGetAll( state ) )
         {
-            constraintSemantics.validateRelationshipPropertyExistenceConstraint( cursor, relTypeId, propertyKeyId );
+            constraintSemantics.validateRelationshipPropertyExistenceConstraint( cursor, descriptor );
         }
-        return schemaWriteOperations.relationshipPropertyExistenceConstraintCreate( state, relTypeId, propertyKeyId );
+        return schemaWriteOperations.relationshipPropertyExistenceConstraintCreate( state, descriptor );
     }
 
     @Override

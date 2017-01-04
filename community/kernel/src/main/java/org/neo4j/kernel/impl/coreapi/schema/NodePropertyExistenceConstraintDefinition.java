@@ -41,7 +41,7 @@ public class NodePropertyExistenceConstraintDefinition extends NodeConstraintDef
     public void drop()
     {
         assertInUnterminatedTransaction();
-        actions.dropNodePropertyExistenceConstraint( actions.createIndexDefinition( label, propertyKeys ) );
+        actions.dropNodePropertyExistenceConstraint( new IndexDefinitionImpl(actions, label, propertyKeys,true ) );
     }
 
     @Override

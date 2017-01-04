@@ -19,20 +19,18 @@
  */
 package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
-import static java.lang.String.format;
-
 /**
- * Description of a single index.
+ * Description of a single index based on one label and one property.
  *
  * @see SchemaRule
  */
-public class CompositeIndexDescriptor extends NodeMultiPropertyDescriptor implements IndexDescriptor
+public class SinglePropertyIndexDescriptor extends NodePropertyDescriptor implements IndexDescriptor
 {
-    public CompositeIndexDescriptor( int labelId, int[] propertyKeyIds )
+    SinglePropertyIndexDescriptor( int labelId, int propertyKeyId )
     {
-        super( labelId, propertyKeyIds );
+        super(labelId, propertyKeyId);
     }
 }

@@ -54,6 +54,12 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
     }
 
     @Override
+    public boolean isComposite()
+    {
+        return true;
+    }
+
+    @Override
     public int hashCode()
     {
         return hashcode( getLabelId(), propertyKeyIds );

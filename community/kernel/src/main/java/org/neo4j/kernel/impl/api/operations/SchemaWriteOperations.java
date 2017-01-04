@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.impl.api.operations;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -38,7 +40,7 @@ public interface SchemaWriteOperations
      * Creates an index, indexing properties with the given {@code propertyKeyId} for nodes with the given
      * {@code labelId}.
      */
-    IndexDescriptor indexCreate( KernelStatement state, IndexDescriptor indexdescriptor )
+    IndexDescriptor indexCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException;
 
     /** Drops a {@link IndexDescriptor} from the database */
@@ -50,14 +52,14 @@ public interface SchemaWriteOperations
      */
     void uniqueIndexDrop( KernelStatement state, IndexDescriptor descriptor ) throws DropIndexFailureException;
 
-    UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, IndexDescriptor indexdescriptor )
+    UniquenessConstraint uniquePropertyConstraintCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException;
 
     NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( KernelStatement state,
-            IndexDescriptor indexdescriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException;
+            NodePropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException;
 
     RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( KernelStatement state,
-            int relTypeId, int propertyKeyId ) throws AlreadyConstrainedException, CreateConstraintFailureException;
+            RelationshipPropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException;
 
     void constraintDrop( KernelStatement state, NodePropertyConstraint constraint ) throws DropConstraintFailureException;
 

@@ -41,6 +41,11 @@ public class NodePropertyDescriptor extends EntityPropertyDescriptor
         return getEntityId();
     }
 
+    public boolean isComposite()
+    {
+        return false;
+    }
+
     @Override
     public String entityNameText( TokenNameLookup tokenNameLookup )
     {

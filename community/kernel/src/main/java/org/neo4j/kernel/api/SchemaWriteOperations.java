@@ -39,20 +39,21 @@ public interface SchemaWriteOperations extends TokenWriteOperations
      * Creates an index, indexing properties with the given {@code propertyKeyId} for nodes with the given
      * {@code labelId}.
      */
-    IndexDescriptor indexCreate( IndexDescriptor indexDescriptor )
+    IndexDescriptor indexCreate( NodePropertyDescriptor nodeDescriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException;
 
     /** Drops a {@link IndexDescriptor} from the database */
-    void indexDrop( IndexDescriptor descriptor ) throws DropIndexFailureException;
+    void indexDrop( NodePropertyDescriptor descriptor ) throws DropIndexFailureException;
 
-    UniquenessConstraint uniquePropertyConstraintCreate( IndexDescriptor indexDescriptor )
+    UniquenessConstraint uniquePropertyConstraintCreate( NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException;
 
-    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( IndexDescriptor indexDescriptor )
+    NodePropertyExistenceConstraint nodePropertyExistenceConstraintCreate( NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException;
 
-    RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate( int relationshipTypeId,
-            int propertyKeyId ) throws CreateConstraintFailureException, AlreadyConstrainedException;
+    RelationshipPropertyExistenceConstraint relationshipPropertyExistenceConstraintCreate(
+            RelationshipPropertyDescriptor relationshipPropertyDescriptor ) throws
+            CreateConstraintFailureException, AlreadyConstrainedException;
 
     void constraintDrop( NodePropertyConstraint constraint ) throws DropConstraintFailureException;
 
