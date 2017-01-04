@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 
@@ -29,12 +30,12 @@ public class IndexSchemaRuleNotFoundException extends SchemaRuleNotFoundExceptio
     private static final String INDEX_RULE_NOT_FOUND_MESSAGE_TEMPLATE =
             "%s for label '%s' and property '%s' not found.";
 
-    public IndexSchemaRuleNotFoundException( IndexDescriptor descriptor )
+    public IndexSchemaRuleNotFoundException( NodePropertyDescriptor descriptor )
     {
         this( descriptor, false );
     }
 
-    public IndexSchemaRuleNotFoundException( IndexDescriptor descriptor, boolean unique )
+    public IndexSchemaRuleNotFoundException( NodePropertyDescriptor descriptor, boolean unique )
     {
         super( INDEX_RULE_NOT_FOUND_MESSAGE_TEMPLATE, descriptor, unique ? UNIQUE_INDEX_PREFIX : INDEX_PREFIX );
     }

@@ -38,6 +38,7 @@ import org.neo4j.kernel.api.DataWriteOperations;
 import org.neo4j.kernel.api.ExecutingQuery;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.LegacyIndexHits;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ProcedureCallOperations;
 import org.neo4j.kernel.api.QueryRegistryOperations;
 import org.neo4j.kernel.api.ReadOperations;
@@ -805,10 +806,10 @@ public class OperationsFacade
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
     {
         statement.assertOpen();
-        return schemaRead().constraintsGetForLabelAndPropertyKey( statement, labelId, propertyKeyIds );
+        return schemaRead().constraintsGetForLabelAndPropertyKey( statement, descriptor );
     }
 
     @Override
@@ -1098,11 +1099,11 @@ public class OperationsFacade
 
     // <SchemaWrite>
     @Override
-    public IndexDescriptor indexCreate( Indexdescriptor indexdescriptor )
+    public IndexDescriptor indexCreate( IndexDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         statement.assertOpen();
-        return schemaWrite().indexCreate( statement, indexdescriptor );
+        return schemaWrite().indexCreate( statement, descriptor );
     }
 
     @Override

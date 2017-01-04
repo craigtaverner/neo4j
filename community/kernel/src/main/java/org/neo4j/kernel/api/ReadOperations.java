@@ -329,7 +329,7 @@ public interface ReadOperations
      * Get all constraints applicable to label and propertyKey. There are only {@link NodePropertyConstraint}
      * for the time being.
      */
-    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
+    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor );
 
     /**
      * Get all constraints applicable to label. There are only {@link NodePropertyConstraint}
