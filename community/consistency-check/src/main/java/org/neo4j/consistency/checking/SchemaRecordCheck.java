@@ -105,6 +105,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
             switch ( kind )
             {
                 case INDEX_RULE:
+                case COMPOSITE_INDEX_RULE:
                 case CONSTRAINT_INDEX_RULE:
                     strategy.checkIndexRule( (IndexRule) rule, record, records, engine );
                     break;
@@ -153,7 +154,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkIndexRule( IndexRule rule, DynamicRecord record, RecordAccess records,
                 CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
 
             if ( rule.isConstraintIndex() && rule.getOwningConstraint() != null )
             {
@@ -169,7 +170,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkUniquenessConstraintRule( UniquePropertyConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
 
             DynamicRecord previousObligation = indexObligations.put( rule.getOwnedIndex(), record.clone() );
             if ( previousObligation != null )
@@ -182,7 +183,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkNodePropertyExistenceRule( NodePropertyExistenceConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys()[0], record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
         }
 
         @Override
@@ -256,11 +257,22 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         }
     }
 
-    private void checkLabelAndPropertyRule( SchemaRule rule, int propertyKey, DynamicRecord record,
+    private void checkLabelAndPropertyRule( SchemaRule rule, int[] propertyKeys, DynamicRecord record,
             RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
     {
         engine.comparativeCheck( records.label( rule.getLabel() ), VALID_LABEL );
-        engine.comparativeCheck( records.propertyKey( propertyKey ), VALID_PROPERTY_KEY );
+        //TODO: See if this composite idnex specific check can be encapsulted in the SchemaRule class structure
+        if ( rule.getKind().isComposite() )
+        {
+            for ( int propertyKey : propertyKeys )
+            {
+                engine.comparativeCheck( records.propertyKey( propertyKey ), VALID_PROPERTY_KEY );
+            }
+        }
+        else
+        {
+            engine.comparativeCheck( records.propertyKey( propertyKeys[0] ), VALID_PROPERTY_KEY );
+        }
         checkForDuplicates( rule, record, engine );
     }
 

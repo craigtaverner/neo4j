@@ -51,21 +51,24 @@ public interface SchemaRule
 
     enum Kind
     {
-        INDEX_RULE( true, false ),
-        CONSTRAINT_INDEX_RULE( true, true ),
-        UNIQUENESS_CONSTRAINT( false, true ),
-        NODE_PROPERTY_EXISTENCE_CONSTRAINT( false, true ),
-        RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT( false, true );
+        INDEX_RULE( true, false, false ),
+        CONSTRAINT_INDEX_RULE( true, true, false ),
+        UNIQUENESS_CONSTRAINT( false, true, false ),
+        NODE_PROPERTY_EXISTENCE_CONSTRAINT( false, true, false ),
+        RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT( false, true, false ),
+        COMPOSITE_INDEX_RULE( true, false, true );
 
         private static final Kind[] ALL = values();
 
         private final boolean isIndex;
         private final boolean isConstraint;
+        private final boolean isComposite;
 
-        private Kind( boolean isIndex, boolean isConstraint )
+        private Kind( boolean isIndex, boolean isConstraint, boolean isComposite )
         {
             this.isIndex = isIndex;
             this.isConstraint = isConstraint;
+            this.isComposite = isComposite;
         }
 
         public byte id()
@@ -76,6 +79,11 @@ public interface SchemaRule
         public boolean isConstraint()
         {
             return isConstraint;
+        }
+
+        public boolean isComposite()
+        {
+            return isComposite;
         }
 
         public boolean isIndex()
