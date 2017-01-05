@@ -30,7 +30,9 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.function.Predicates;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -42,6 +44,7 @@ import org.neo4j.kernel.api.exceptions.index.IndexNotFoundKernelException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.properties.PropertyKeyIdIterator;
 import org.neo4j.kernel.impl.api.RelationshipVisitor;
@@ -181,14 +184,15 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeys )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
     {
-        return descriptor( schemaStorage.indexRule( labelId, propertyKeys ) );
+        return descriptor( schemaStorage.indexRule( descriptor ) );
     }
 
     private static IndexDescriptor descriptor( IndexRule ruleRecord )
     {
-        return new IndexDescriptor( ruleRecord.getLabel(), ruleRecord.getPropertyKeys() );
+        return new IndexDescriptorFactory.from(
+                new NodePropertyDescriptor( ruleRecord.getLabel(), ruleRecord.getPropertyKeys() ) );
     }
 
     @Override
@@ -312,11 +316,11 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( int typeId,
-            final int propertyKeyId )
+    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
+            RelationshipPropertyDescriptor descriptor )
     {
         return schemaStorage.schemaRulesForRelationships( REL_RULE_TO_CONSTRAINT,
-                RelationshipPropertyConstraintRule.class, typeId, rule -> rule.containsPropertyKeyId( propertyKeyId ) );
+                RelationshipPropertyConstraintRule.class, descriptor, rule -> rule.containsPropertyKeyId( descriptor ) );
     }
 
     @Override

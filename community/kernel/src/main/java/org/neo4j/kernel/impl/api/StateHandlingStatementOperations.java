@@ -409,8 +409,8 @@ public class StateHandlingStatementOperations implements
                 while ( properties.next() )
                 {
                     PropertyItem propertyItem = properties.get();
-                    IndexDescriptor descriptor = indexGetForLabelAndPropertyKey( state, labelId,
-                            new int[]{propertyItem.propertyKeyId()} );
+                    IndexDescriptor descriptor = indexGetForLabelAndPropertyKey( state,
+                            new NodePropertyDescriptor( labelId, propertyItem.propertyKeyId() ) );
                     if ( descriptor != null )
                     {
                         DefinedProperty after = Property.property( propertyItem.propertyKeyId(),
@@ -448,7 +448,8 @@ public class StateHandlingStatementOperations implements
                 {
                     PropertyItem propItem = properties.get();
                     DefinedProperty property = Property.property( propItem.propertyKeyId(), propItem.value() );
-                    indexUpdateProperty( state, node.id(), labelId, property.propertyKeyId(), property, null );
+                    indexUpdateProperty( state, node.id(),
+                            new NodePropertyDescriptor( labelId, property.propertyKeyId() ), property, null );
                 }
             }
 
@@ -513,7 +514,7 @@ public class StateHandlingStatementOperations implements
         {
 
             if ( state.hasTxStateWithChanges() &&
-                 state.txState().constraintIndexDoUnRemove( descriptor ) ) // ..., DROP, *CREATE*
+                 state.txState().constraintIndexDoUnRemove( constraint ) ) // ..., DROP, *CREATE*
             { // creation is undoing a drop
                 if ( !state.txState().constraintDoUnRemove( constraint ) ) // CREATE, ..., DROP, *CREATE*
                 { // ... the drop we are undoing did itself undo a prior create...
@@ -531,7 +532,7 @@ public class StateHandlingStatementOperations implements
                         return constraint;
                     }
                 }
-                long indexId = constraintIndexCreator.createUniquenessConstraintIndex( state, this, descriptor );
+                long indexId = constraintIndexCreator.createUniquenessConstraintIndex( state, this, constraint.indexDescriptor() );
                 state.txState().constraintDoAdd( constraint, indexId );
             }
             return constraint;
@@ -589,14 +590,14 @@ public class StateHandlingStatementOperations implements
 
     @Override
     public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
-            KernelStatement state, int relTypeId, int propertyKeyId )
+            KernelStatement state, RelationshipPropertyDescriptor descriptor )
     {
         Iterator<RelationshipPropertyConstraint> constraints =
-                storeLayer.constraintsGetForRelationshipTypeAndPropertyKey( relTypeId, propertyKeyId );
+                storeLayer.constraintsGetForRelationshipTypeAndPropertyKey( descriptor );
         if ( state.hasTxStateWithChanges() )
         {
             return state.txState()
-                    .constraintsChangesForRelationshipTypeAndProperty( relTypeId, propertyKeyId )
+                    .constraintsChangesForRelationshipTypeAndProperty( descriptor )
                     .apply( constraints );
         }
         return constraints;
@@ -639,25 +640,25 @@ public class StateHandlingStatementOperations implements
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, int labelId, int[] propertyKeys )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, NodePropertyDescriptor descriptor )
     {
-        IndexDescriptor indexDescriptor = storeLayer.indexGetForLabelAndPropertyKey( labelId, propertyKeys );
+        IndexDescriptor indexDescriptor = storeLayer.indexGetForLabelAndPropertyKey( descriptor );
 
         Iterator<IndexDescriptor> rules = iterator( indexDescriptor );
         if ( state.hasTxStateWithChanges() )
         {
             rules = filterByPropertyKeyId(
-                    state.txState().indexDiffSetsByLabel( labelId ).apply( rules ),
-                    propertyKeys );
+                    state.txState().indexDiffSetsByLabel( descriptor.getLabelId() ).apply( rules ),
+                    descriptor );
         }
         return singleOrNull( rules );
     }
 
     private Iterator<IndexDescriptor> filterByPropertyKeyId(
             Iterator<IndexDescriptor> descriptorIterator,
-            final int[] propertyKeys )
+            NodePropertyDescriptor descriptor )
     {
-        Predicate<IndexDescriptor> predicate = item -> Arrays.equals(item.getPropertyKeyIds(), propertyKeys);
+        Predicate<IndexDescriptor> predicate = item ->(item.equals( descriptor ));
         return Iterators.filter( predicate, descriptorIterator );
     }
 
@@ -1128,16 +1129,17 @@ public class StateHandlingStatementOperations implements
             while ( labels.next() )
             {
                 LabelItem label = labels.get();
-                indexUpdateProperty( state, node.id(), label.getAsInt(), propertyKey, before, after );
+                indexUpdateProperty( state, node.id(), new NodePropertyDescriptor( label.getAsInt(), propertyKey ),
+                        before, after );
             }
         }
     }
 
-    private void indexUpdateProperty( KernelStatement state, long nodeId, int labelId, int propertyKey,
+    private void indexUpdateProperty( KernelStatement state, long nodeId, NodePropertyDescriptor descriptor,
             DefinedProperty before, DefinedProperty after )
     {
         // TODO: Update this to handle composite indexes
-        IndexDescriptor descriptor = indexGetForLabelAndPropertyKey( state, labelId, new int[]{propertyKey} );
+        IndexDescriptor indexDescriptor = indexGetForLabelAndPropertyKey( state, descriptor );
         if ( descriptor != null )
         {
             if (after != null)
@@ -1145,7 +1147,7 @@ public class StateHandlingStatementOperations implements
                 Validators.INDEX_VALUE_VALIDATOR.validate( after.value() );
             }
 
-            state.txState().indexDoUpdateProperty( descriptor, nodeId, before, after );
+            state.txState().indexDoUpdateProperty( indexDescriptor, nodeId, before, after );
         }
     }
 

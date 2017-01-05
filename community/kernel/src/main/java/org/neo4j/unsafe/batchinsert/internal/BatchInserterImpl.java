@@ -1109,10 +1109,10 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
 
     private class BatchSchemaActions implements InternalSchemaActions
     {
-        private int[] getOrCreatePropertyKeyIds( Iterable<String> propertys )
+        private int[] getOrCreatePropertyKeyIds( Iterable<String> properties )
         {
             ArrayList<Integer> propertyKeyIds = new ArrayList<>();
-            propertys.forEach( index -> propertyKeyIds.add( getOrCreatePropertyKeyId( index ) ) );
+            properties.forEach( index -> propertyKeyIds.add( getOrCreatePropertyKeyId( index ) ) );
             return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
 
         }

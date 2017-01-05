@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.api.txstate;
 
+import org.neo4j.kernel.api.constraints.IndexBackedConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -98,7 +99,7 @@ public interface TransactionState extends ReadableTransactionState
 
     boolean constraintDoUnRemove( NodePropertyConstraint constraint );
 
-    boolean constraintIndexDoUnRemove( IndexDescriptor index );
+    boolean constraintIndexDoUnRemove( IndexBackedConstraint constraint );
 
     void indexDoUpdateProperty( IndexDescriptor descriptor, long nodeId, DefinedProperty before, DefinedProperty after );
 }

@@ -84,13 +84,16 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
     @Override
     public String propertyIdText()
     {
-        return propertyIdText( propertyKeyIds );
+        return Arrays.stream( propertyKeyIds ).mapToObj( id -> Integer.toString( id ) )
+                .collect( Collectors.joining( "," ) );
     }
 
     public String propertyNameText( TokenNameLookup tokenNameLookup )
     {
-        return propertyNameText( tokenNameLookup, propertyKeyIds );
+        return Arrays.stream( propertyKeyIds ).mapToObj( id -> tokenNameLookup.propertyKeyGetName( id ) )
+                .collect( Collectors.joining( "," ) );
     }
+
 
     /**
      * @param tokenNameLookup used for looking up names for token ids.
@@ -99,21 +102,7 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
     public String userDescription( TokenNameLookup tokenNameLookup )
     {
         return format( ":%s(%s)", tokenNameLookup.labelGetName( getLabelId() ),
-                propertyNameText( tokenNameLookup, propertyKeyIds ) );
-    }
-
-    //TODO: remove and inline above
-    public static String propertyNameText( TokenNameLookup tokenNameLookup, int[] propertyKeyIds )
-    {
-        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
-                tokenNameLookup.propertyKeyGetName( id ) ).collect( Collectors.joining( "," ) );
-    }
-
-    //TODO: remove and inline above
-    public static String propertyIdText( int[] propertyKeyIds )
-    {
-        return Arrays.stream( propertyKeyIds ).mapToObj( id ->
-                Integer.toString( id ) ).collect( Collectors.joining( "," ) );
+                propertyNameText( tokenNameLookup ) );
     }
 
     //TODO: remove and inline above

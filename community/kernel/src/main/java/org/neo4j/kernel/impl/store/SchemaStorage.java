@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import org.neo4j.function.Predicates;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.PrefetchingIterator;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateEntitySchemaRuleException;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateSchemaRuleException;
@@ -110,9 +111,9 @@ public class SchemaStorage implements SchemaRuleAccess
      *
      * Otherwise throw if there are not exactly one matching candidate rule.
      */
-    public IndexRule indexRule( int labelId, int[] propertyKeyIds )
+    public IndexRule indexRule( NodePropertyDescriptor descriptor )
     {
-        return indexRule( labelId, propertyKeyIds, IndexRuleKind.ALL );
+        return indexRule( descriptor, IndexRuleKind.ALL );
     }
 
     /**
@@ -120,10 +121,10 @@ public class SchemaStorage implements SchemaRuleAccess
      *
      * Otherwise throw if there are not exactly one matching candidate rule.
      */
-    public IndexRule indexRule( final int labelId, final int[] propertyKeyIds, IndexRuleKind kind )
+    public IndexRule indexRule( NodePropertyDescriptor descriptor, IndexRuleKind kind )
     {
         Iterator<IndexRule> rules = schemaRules( cast( IndexRule.class ), IndexRule.class,
-                rule -> rule.getLabel() == labelId && Arrays.equals( rule.getPropertyKeys(), propertyKeyIds ) );
+                rule -> rule.getLabel() == descriptor.getLabelId() && rule.equals( descriptor ) );
 
         IndexRule foundRule = null;
 

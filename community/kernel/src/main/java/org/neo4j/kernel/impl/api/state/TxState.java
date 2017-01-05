@@ -34,6 +34,9 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.collection.primitive.PrimitiveLongSet;
 import org.neo4j.cursor.Cursor;
 import org.neo4j.helpers.collection.Iterables;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
+import org.neo4j.kernel.api.constraints.IndexBackedConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -1094,11 +1097,10 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     }
 
     @Override
-    public ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( int labelId,
-            final int[] propertyKeys )
+    public ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( NodePropertyDescriptor descriptor )
     {
-        return LABEL_STATE.get( this, labelId ).nodeConstraintsChanges().filterAdded(
-                item -> Arrays.equals(item.getPropertyKeyIds(), propertyKeys) );
+        return LABEL_STATE.get( this, descriptor.getLabelId() ).nodeConstraintsChanges()
+                .filterAdded( item -> item.descriptor().equals( descriptor ) );
     }
 
     @Override
@@ -1119,12 +1121,11 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     }
 
     @Override
-    public ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipTypeAndProperty(
-            int relTypeId, final int propertyKey )
+    public ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipTypeAndProperty
+            (RelationshipPropertyDescriptor descriptor )
     {
-        return constraintsChangesForRelationshipType( relTypeId ).filterAdded(
-                constraint -> constraint.getPropertyKeyIds()[0] == propertyKey
-        );
+        return constraintsChangesForRelationshipType( descriptor.getRelationshipTypeId() )
+                .filterAdded( constraint -> constraint.propertyKey() == descriptor.getPropertyKeyId() );
     }
 
     @Override
@@ -1149,7 +1150,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
 
         if ( constraint instanceof UniquenessConstraint )
         {
-            constraintIndexDoDrop( new IndexDescriptor( constraint.label(), constraint.getPropertyKeyIds() ) );
+            constraintIndexDoDrop( constraint.indexDescriptor() );
         }
         getOrCreateLabelState( constraint.label() ).getOrCreateConstraintsChanges().remove( constraint );
         changed();
@@ -1189,11 +1190,13 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     }
 
     @Override
-    public boolean constraintIndexDoUnRemove( IndexDescriptor index )
+    public boolean constraintIndexDoUnRemove( IndexBackedConstraint constraint )
     {
-        if ( constraintIndexChangesDiffSets().unRemove( index ) )
+        IndexDescriptor descriptor = constraint.indexDescriptor();
+        if ( constraintIndexChangesDiffSets().unRemove( descriptor ) )
         {
-            LABEL_STATE.getOrCreate( this, index.getLabelId() ).getOrCreateConstraintIndexChanges().unRemove( index );
+            LABEL_STATE.getOrCreate( this, descriptor.getLabelId() ).getOrCreateConstraintIndexChanges()
+                    .unRemove( descriptor );
             return true;
         }
         return false;
@@ -1204,8 +1207,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     {
         if ( createdConstraintIndexesByConstraint != null && !createdConstraintIndexesByConstraint.isEmpty() )
         {
-            return map( constraint -> new IndexDescriptor( constraint.label(), constraint.getPropertyKeyIds() ),
-                    createdConstraintIndexesByConstraint.keySet() );
+            return map( constraint -> constraint.indexDescriptor(), createdConstraintIndexesByConstraint.keySet() );
         }
         return Iterables.empty();
     }

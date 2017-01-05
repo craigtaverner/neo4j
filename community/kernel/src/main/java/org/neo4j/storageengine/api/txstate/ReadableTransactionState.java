@@ -24,6 +24,8 @@ import java.util.Iterator;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.cursor.Cursor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -124,12 +126,12 @@ public interface ReadableTransactionState
 
     ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabel( int labelId );
 
-    ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( int labelId, int[] propertyKeys );
+    ReadableDiffSets<NodePropertyConstraint> constraintsChangesForLabelAndProperty( NodePropertyDescriptor descriptor );
 
     ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipType( int relTypeId );
 
-    ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipTypeAndProperty( int relTypeId,
-            int propertyKey );
+    ReadableDiffSets<RelationshipPropertyConstraint> constraintsChangesForRelationshipTypeAndProperty(
+            RelationshipPropertyDescriptor descriptor );
 
     Long indexCreatedForConstraint( UniquenessConstraint constraint );
 

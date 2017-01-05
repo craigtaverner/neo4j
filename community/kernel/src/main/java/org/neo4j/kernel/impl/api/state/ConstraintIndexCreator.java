@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import org.neo4j.kernel.api.KernelAPI;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
@@ -64,13 +65,23 @@ public class ConstraintIndexCreator
             CreateConstraintFailureException, DropIndexFailureException
     {
         createConstraintIndex( descriptor );
-        UniquenessConstraint constraint = new UniquenessConstraint( descriptor );
-
+        UniquenessConstraint constraint;
+        try
+        {
+            constraint = new UniquenessConstraint(
+                    new NodePropertyDescriptor( descriptor.getLabelId(), descriptor.getPropertyKeyId() ) );
+        }
+        catch ( UnsupportedOperationException e )
+        {
+            constraint = new UniquenessConstraint(
+                    new NodeMultiPropertyDescriptor( descriptor.getLabelId(), descriptor.getPropertyKeyIds() ) );
+        }
         boolean success = false;
         try
         {
             long indexId = schema.indexGetCommittedId( state, descriptor, CONSTRAINT );
-            awaitIndexPopulation( constraint, indexId );
+
+            awaitConstrainIndexPopulation( constraint, indexId );
             success = true;
             return indexId;
         }
@@ -114,7 +125,7 @@ public class ConstraintIndexCreator
         }
     }
 
-    private void awaitIndexPopulation( UniquenessConstraint constraint, long indexId )
+    private void awaitConstrainIndexPopulation( UniquenessConstraint constraint, long indexId )
             throws InterruptedException, ConstraintVerificationFailedKernelException
     {
         try

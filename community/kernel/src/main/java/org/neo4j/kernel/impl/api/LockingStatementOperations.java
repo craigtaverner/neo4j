@@ -185,11 +185,11 @@ public class LockingStatementOperations implements
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, int labelId, int[] propertyKeys )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, NodePropertyDescriptor descriptor )
     {
         acquireSharedSchemaLock( state );
         state.assertOpen();
-        return schemaReadDelegate.indexGetForLabelAndPropertyKey( state, labelId, propertyKeys );
+        return schemaReadDelegate.indexGetForLabelAndPropertyKey( state, descriptor );
     }
 
     @Override
@@ -391,11 +391,11 @@ public class LockingStatementOperations implements
     @Override
     public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
             KernelStatement state,
-            int relTypeId, int propertyKeyId )
+            RelationshipPropertyDescriptor descriptor )
     {
         acquireSharedSchemaLock( state );
         state.assertOpen();
-        return schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey( state, relTypeId, propertyKeyId );
+        return schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey( state, descriptor );
     }
 
     @Override

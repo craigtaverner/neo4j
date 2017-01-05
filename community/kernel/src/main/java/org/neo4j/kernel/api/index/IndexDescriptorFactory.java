@@ -19,17 +19,46 @@
  */
 package org.neo4j.kernel.api.index;
 
+import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.SchemaWriteOperations;
+import org.neo4j.kernel.api.exceptions.schema.IllegalTokenNameException;
+import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
+
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getOrCreatePropertyKeyIds;
+import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeyIds;
 
 /**
  * Factory methods for creating IndexDescriptors that are either single property or composite.
  */
 public class IndexDescriptorFactory
 {
-    public static IndexDescriptor from(NodePropertyDescriptor descriptor)
+    public static IndexDescriptor from( NodePropertyDescriptor descriptor )
     {
         return descriptor.isComposite() ? new CompositeIndexDescriptor( descriptor.getLabelId(),
                 descriptor.getPropertyKeyIds() ) : new SinglePropertyIndexDescriptor( descriptor.getLabelId(),
                 descriptor.getPropertyKeyId() );
+    }
+
+    public static NodePropertyDescriptor getOrCreateTokens( SchemaWriteOperations schemaWriteOperations,
+            IndexDefinition indexDefinition ) throws IllegalTokenNameException, TooManyLabelsException
+    {
+        int labelId = schemaWriteOperations.labelGetOrCreateForName( indexDefinition.getLabel().name() );
+        int[] propertyKeyIds = getOrCreatePropertyKeyIds( schemaWriteOperations, indexDefinition );
+
+        return propertyKeyIds.length > 1 ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
+                                         : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
+    }
+
+
+    public static NodePropertyDescriptor getTokens( SchemaWriteOperations schemaWriteOperations,
+            IndexDefinition indexDefinition )
+    {
+        int labelId = schemaWriteOperations.labelGetForName( indexDefinition.getLabel().name() );
+        int[] propertyKeyIds = getPropertyKeyIds( schemaWriteOperations, indexDefinition );
+
+        return propertyKeyIds.length > 1 ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
+                                         : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
     }
 }

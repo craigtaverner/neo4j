@@ -24,6 +24,8 @@ import java.util.function.Predicate;
 
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -123,7 +125,7 @@ public interface StoreReadLayer
      * @param propertyKeyIds property keyd token ids.
      * @return node property constraints associated with the label and one or more property keys token ids.
      */
-    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
+    Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor );
 
     /**
      * @param labelId label token id .
@@ -132,12 +134,11 @@ public interface StoreReadLayer
     Iterator<NodePropertyConstraint> constraintsGetForLabel( int labelId );
 
     /**
-     * @param typeId relationship type token id .
-     * @param propertyKeyId property key token id.
-     * @return relationship property constraints associated with the relationship type and property key token ids.
+     * @param descriptor of the relationship .
+     * @return relationship property constraints associated with the relationship description.
      */
-    Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( int typeId,
-            int propertyKeyId );
+    Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
+            RelationshipPropertyDescriptor descriptor );
 
     /**
      * @param typeId relationship type token id .
@@ -153,13 +154,12 @@ public interface StoreReadLayer
     PrimitiveLongIterator nodesGetForLabel( StorageStatement statement, int labelId );
 
     /**
-     * Looks for a stored index by given {@code labelId} and {@code propertyKey}
+     * Looks for a stored index by given {@code descriptor}
      *
-     * @param labelId label id.
-     * @param propertyKeyIds property key ids.
+     * @param descriptor a description of the node .
      * @return {@link IndexDescriptor} for matching index, or {@code null} if not found. TODO should throw exception.
      */
-    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds );
+    IndexDescriptor indexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor );
 
     /**
      * Returns state of a stored index.

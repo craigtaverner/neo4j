@@ -43,7 +43,7 @@ public interface SchemaWriteOperations extends TokenWriteOperations
             throws AlreadyIndexedException, AlreadyConstrainedException;
 
     /** Drops a {@link IndexDescriptor} from the database */
-    void indexDrop( NodePropertyDescriptor descriptor ) throws DropIndexFailureException;
+    void indexDrop( IndexDescriptor descriptor ) throws DropIndexFailureException;
 
     UniquenessConstraint uniquePropertyConstraintCreate( NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException;

@@ -55,11 +55,12 @@ public abstract class SchemaKernelException extends KernelException
     }
 
     //TODO: Remove this pre-composite index API
-    protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
-            int labelId, int propertyKeyId )
-    {
-        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, new IndexDescriptor( labelId, propertyKeyId) );
-    }
+//    protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
+//            int labelId, int propertyKeyId )
+//    {
+//        //Don't seems to be used, investigate
+//        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, new IndexDescriptor( labelId, propertyKeyId) );
+//    }
 
     protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
             NodePropertyDescriptor descriptor )

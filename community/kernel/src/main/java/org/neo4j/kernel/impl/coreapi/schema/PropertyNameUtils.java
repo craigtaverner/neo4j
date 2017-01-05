@@ -160,6 +160,6 @@ public class PropertyNameUtils
         {
             propertyKeyIds.add( statement.propertyKeyGetOrCreateForName( indexIterator.next() ) );
         }
-     return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
+        return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
     }
 }

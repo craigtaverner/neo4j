@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 
 import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -40,7 +41,7 @@ public interface SchemaReadOperations
     /**
      * Returns the descriptor for the given labelId and propertyKey.
      */
-    IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, int labelId, int[] propertyKey );
+    IndexDescriptor indexGetForLabelAndPropertyKey( KernelStatement state, NodePropertyDescriptor descriptor );
 
     /**
      * Get all indexes for a label.
@@ -106,7 +107,7 @@ public interface SchemaReadOperations
      * There are only {@link RelationshipPropertyConstraint} for the time being.
      */
     Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( KernelStatement state,
-            int relTypeId, int propertyKeyId );
+            RelationshipPropertyDescriptor descriptor );
 
     /**
      * Get all constraints applicable to relationship type. There are only {@link RelationshipPropertyConstraint}

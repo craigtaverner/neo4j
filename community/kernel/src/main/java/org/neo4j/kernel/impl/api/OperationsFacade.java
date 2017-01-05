@@ -1109,10 +1109,10 @@ public class OperationsFacade
     }
 
     @Override
-    public void indexDrop( NodePropertyDescriptor descriptor ) throws DropIndexFailureException
+    public void indexDrop( IndexDescriptor descriptor ) throws DropIndexFailureException
     {
         statement.assertOpen();
-        schemaWrite().indexDrop( statement, IndexDescriptorFactory.from( descriptor ) );
+        schemaWrite().indexDrop( statement, descriptor );
     }
 
     @Override
