@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.index.IndexDescriptor;
@@ -31,10 +33,10 @@ public class AlreadyIndexedException extends SchemaKernelException
     private static final String CONSTRAINT_CONTEXT_FORMAT = "There already exists an index for label '%s' on property '%s'. " +
                                                             "A constraint cannot be created until the index has been dropped.";
 
-    private final IndexDescriptor descriptor;
+    private final NodePropertyDescriptor descriptor;
     private final OperationContext context;
 
-    public AlreadyIndexedException( IndexDescriptor descriptor, OperationContext context )
+    public AlreadyIndexedException( NodePropertyDescriptor descriptor, OperationContext context )
     {
         super( Status.Schema.IndexAlreadyExists, constructUserMessage( context, null, descriptor ) );
 
@@ -42,7 +44,8 @@ public class AlreadyIndexedException extends SchemaKernelException
         this.context = context;
     }
 
-    private static String constructUserMessage( OperationContext context, TokenNameLookup tokenNameLookup, IndexDescriptor descriptor )
+    private static String constructUserMessage( OperationContext context, TokenNameLookup tokenNameLookup,
+            NodePropertyDescriptor descriptor )
     {
         switch ( context )
         {

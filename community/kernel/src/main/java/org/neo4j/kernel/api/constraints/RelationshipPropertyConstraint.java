@@ -39,6 +39,16 @@ public abstract class RelationshipPropertyConstraint extends SinglePropertyConst
         return descriptor.getRelationshipTypeId();
     }
 
+    public final RelationshipPropertyDescriptor getDescriptor()
+    {
+        return descriptor;
+    }
+
+    public boolean matches( RelationshipPropertyDescriptor descriptor )
+    {
+        return this.descriptor.equals( descriptor );
+    }
+
     @Override
     public boolean equals( Object o )
     {

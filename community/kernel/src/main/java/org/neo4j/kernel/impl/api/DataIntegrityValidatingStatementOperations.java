@@ -128,7 +128,7 @@ public class DataIntegrityValidatingStatementOperations implements
         }
         catch ( IndexBelongsToConstraintException | NoSuchIndexException e )
         {
-            throw new DropIndexFailureException( descriptor, e );
+            throw new DropIndexFailureException( descriptor.descriptor(), e );
         }
         schemaWriteDelegate.indexDrop( state, descriptor );
     }
@@ -186,8 +186,7 @@ public class DataIntegrityValidatingStatementOperations implements
             RelationshipPropertyDescriptor descriptor ) throws AlreadyConstrainedException, CreateConstraintFailureException
     {
         Iterator<RelationshipPropertyConstraint> constraints =
-                schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey( state, descriptor
-                        .getRelationshipTypeId(), descriptor.getPropertyKeyId() );
+                schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey( state, descriptor );
         while ( constraints.hasNext() )
         {
             RelationshipPropertyConstraint constraint = constraints.next();
@@ -223,7 +222,7 @@ public class DataIntegrityValidatingStatementOperations implements
         try
         {
             assertConstraintExists( constraint, schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey(
-                    state, constraint.relationshipType(), constraint.propertyKey() ) );
+                    state, constraint.getDescriptor() ) );
         }
         catch ( NoSuchConstraintException e )
         {
@@ -241,7 +240,7 @@ public class DataIntegrityValidatingStatementOperations implements
         {
             if ( nodeDescriptor.equals( descriptor ) )
             {
-                throw new AlreadyIndexedException( descriptor, context );
+                throw new AlreadyIndexedException( descriptor.descriptor(), context );
             }
 
         }
@@ -275,7 +274,7 @@ public class DataIntegrityValidatingStatementOperations implements
             IndexDescriptor uniqueIndex = uniqueIndexes.next();
             if ( Arrays.equals( uniqueIndex.getPropertyKeyIds(), descriptor.getPropertyKeyIds() ) )
             {
-                throw new IndexBelongsToConstraintException( descriptor );
+                throw new IndexBelongsToConstraintException( descriptor.descriptor() );
             }
         }
     }
@@ -290,7 +289,7 @@ public class DataIntegrityValidatingStatementOperations implements
                 return;
             }
         }
-        throw new NoSuchIndexException( descriptor );
+        throw new NoSuchIndexException( descriptor.descriptor() );
     }
 
     private <C extends PropertyConstraint> void assertConstraintExists( C constraint, Iterator<C> existingConstraints )

@@ -694,16 +694,16 @@ public class OperationsFacade
 
     // <SchemaRead>
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyId )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException
     {
         statement.assertOpen();
-        IndexDescriptor descriptor = schemaRead().indexGetForLabelAndPropertyKey( statement, labelId, propertyKeyId );
-        if ( descriptor == null )
+        IndexDescriptor indexDescriptor = schemaRead().indexGetForLabelAndPropertyKey( statement, descriptor );
+        if ( indexDescriptor == null )
         {
             throw new IndexSchemaRuleNotFoundException( descriptor );
         }
-        return descriptor;
+        return indexDescriptor;
     }
 
     @Override
@@ -721,16 +721,16 @@ public class OperationsFacade
     }
 
     @Override
-    public IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
+    public IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException, DuplicateIndexSchemaRuleException
 
     {
         IndexDescriptor result = null;
-        Iterator<IndexDescriptor> indexes = uniqueIndexesGetForLabel( labelId );
+        Iterator<IndexDescriptor> indexes = uniqueIndexesGetForLabel( descriptor.getLabelId() );
         while ( indexes.hasNext() )
         {
             IndexDescriptor index = indexes.next();
-            if ( Arrays.equals(index.getPropertyKeyIds(), propertyKeyIds) )
+            if ( index.equals( descriptor ) )
             {
                 if ( null == result )
                 {
@@ -738,14 +738,14 @@ public class OperationsFacade
                 }
                 else
                 {
-                    throw new DuplicateIndexSchemaRuleException( index, true );
+                    throw new DuplicateIndexSchemaRuleException( descriptor, true );
                 }
             }
         }
 
         if ( null == result )
         {
-            throw new IndexSchemaRuleNotFoundException( new CompositeIndexDescriptor( labelId, propertyKeyIds ), true );
+            throw new IndexSchemaRuleNotFoundException( descriptor, true );
         }
 
         return result;
@@ -829,11 +829,11 @@ public class OperationsFacade
     }
 
     @Override
-    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( int typeId,
-            int propertyKeyId )
+    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
+            RelationshipPropertyDescriptor descriptor )
     {
         statement.assertOpen();
-        return schemaRead().constraintsGetForRelationshipTypeAndPropertyKey( statement, typeId, propertyKeyId );
+        return schemaRead().constraintsGetForRelationshipTypeAndPropertyKey( statement, descriptor );
     }
 
     @Override

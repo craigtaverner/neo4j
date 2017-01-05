@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api.index;
 
 import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
 import static java.lang.String.format;

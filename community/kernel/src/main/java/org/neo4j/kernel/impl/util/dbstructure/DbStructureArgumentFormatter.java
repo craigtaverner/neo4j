@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.neo4j.helpers.Strings;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
@@ -80,34 +81,31 @@ public enum DbStructureArgumentFormatter implements ArgumentFormatter
                 builder.append( 'd' );
             }
         }
-        else if ( arg instanceof IndexDescriptor )
+        else if ( arg instanceof NodePropertyDescriptor )
         {
-            IndexDescriptor descriptor = (IndexDescriptor) arg;
+            NodePropertyDescriptor descriptor = (NodePropertyDescriptor) arg;
             int labelId = descriptor.getLabelId();
-            int[] propertyKeyIds = descriptor.getPropertyKeyIds();
-            builder.append( format( "new IndexDescriptor( %s, %s )", labelId, IndexDescriptor.propertyIdText( propertyKeyIds ) ) );
+            builder.append( format( "new IndexDescriptor( %s, %s )", labelId, descriptor.propertyIdText( ) ) );
         }
         else if ( arg instanceof UniquenessConstraint )
         {
             UniquenessConstraint constraint = (UniquenessConstraint) arg;
             int labelId = constraint.label();
-            int[] propertyKeyIds = constraint.getPropertyKeyIds();
-            builder.append( format( "new UniquenessConstraint( %s, new int[]{%s} )", labelId, IndexDescriptor
-                    .propertyIdText( propertyKeyIds ) ) );
+            builder.append( format( "new UniquenessConstraint( %s, new int[]{%s} )", labelId, constraint.descriptor()
+                    .propertyIdText( ) ) );
         }
         else if ( arg instanceof NodePropertyExistenceConstraint )
         {
             NodePropertyExistenceConstraint constraint = (NodePropertyExistenceConstraint) arg;
             int labelId = constraint.label();
-            int[] propertyKeyIds = constraint.getPropertyKeyIds();
-            builder.append( format( "new NodePropertyExistenceConstraint( %s, %s )", labelId, IndexDescriptor.propertyIdText( propertyKeyIds ) ) );
+            builder.append( format( "new NodePropertyExistenceConstraint( %s, %s )", labelId, constraint.descriptor().propertyIdText( ) ) );
         }
         else if ( arg instanceof RelationshipPropertyExistenceConstraint )
         {
             RelationshipPropertyExistenceConstraint constraint = (RelationshipPropertyExistenceConstraint) arg;
             int relTypeId = constraint.relationshipType();
-            int[] propertyKeyIds = constraint.getPropertyKeyIds();
-            builder.append( format( "new RelationshipPropertyExistenceConstraint( %s, %s )", relTypeId, IndexDescriptor.propertyIdText( propertyKeyIds ) ) );
+            int propertyKey = constraint.propertyKey();
+            builder.append( format( "new RelationshipPropertyExistenceConstraint( %s, %s )", relTypeId, propertyKey ) );
         }
         else
         {

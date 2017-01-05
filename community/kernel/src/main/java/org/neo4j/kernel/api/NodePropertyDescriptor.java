@@ -57,4 +57,8 @@ public class NodePropertyDescriptor extends EntityPropertyDescriptor
         return EntityType.NODE;
     }
 
+    public NodePropertyDescriptor descriptor()
+    {
+        return this;
+    }
 }

@@ -191,8 +191,7 @@ public class DiskLayer implements StoreReadLayer
 
     private static IndexDescriptor descriptor( IndexRule ruleRecord )
     {
-        return new IndexDescriptorFactory.from(
-                new NodePropertyDescriptor( ruleRecord.getLabel(), ruleRecord.getPropertyKeys() ) );
+        return IndexDescriptorFactory.from( ruleRecord );
     }
 
     @Override
@@ -252,20 +251,20 @@ public class DiskLayer implements StoreReadLayer
     public Long indexGetOwningUniquenessConstraintId( IndexDescriptor index )
             throws SchemaRuleNotFoundException
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() ).getOwningConstraint();
+        return schemaStorage.indexRule( index.descriptor() ).getOwningConstraint();
     }
 
     @Override
     public IndexSchemaRule indexRule( IndexDescriptor index, Predicate<SchemaRule.Kind> filter )
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() );
+        return schemaStorage.indexRule( index.descriptor() );
     }
 
     @Override
     public long indexGetCommittedId( IndexDescriptor index, Predicate<SchemaRule.Kind> filter )
             throws SchemaRuleNotFoundException
     {
-        return schemaStorage.indexRule( index.getLabelId(), index.getPropertyKeyIds() ).getId();
+        return schemaStorage.indexRule( index.descriptor() ).getId();
     }
 
     @Override
@@ -302,10 +301,10 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, final int[] propertyKeyIds )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
     {
         return schemaStorage.schemaRulesForNodes( NODE_RULE_TO_CONSTRAINT, NodePropertyConstraintRule.class,
-                labelId, rule -> rule.containsPropertyKeyIds( propertyKeyIds ) );
+                descriptor.getLabelId(), rule -> rule.matches( descriptor ) );
     }
 
     @Override
@@ -319,8 +318,10 @@ public class DiskLayer implements StoreReadLayer
     public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
             RelationshipPropertyDescriptor descriptor )
     {
-        return schemaStorage.schemaRulesForRelationships( REL_RULE_TO_CONSTRAINT,
-                RelationshipPropertyConstraintRule.class, descriptor, rule -> rule.containsPropertyKeyId( descriptor ) );
+        return schemaStorage
+                .schemaRulesForRelationships( REL_RULE_TO_CONSTRAINT, RelationshipPropertyConstraintRule.class,
+                        descriptor.getRelationshipTypeId(),
+                        rule -> rule.containsPropertyKeyId( descriptor.getPropertyKeyId() ) );
     }
 
     @Override

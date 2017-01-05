@@ -51,6 +51,11 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint imp
         return descriptor;
     }
 
+    public boolean matches( NodePropertyDescriptor descriptor )
+    {
+        return this.descriptor.equals( descriptor );
+    }
+
     @Override
     public IndexDescriptor indexDescriptor()
     {

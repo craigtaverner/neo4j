@@ -57,6 +57,7 @@ import org.neo4j.helpers.collection.PrefetchingResourceIterator;
 import org.neo4j.helpers.collection.ResourceClosingIterator;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.EntityNotFoundException;
@@ -611,7 +612,8 @@ public class GraphDatabaseFacade implements GraphDatabaseAPI
     {
         try
         {
-            IndexDescriptor descriptor = readOps.indexGetForLabelAndPropertyKey( labelId, new int[]{propertyId} );
+            IndexDescriptor descriptor =
+                    readOps.indexGetForLabelAndPropertyKey( new NodePropertyDescriptor( labelId, propertyId ) );
 
             if ( readOps.indexGetState( descriptor ) == InternalIndexState.ONLINE )
             {

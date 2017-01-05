@@ -28,10 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.impl.constraints.ConstraintSemantics;
 import org.neo4j.kernel.impl.store.record.IndexRule;
 import org.neo4j.kernel.impl.store.record.NodePropertyConstraintRule;
@@ -99,27 +102,31 @@ public class SchemaCache
 
     public Iterator<NodePropertyConstraint> constraintsForLabel( final int label )
     {
-        return Iterators.filter( constraint -> constraint.label() == label, nodeConstraints.iterator() );
+        return Iterators.filter(
+                constraint -> constraint.label() == label,
+                nodeConstraints.iterator() );
     }
 
-    public Iterator<NodePropertyConstraint> constraintsForLabelAndProperty( final int label, final int[] properties )
+    public Iterator<NodePropertyConstraint> constraintsForLabelAndProperty( NodePropertyDescriptor descriptor )
     {
-        return Iterators.filter( constraint -> constraint.label() == label &&
-                                               constraint.containsPropertyKeyIds( properties ),
+        return Iterators.filter(
+                constraint -> constraint.matches( descriptor ),
                 nodeConstraints.iterator() );
     }
 
     public Iterator<RelationshipPropertyConstraint> constraintsForRelationshipType( final int typeId )
     {
-        return Iterators.filter( constraint -> constraint.relationshipType() == typeId, relationshipConstraints.iterator() );
+        return Iterators.filter(
+                constraint -> constraint.relationshipType() == typeId,
+                relationshipConstraints.iterator() );
     }
 
-    public Iterator<RelationshipPropertyConstraint> constraintsForRelationshipTypeAndProperty( final int typeId,
-            final int propertyKeyId )
+    public Iterator<RelationshipPropertyConstraint> constraintsForRelationshipTypeAndProperty(
+            RelationshipPropertyDescriptor descriptor )
     {
         return Iterators.filter(
-                constraint -> constraint.relationshipType() == typeId &&
-                              constraint.containsPropertyKeyId( propertyKeyId ), relationshipConstraints.iterator() );
+                constraint -> constraint.matches( descriptor ),
+                relationshipConstraints.iterator() );
     }
 
     public void addSchemaRule( SchemaRule rule )
@@ -141,7 +148,7 @@ public class SchemaCache
         else if ( rule instanceof IndexRule )
         {
             IndexRule indexRule = (IndexRule) rule;
-            IndexDescriptor index = new IndexDescriptor( indexRule.getLabel(), indexRule.getPropertyKeys() );
+            IndexDescriptor index = IndexDescriptorFactory.from( indexRule );
             if ( !indexDescriptors.containsKey( index ) )
             {
                 indexDescriptors.put( index, new CommittedIndexDescriptor( index, indexRule.getId() ) );
@@ -212,13 +219,13 @@ public class SchemaCache
         else if ( rule instanceof IndexRule )
         {
             IndexRule indexRule = (IndexRule) rule;
-            indexDescriptors.remove( new IndexDescriptor( indexRule.getLabel(), indexRule.getPropertyKeys() ) );
+            indexDescriptors.remove( IndexDescriptorFactory.from( indexRule ) );
         }
     }
 
-    public IndexDescriptor indexDescriptor( int labelId, int[] propertyKeys )
+    public IndexDescriptor indexDescriptor( NodePropertyDescriptor descriptor )
     {
-        IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, propertyKeys );
+        IndexDescriptor indexDescriptor = IndexDescriptorFactory.from( descriptor );
         return indexDescriptors.containsKey(indexDescriptor) ? indexDescriptor : null;
     }
 }

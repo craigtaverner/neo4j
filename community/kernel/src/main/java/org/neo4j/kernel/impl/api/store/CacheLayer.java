@@ -28,6 +28,8 @@ import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.function.Predicates;
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
@@ -39,6 +41,7 @@ import org.neo4j.kernel.api.exceptions.index.IndexNotFoundKernelException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.impl.api.RelationshipVisitor;
 import org.neo4j.kernel.impl.store.record.IndexRule;
@@ -60,13 +63,6 @@ import org.neo4j.storageengine.api.schema.SchemaRule;
  */
 public class CacheLayer implements StoreReadLayer
 {
-    private static final Function<? super SchemaRule, IndexDescriptor> TO_INDEX_RULE =
-            from -> {
-                IndexRule rule = (IndexRule) from;
-                // We know that we only have int range of property key ids.
-                return new IndexDescriptor( rule.getLabel(), rule.getPropertyKeys() );
-            };
-
     private final SchemaCache schemaCache;
     private final DiskLayer diskLayer;
 
@@ -111,7 +107,7 @@ public class CacheLayer implements StoreReadLayer
             final SchemaRule.Kind kind )
     {
         Iterator<SchemaRule> filteredRules = Iterators.filter( item -> item.getKind() == kind, rules.iterator() );
-        return Iterators.map( TO_INDEX_RULE, filteredRules );
+        return Iterators.map( from -> IndexDescriptorFactory.from( (IndexRule) from ), filteredRules );
     }
 
     @Override
@@ -175,9 +171,9 @@ public class CacheLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
+    public Iterator<NodePropertyConstraint> constraintsGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
     {
-        return schemaCache.constraintsForLabelAndProperty( labelId, propertyKeyIds );
+        return schemaCache.constraintsForLabelAndProperty( descriptor );
     }
 
     @Override
@@ -187,10 +183,10 @@ public class CacheLayer implements StoreReadLayer
     }
 
     @Override
-    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( int typeId,
-            int propertyKeyId )
+    public Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
+            RelationshipPropertyDescriptor descriptor )
     {
-        return schemaCache.constraintsForRelationshipTypeAndProperty( typeId, propertyKeyId );
+        return schemaCache.constraintsForRelationshipTypeAndProperty( descriptor );
     }
 
     @Override
@@ -212,9 +208,9 @@ public class CacheLayer implements StoreReadLayer
     }
 
     @Override
-    public IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKeys )
+    public IndexDescriptor indexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
     {
-        return schemaCache.indexDescriptor( labelId, propertyKeys );
+        return schemaCache.indexDescriptor( descriptor );
     }
 
     @Override

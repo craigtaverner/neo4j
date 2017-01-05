@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.neo4j.function.Predicates;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.ProcedureException;
@@ -55,15 +56,16 @@ public class IndexProcedures implements AutoCloseable
         int labelId = getLabelId( index.label() );
         int propertyKeyId = getPropertyKeyId( index.property() );
         //TODO: Support composite indexes
-        waitUntilOnline( getIndex( labelId, new int[]{propertyKeyId}, index ), index, timeout, timeoutUnits );
+        waitUntilOnline( getIndex( labelId, propertyKeyId, index ), index, timeout, timeoutUnits );
     }
 
     public void resampleIndex( String indexSpecification ) throws ProcedureException
     {
         IndexSpecifier index = parse( indexSpecification );
+        int labelId = getLabelId( index.label() );
+        int propertyKeyId = getPropertyKeyId( index.property() );
         //TODO: Support composite indexes
-        triggerSampling(
-                getIndex( getLabelId( index.label() ), new int[]{getPropertyKeyId( index.property() )}, index ) );
+        triggerSampling( getIndex( labelId, propertyKeyId, index ) );
     }
 
     public void resampleOutdatedIndexes()
@@ -97,12 +99,12 @@ public class IndexProcedures implements AutoCloseable
         return propertyKeyId;
     }
 
-    private IndexDescriptor getIndex( int labelId, int[] propertyKeyIds, IndexSpecifier index ) throws
+    private IndexDescriptor getIndex( int labelId, int propertyKeyId, IndexSpecifier index ) throws
             ProcedureException
     {
         try
         {
-            return operations.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds );
+            return operations.indexGetForLabelAndPropertyKey( new NodePropertyDescriptor( labelId, propertyKeyId ) );
         }
         catch ( SchemaRuleNotFoundException e )
         {

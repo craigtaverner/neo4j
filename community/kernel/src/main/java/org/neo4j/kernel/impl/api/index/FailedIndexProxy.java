@@ -79,7 +79,7 @@ public class FailedIndexProxy extends AbstractSwallowingIndexProxy
     @Override
     public boolean awaitStoreScanCompleted() throws IndexPopulationFailedKernelException
     {
-        throw getPopulationFailure().asIndexPopulationFailure( getDescriptor(), indexUserDescription );
+        throw getPopulationFailure().asIndexPopulationFailure( getDescriptor().descriptor(), indexUserDescription );
     }
 
     @Override
@@ -91,7 +91,7 @@ public class FailedIndexProxy extends AbstractSwallowingIndexProxy
     @Override
     public void validate() throws IndexPopulationFailedKernelException
     {
-        throw getPopulationFailure().asIndexPopulationFailure( getDescriptor(), indexUserDescription );
+        throw getPopulationFailure().asIndexPopulationFailure( getDescriptor().descriptor(), indexUserDescription );
     }
 
     @Override

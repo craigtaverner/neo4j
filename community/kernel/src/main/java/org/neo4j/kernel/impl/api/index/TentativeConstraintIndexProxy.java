@@ -143,7 +143,7 @@ public class TentativeConstraintIndexProxy extends AbstractDelegatingIndexProxy
         {
             IndexDescriptor descriptor = getDescriptor();
             throw new UniquenessConstraintVerificationFailedKernelException(
-                    new UniquenessConstraint( descriptor.getLabelId(), descriptor.getPropertyKeyIds() ),
+                    new UniquenessConstraint( descriptor.descriptor() ),
                     new HashSet<>( failures ) );
         }
     }

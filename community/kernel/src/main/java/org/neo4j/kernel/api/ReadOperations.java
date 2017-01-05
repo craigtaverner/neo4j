@@ -291,7 +291,7 @@ public interface ReadOperations
     //===========================================
 
     /** Returns the index rule for the given labelId and propertyKey. */
-    IndexDescriptor indexGetForLabelAndPropertyKey( int labelId, int[] propertyKey )
+    IndexDescriptor indexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException;
 
     /** Get all indexes for a label. */
@@ -301,7 +301,7 @@ public interface ReadOperations
     Iterator<IndexDescriptor> indexesGetAll();
 
     /** Returns the constraint index for the given labelId and propertyKey. */
-    IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( int labelId, int[] propertyKeyIds )
+    IndexDescriptor uniqueIndexGetForLabelAndPropertyKey( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException, DuplicateIndexSchemaRuleException;
 
     /** Get all constraint indexes for a label. */
@@ -347,7 +347,8 @@ public interface ReadOperations
      * Get all constraints applicable to relationship type and propertyKey.
      * There are only {@link RelationshipPropertyConstraint} for the time being.
      */
-    Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey( int typeId, int propertyKeyId );
+    Iterator<RelationshipPropertyConstraint> constraintsGetForRelationshipTypeAndPropertyKey(
+            RelationshipPropertyDescriptor descriptor );
 
     /**
      * Get all constraints. There are only {@link PropertyConstraint}

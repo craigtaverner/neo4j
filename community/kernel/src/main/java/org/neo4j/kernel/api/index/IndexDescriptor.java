@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api.index;
 
 import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
 import static java.lang.String.format;
@@ -35,4 +36,6 @@ public interface IndexDescriptor
     int getPropertyKeyId();
     int[] getPropertyKeyIds();
     boolean isComposite();
+    String userDescription( TokenNameLookup tokenNameLookup );
+    NodePropertyDescriptor descriptor();
 }

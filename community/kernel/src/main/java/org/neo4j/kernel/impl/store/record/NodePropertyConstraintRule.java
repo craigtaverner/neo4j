@@ -66,6 +66,11 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
         return Arrays.equals( propertyKeyIds, this.descriptor.getPropertyKeyIds() );
     }
 
+    public boolean matches(NodePropertyDescriptor descriptor)
+    {
+        return this.descriptor.equals( descriptor );
+    }
+
     @Override
     public abstract NodePropertyConstraint toConstraint();
 

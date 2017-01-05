@@ -22,9 +22,12 @@ package org.neo4j.kernel.api.index;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.exceptions.schema.IllegalTokenNameException;
+import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
+import org.neo4j.kernel.impl.store.record.IndexRule;
 
 import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getOrCreatePropertyKeyIds;
 import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeyIds;
@@ -39,6 +42,13 @@ public class IndexDescriptorFactory
         return descriptor.isComposite() ? new CompositeIndexDescriptor( descriptor.getLabelId(),
                 descriptor.getPropertyKeyIds() ) : new SinglePropertyIndexDescriptor( descriptor.getLabelId(),
                 descriptor.getPropertyKeyId() );
+    }
+
+    public static IndexDescriptor from( IndexRule rule )
+    {
+        int[] propertyIds = rule.getPropertyKeys();
+        return propertyIds.length > 1 ? new CompositeIndexDescriptor( rule.getLabel(), propertyIds )
+                                      : new SinglePropertyIndexDescriptor( rule.getLabel(), propertyIds[0] );
     }
 
     public static NodePropertyDescriptor getOrCreateTokens( SchemaWriteOperations schemaWriteOperations,

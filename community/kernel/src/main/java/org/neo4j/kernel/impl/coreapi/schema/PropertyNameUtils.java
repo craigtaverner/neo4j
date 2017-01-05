@@ -26,6 +26,8 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.schema.DefinitionWithProperties;
 import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.TokenNameLookup;
@@ -54,16 +56,18 @@ public class PropertyNameUtils
         return null;
     }
 
-    public static IndexDescriptor getIndexDescriptor(ReadOperations readOperations, IndexDefinition index)
+    public static IndexDescriptor getIndexDescriptor( ReadOperations readOperations, IndexDefinition index )
             throws SchemaRuleNotFoundException
     {
         int labelId = readOperations.labelGetForName( index.getLabel().name() );
         int[] propertyKeyIds = getPropertyKeyIds( readOperations, index );
-        checkValidLabelAndProperties( index.getLabel(), labelId, propertyKeyIds, index );
-        return readOperations.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds );
+        NodePropertyDescriptor descriptor =
+                checkValidLabelAndProperties( index.getLabel(), labelId, propertyKeyIds, index );
+        return readOperations.indexGetForLabelAndPropertyKey( descriptor );
     }
 
-    private static void checkValidLabelAndProperties(Label label, int labelId, int[] propertyKeyIds, DefinitionWithProperties index)
+    private static NodePropertyDescriptor checkValidLabelAndProperties( Label label, int labelId, int[] propertyKeyIds,
+            DefinitionWithProperties index )
     {
         if ( labelId == KeyReadOperations.NO_SUCH_LABEL )
         {
@@ -78,15 +82,19 @@ public class PropertyNameUtils
                         format( "Property key %s not found", getPropertyKeyNameAt( index, i ) ) );
             }
         }
+        return propertyKeyIds.length > 1 ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
+                                         : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
     }
 
-    public static IndexDescriptor getIndexDescriptor(ReadOperations readOperations, Label label, String[] propertyKeys)
+    public static IndexDescriptor getIndexDescriptor( ReadOperations readOperations, Label label,
+            String[] propertyKeys )
             throws SchemaRuleNotFoundException
     {
         int labelId = readOperations.labelGetForName( label.name() );
         int[] propertyKeyIds = getPropertyKeyIds( readOperations, propertyKeys );
-        checkValidLabelAndProperties( label, labelId, propertyKeyIds, () -> asList( propertyKeys ) );
-        return readOperations.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds );
+        NodePropertyDescriptor descriptor =
+                checkValidLabelAndProperties( label, labelId, propertyKeyIds, () -> asList( propertyKeys ) );
+        return readOperations.indexGetForLabelAndPropertyKey( descriptor );
     }
 
     public static String[] getPropertyKeys( ReadOperations readOperations, DescriptorWithProperties index )
