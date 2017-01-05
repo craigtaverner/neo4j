@@ -24,11 +24,13 @@ import java.util.Arrays;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.DescriptorWithProperties;
+import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 
 /**
  * Base class describing property constraint on nodes.
  */
-public abstract class NodePropertyConstraint extends MultiPropertyConstraint
+public abstract class NodePropertyConstraint extends MultiPropertyConstraint implements IndexBackedConstraint
 {
     protected final NodePropertyDescriptor descriptor;
 
@@ -47,6 +49,12 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint
     public NodePropertyDescriptor descriptor()
     {
         return descriptor;
+    }
+
+    @Override
+    public IndexDescriptor indexDescriptor()
+    {
+        return IndexDescriptorFactory.from( descriptor );
     }
 
     @Override

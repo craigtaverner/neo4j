@@ -30,6 +30,7 @@ import org.neo4j.helpers.Strings;
 import org.neo4j.helpers.collection.FilteringIterator;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
+import org.neo4j.kernel.api.constraints.IndexBackedConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -97,23 +98,20 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     public boolean nodeAddLabel( KernelStatement state, long nodeId, int labelId )
             throws ConstraintValidationKernelException, EntityNotFoundException
     {
-        Iterator<NodePropertyConstraint> allConstraints = schemaReadOperations.constraintsGetForLabel( state, labelId );
-        Iterator<NodePropertyConstraint> constraints = uniquePropertyConstraints( allConstraints );
-        while ( constraints.hasNext() )
+        try ( Cursor<NodeItem> cursor = nodeCursorById( state, nodeId ) )
         {
-            // TODO: Support composite indexes
-            NodePropertyConstraint constraint = constraints.next();
-            int propertyKeyIds = constraint.descriptor().getPropertyKeyId();
-            try ( Cursor<NodeItem> cursor = nodeCursorById( state, nodeId ) )
+            NodeItem node = cursor.get();
+            Iterator<NodePropertyConstraint> allConstraints = schemaReadOperations.constraintsGetForLabel( state, labelId );
+            Iterator<NodePropertyConstraint> constraints = uniquePropertyConstraints( allConstraints );
+            while ( constraints.hasNext() )
             {
-                NodeItem node = cursor.get();
+                NodePropertyConstraint constraint = constraints.next();
                 // TODO: Support composite indexes
-                Object propertyValue = node.getProperty( propertyKeyIds );
+                Object propertyValue = node.getProperty( constraint.descriptor().getPropertyKeyId() );
                 if ( propertyValue != null )
                 {
                     // TODO: Support composite indexes
-                    validateNoExistingNodeWithLabelAndProperty( state,
-                            new IndexDescriptorFactory().from( new NodePropertyDescriptor( labelId, propertyKeyIds ) ), propertyValue, node.id() );
+                    validateNoExistingNodeWithLabelAndProperty( state, constraint, propertyValue, node.id() );
                 }
             }
 
@@ -141,9 +139,8 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
                                     new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
                     if ( constraintIterator.hasNext() )
                     {
-                        //TODO make sure tht index are araving inset of nodeID and property
-                        validateNoExistingNodeWithLabelAndProperty( state,
-                                new IndexDescriptorFactory().from( new NodePropertyDescriptor( labelId, propertyKeyId ) ), property.value(), node.id() );
+                        NodePropertyConstraint constraint = constraintIterator.next();
+                        validateNoExistingNodeWithLabelAndProperty( state, constraint, property.value(), node.id() );
                     }
                 }
             }
@@ -153,24 +150,24 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
         return entityWriteOperations.nodeSetProperty( state, nodeId, property );
     }
 
-    private void validateNoExistingNodeWithLabelAndProperty( KernelStatement state,  IndexDescriptor indexDescriptor,
+    private void validateNoExistingNodeWithLabelAndProperty( KernelStatement state,  IndexBackedConstraint constraint,
             Object value, long modifiedNode )
             throws ConstraintValidationKernelException
     {
         try
         {
             // TODO: Support composite constraints
-
-            assertIndexOnline( state, indexDescriptor );
+            IndexDescriptor index = constraint.indexDescriptor();
+            assertIndexOnline( state, index );
             state.locks().optimistic().acquireExclusive( INDEX_ENTRY,
-                    indexEntryResourceId( indexDescriptor.getLabelId(), indexDescriptor.getPropertyKeyId(), Strings.prettyPrint( value
+                    indexEntryResourceId( index.getLabelId(), index.getPropertyKeyId(), Strings.prettyPrint( value
                     ) ) );
 
-            long existing = entityReadOperations.nodeGetFromUniqueIndexSeek( state, indexDescriptor, value );
+            long existing = entityReadOperations.nodeGetFromUniqueIndexSeek( state, index, value );
             if ( existing != NO_SUCH_NODE && existing != modifiedNode )
             {
-                throw new UniquePropertyConstraintViolationKernelException( indexDescriptor.getLabelId(),
-                        indexDescriptor.getPropertyKeyId(),
+                throw new UniquePropertyConstraintViolationKernelException( index.getLabelId(),
+                        index.getPropertyKeyId(),
                         value, existing );
             }
         }
