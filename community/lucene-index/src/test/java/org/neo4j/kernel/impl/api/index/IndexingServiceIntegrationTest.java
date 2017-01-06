@@ -32,9 +32,11 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.mockfs.EphemeralFileSystemAbstraction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.index.IndexNotFoundKernelException;
 import org.neo4j.kernel.api.impl.schema.LuceneSchemaIndexProviderFactory;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.impl.core.LabelTokenHolder;
@@ -82,9 +84,9 @@ public class IndexingServiceIntegrationTest
         LabelTokenHolder labelTokenHolder = getLabelTokenHolder( database );
         PropertyKeyTokenHolder propertyKeyTokenHolder = getPropertyKeyTokenHolder( database );
         int foodId = labelTokenHolder.getIdByName( FOOD_LABEL );
-        int[] propertyId = {propertyKeyTokenHolder.getIdByName( PROPERTY_NAME )};
+        int propertyId = propertyKeyTokenHolder.getIdByName( PROPERTY_NAME );
 
-        IndexRule rule = IndexRule.indexRule( schemaStore.nextId(), foodId, propertyId,
+        IndexRule rule = IndexRule.indexRule( schemaStore.nextId(), new NodePropertyDescriptor( foodId, propertyId ),
                 indexDescriptor );
         indexingService.createIndexes( rule );
         IndexProxy indexProxy = indexingService.getIndexProxy( rule.getId() );
@@ -118,8 +120,10 @@ public class IndexingServiceIntegrationTest
         int weatherLabelId = labelTokenHolder.getIdByName( WEATHER_LABEL );
         int propertyId = propertyKeyTokenHolder.getIdByName( PROPERTY_NAME );
 
-        IndexProxy clothesIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( clothedLabelId, propertyId ) ) );
-        IndexProxy weatherIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( weatherLabelId, propertyId ) ) );
+        NodePropertyDescriptor clothesDescriptor = new NodePropertyDescriptor( clothedLabelId, propertyId );
+        NodePropertyDescriptor weatherDescriptor = new NodePropertyDescriptor( weatherLabelId, propertyId );
+        IndexProxy clothesIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( clothesDescriptor ) );
+        IndexProxy weatherIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( weatherDescriptor ) );
         assertEquals( InternalIndexState.ONLINE, clothesIndex.getState());
         assertEquals( InternalIndexState.ONLINE, weatherIndex.getState());
     }
