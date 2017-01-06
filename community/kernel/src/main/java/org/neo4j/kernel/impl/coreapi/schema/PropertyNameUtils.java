@@ -60,7 +60,7 @@ public class PropertyNameUtils
             throws SchemaRuleNotFoundException
     {
         int labelId = readOperations.labelGetForName( index.getLabel().name() );
-        int[] propertyKeyIds = getPropertyKeyIds( readOperations, index );
+        int[] propertyKeyIds = getPropertyKeyIds( readOperations, index.getPropertyKeys() );
         NodePropertyDescriptor descriptor =
                 checkValidLabelAndProperties( index.getLabel(), labelId, propertyKeyIds, index );
         return readOperations.indexGetForLabelAndPropertyKey( descriptor );
@@ -140,11 +140,10 @@ public class PropertyNameUtils
         return propertyKeyIds;
     }
 
-    public static int[] getPropertyKeyIds( ReadOperations statement, IndexDefinition indexDefinition )
+    public static int[] getPropertyKeyIds( ReadOperations statement, Iterable<String> propertyKeys )
     {
         ArrayList<Integer> propertyKeyIds = new ArrayList<>();
-        indexDefinition.getPropertyKeys()
-                .forEach( index -> propertyKeyIds.add( statement.propertyKeyGetForName( index ) ) );
+        propertyKeys.forEach( index -> propertyKeyIds.add( statement.propertyKeyGetForName( index ) ) );
         return propertyKeyIds.stream().mapToInt( i -> i ).toArray();
     }
 

@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 
 import org.neo4j.kernel.api.KernelAPI;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
@@ -60,26 +59,16 @@ public class ConstraintIndexCreator
      * You MUST hold a schema write lock before you call this method.
      */
     public long createUniquenessConstraintIndex( KernelStatement state, SchemaReadOperations schema,
-            IndexDescriptor descriptor )
+            NodePropertyDescriptor descriptor )
             throws ConstraintVerificationFailedKernelException, TransactionFailureException,
             CreateConstraintFailureException, DropIndexFailureException
     {
-        createConstraintIndex( descriptor );
-        UniquenessConstraint constraint;
-        try
-        {
-            constraint = new UniquenessConstraint(
-                    new NodePropertyDescriptor( descriptor.getLabelId(), descriptor.getPropertyKeyId() ) );
-        }
-        catch ( UnsupportedOperationException e )
-        {
-            constraint = new UniquenessConstraint(
-                    new NodeMultiPropertyDescriptor( descriptor.getLabelId(), descriptor.getPropertyKeyIds() ) );
-        }
+        UniquenessConstraint constraint = new UniquenessConstraint( descriptor );
+        IndexDescriptor index = createConstraintIndex( constraint );
         boolean success = false;
         try
         {
-            long indexId = schema.indexGetCommittedId( state, descriptor, CONSTRAINT );
+            long indexId = schema.indexGetCommittedId( state, index, CONSTRAINT );
 
             awaitConstrainIndexPopulation( constraint, indexId );
             success = true;
@@ -98,7 +87,7 @@ public class ConstraintIndexCreator
         {
             if ( !success )
             {
-                dropUniquenessConstraintIndex( descriptor );
+                dropUniquenessConstraintIndex( index );
             }
         }
     }
@@ -152,7 +141,7 @@ public class ConstraintIndexCreator
         }
     }
 
-    public IndexDescriptor createConstraintIndex( final IndexDescriptor descriptor )
+    public IndexDescriptor createConstraintIndex( final UniquenessConstraint constraint )
     {
         try ( KernelTransaction transaction =
                       kernelSupplier.get().newTransaction( KernelTransaction.Type.implicit, AUTH_DISABLED );
@@ -165,9 +154,9 @@ public class ConstraintIndexCreator
             // TODO (Ben+Jake): The Transactor is really part of the kernel internals, so it needs access to the
             // internal implementation of Statement. However it is currently used by the external
             // RemoveOrphanConstraintIndexesOnStartup job. This needs revisiting.
-            ((KernelStatement) statement).txState().constraintIndexRuleDoAdd( descriptor );
+            ((KernelStatement) statement).txState().constraintIndexRuleDoAdd( constraint.indexDescriptor() );
             transaction.success();
-            return descriptor;
+            return constraint.indexDescriptor();
         }
         catch ( TransactionFailureException e )
         {

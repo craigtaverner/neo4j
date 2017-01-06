@@ -110,11 +110,11 @@ public abstract class DiskLayerTest
         }
     }
 
-    protected int[] propertyKeyId( String propertyKey )
+    protected int propertyKeyId( String propertyKey )
     {
         try ( Transaction ignored = db.beginTx() )
         {
-            return new int[]{readOps().propertyKeyGetForName( propertyKey )};
+            return readOps().propertyKeyGetForName( propertyKey );
         }
     }
 

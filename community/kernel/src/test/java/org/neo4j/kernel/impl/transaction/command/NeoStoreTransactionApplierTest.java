@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.function.Supplier;
 
 import org.neo4j.concurrent.WorkSync;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.index.IndexActivationFailedKernelException;
 import org.neo4j.kernel.api.exceptions.index.IndexNotFoundKernelException;
 import org.neo4j.kernel.api.exceptions.index.IndexPopulationFailedKernelException;
@@ -559,7 +560,9 @@ public class NeoStoreTransactionApplierTest
             SchemaIndexProvider.Descriptor providerDescriptor )
     {
         //TODO: Consider testing composite indexes
-        return IndexRule.indexRule( id, label, new int[]{propertyKeyId}, providerDescriptor );
+        return IndexRule.indexRule( id,
+                new NodePropertyDescriptor( label, propertyKeyId ),
+                providerDescriptor );
     }
 
     public static IndexRule constraintIndexRule( long id, int label, int propertyKeyId,
@@ -567,15 +570,18 @@ public class NeoStoreTransactionApplierTest
             Long owningConstraint )
     {
         //TODO: Consider testing composite indexes
-        return IndexRule
-                .constraintIndexRule( id, label, new int[]{propertyKeyId}, providerDescriptor, owningConstraint );
+        return IndexRule.constraintIndexRule( id,
+                new NodePropertyDescriptor( label, propertyKeyId ),
+                providerDescriptor, owningConstraint );
     }
 
     public static UniquePropertyConstraintRule uniquenessConstraintRule( long id, int labelId, int propertyKeyId,
             long ownedIndexRule )
     {
         //TODO: Consider testing composite indexes
-        return UniquePropertyConstraintRule.uniquenessConstraintRule( id, labelId, new int[]{propertyKeyId}, ownedIndexRule );
+        return UniquePropertyConstraintRule.uniquenessConstraintRule( id,
+                new NodePropertyDescriptor( labelId, propertyKeyId ),
+                ownedIndexRule );
     }
 
     @Test

@@ -80,9 +80,7 @@ import static org.neo4j.helpers.collection.Iterators.addToCollection;
 import static org.neo4j.helpers.collection.Iterators.asCollection;
 import static org.neo4j.helpers.collection.Iterators.map;
 import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getIndexDescriptor;
-import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getOrCreatePropertyKeyIds;
 import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeys;
-import static org.neo4j.kernel.impl.coreapi.schema.PropertyNameUtils.getPropertyKeyIds;
 
 public class SchemaImpl implements Schema
 {
@@ -539,7 +537,7 @@ public class SchemaImpl implements Schema
                 try
                 {
                     NodePropertyDescriptor descriptor = IndexDescriptorFactory
-                            .getTokens( statement.schemaWriteOperations(), indexDefinition );
+                            .getTokens( statement.readOperations(), indexDefinition );
                     NodePropertyConstraint constraint = new UniquenessConstraint( descriptor );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }
@@ -563,7 +561,7 @@ public class SchemaImpl implements Schema
                 try
                 {
                     NodePropertyDescriptor descriptor = IndexDescriptorFactory
-                            .getTokens( statement.schemaWriteOperations(), indexDefinition );
+                            .getTokens( statement.readOperations(), indexDefinition );
                     NodePropertyConstraint constraint = new NodePropertyExistenceConstraint( descriptor );
                     statement.schemaWriteOperations().constraintDrop( constraint );
                 }

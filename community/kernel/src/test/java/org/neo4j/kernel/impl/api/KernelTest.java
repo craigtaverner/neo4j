@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
@@ -58,7 +59,7 @@ public class KernelTest
 
             try
             {
-                statement.schemaWriteOperations().uniquePropertyConstraintCreate( 1, new int[]{1} );
+                statement.schemaWriteOperations().uniquePropertyConstraintCreate( new NodePropertyDescriptor( 1, 1 ) );
                 fail( "expected exception here" );
             }
             catch ( InvalidTransactionTypeKernelException e )

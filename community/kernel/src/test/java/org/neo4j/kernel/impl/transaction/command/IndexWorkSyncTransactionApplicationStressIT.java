@@ -31,7 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.helpers.collection.Visitor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.txstate.TransactionState;
 import org.neo4j.kernel.impl.api.TransactionQueue;
@@ -57,6 +59,7 @@ import org.neo4j.test.rule.fs.DefaultFileSystemRule;
 import org.neo4j.unsafe.impl.batchimport.cache.idmapping.string.Workers;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.deepHashCode;
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.helpers.TimeUtil.parseTimeMillis;
 import static org.neo4j.kernel.api.properties.Property.noNodeProperty;
@@ -78,8 +81,7 @@ public class IndexWorkSyncTransactionApplicationStressIT
                                           .around( pageCacheRule )
                                           .around( storageEngineRule );
 
-    private final int labelId = 0;
-    private final int[] propertyKeyId = {0};
+    private final NodePropertyDescriptor descriptor = new NodePropertyDescriptor( 0, 0 );
 
     @Test
     public void shouldApplyIndexUpdatesInWorkSyncedBatches() throws Exception
@@ -94,12 +96,12 @@ public class IndexWorkSyncTransactionApplicationStressIT
                 .indexProvider( new InMemoryIndexProvider() )
                 .build();
         storageEngine.apply( tx( asList( createIndexRule(
-                InMemoryIndexProviderFactory.PROVIDER_DESCRIPTOR, 1, labelId, propertyKeyId ) ) ),
+                InMemoryIndexProviderFactory.PROVIDER_DESCRIPTOR, 1, descriptor ) ) ),
                 TransactionApplicationMode.EXTERNAL );
         Dependencies dependencies = new Dependencies();
         storageEngine.satisfyDependencies( dependencies );
         IndexProxy index = dependencies.resolveDependency( IndexingService.class )
-                .getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
+                .getIndexProxy( IndexDescriptorFactory.from( descriptor ) );
         awaitOnline( index );
 
         // WHEN
@@ -189,10 +191,10 @@ public class IndexWorkSyncTransactionApplicationStressIT
             TransactionState txState = new TxState();
             long nodeId = nodeIds.nextId();
             txState.nodeDoCreate( nodeId );
-            txState.nodeDoAddLabel( labelId, nodeId );
+            txState.nodeDoAddLabel( descriptor.getLabelId(), nodeId );
             txState.nodeDoReplaceProperty( nodeId,
-                    noNodeProperty( nodeId, propertyKeyId[0] ),
-                    property( propertyKeyId[0], propertyValue( id, progress ) ) );
+                    noNodeProperty( nodeId, descriptor.getPropertyKeyId() ),
+                    property( descriptor.getPropertyKeyId(), propertyValue( id, progress ) ) );
             Collection<StorageCommand> commands = new ArrayList<>();
             try ( StorageStatement statement = storageEngine.storeReadLayer().newStatement() )
             {

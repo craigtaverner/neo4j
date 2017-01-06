@@ -30,6 +30,7 @@ import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.TokenWriteOperations;
+import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.exceptions.schema.SchemaKernelException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptorFactory;
@@ -136,7 +137,7 @@ public class IndexIT extends KernelIntegrationTest
     {
         // given
         ConstraintIndexCreator creator = new ConstraintIndexCreator( () -> kernel, indexingService );
-        creator.createConstraintIndex( IndexDescriptorFactory.from( descriptor ) );
+        creator.createConstraintIndex( new UniquenessConstraint( descriptor ) );
 
         // when
         restartDb();

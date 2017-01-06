@@ -61,12 +61,10 @@ public class IndexDescriptorFactory
                                          : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
     }
 
-
-    public static NodePropertyDescriptor getTokens( SchemaWriteOperations schemaWriteOperations,
-            IndexDefinition indexDefinition )
+    public static NodePropertyDescriptor getTokens( ReadOperations readOperations, IndexDefinition indexDefinition )
     {
-        int labelId = schemaWriteOperations.labelGetForName( indexDefinition.getLabel().name() );
-        int[] propertyKeyIds = getPropertyKeyIds( schemaWriteOperations, indexDefinition );
+        int labelId = readOperations.labelGetForName( indexDefinition.getLabel().name() );
+        int[] propertyKeyIds = getPropertyKeyIds( readOperations, indexDefinition.getPropertyKeys() );
 
         return propertyKeyIds.length > 1 ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
                                          : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );

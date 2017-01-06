@@ -25,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.neo4j.collection.RawIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.DataWriteOperations;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.security.AnonymousContext;
@@ -172,8 +173,8 @@ public class BuiltInProceduresIT extends KernelIntegrationTest
         int labelId2 = ops.labelGetOrCreateForName( "Age" );
         int propertyKeyId = ops.propertyKeyGetOrCreateForName( "foo" );
         //TODO: Add test support for composite indexes
-        ops.indexCreate( labelId1, new int[]{propertyKeyId} );
-        ops.uniquePropertyConstraintCreate( labelId2, new int[]{propertyKeyId} );
+        ops.indexCreate( new NodePropertyDescriptor( labelId1, propertyKeyId ) );
+        ops.uniquePropertyConstraintCreate( new NodePropertyDescriptor( labelId2, propertyKeyId ) );
         commit();
 
         //let indexes come online

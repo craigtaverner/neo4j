@@ -532,7 +532,7 @@ public class StateHandlingStatementOperations implements
                         return constraint;
                     }
                 }
-                long indexId = constraintIndexCreator.createUniquenessConstraintIndex( state, this, constraint.indexDescriptor() );
+                long indexId = constraintIndexCreator.createUniquenessConstraintIndex( state, this, constraint.descriptor() );
                 state.txState().constraintDoAdd( constraint, indexId );
             }
             return constraint;
