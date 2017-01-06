@@ -22,7 +22,9 @@ package org.neo4j.kernel.impl.api.operations;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.impl.api.ConstraintEnforcingEntityOperations;
 import org.neo4j.kernel.impl.api.KernelStatement;
@@ -45,7 +47,8 @@ public class ConstraintEnforcingEntityOperationsTest
     private final int labelId = 1;
     private final int propertyKeyId = 2;
     private final String value = "value";
-    private final IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, propertyKeyId );
+    private final IndexDescriptor indexDescriptor =
+            IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) );
     private EntityReadOperations readOps;
     private KernelStatement state;
     private Locks.Client locks;

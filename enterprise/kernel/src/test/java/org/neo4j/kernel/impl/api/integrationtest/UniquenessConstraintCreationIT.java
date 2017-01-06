@@ -171,7 +171,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         // then
         {
             ReadOperations statement = readOperationsInNewTransaction();
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
+            assertEquals( asSet( IndexDescriptorFactory.from( new NodePropertyDescriptor( typeId, propertyKeyIds ) ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
         }
     }
@@ -183,7 +183,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
             statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
+            assertEquals( asSet( IndexDescriptorFactory.from( new NodePropertyDescriptor( typeId, propertyKeyIds ) ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
         }
 
@@ -268,7 +268,7 @@ public class UniquenessConstraintCreationIT extends AbstractConstraintCreationIT
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
             constraint = statement.uniquePropertyConstraintCreate( typeId, propertyKeyIds );
-            assertEquals( asSet( new IndexDescriptor( typeId, propertyKeyIds ) ),
+            assertEquals( asSet( IndexDescriptorFactory.from( new NodePropertyDescriptor( typeId, propertyKeyIds ) ) ),
                     asSet( statement.uniqueIndexesGetAll() ) );
             commit();
         }

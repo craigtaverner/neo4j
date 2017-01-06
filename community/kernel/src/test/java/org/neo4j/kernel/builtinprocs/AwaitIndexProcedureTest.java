@@ -98,7 +98,7 @@ public class AwaitIndexProcedureTest
         when( operations.labelGetForName( anyString() ) ).thenReturn( 123 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 456 );
         when( operations.indexGetForLabelAndPropertyKey( anyInt(), new int[]{anyInt()} ) )
-                .thenReturn( new IndexDescriptor( 0, 0 ) );
+                .thenReturn( IndexDescriptorFactory.from( new NodePropertyDescriptor( 0, 0 ) ) );
         when( operations.indexGetState( any( IndexDescriptor.class ) ) ).thenReturn( ONLINE );
 
         procedure.awaitIndex( ":Person(name)", timeout, timeoutUnits );
@@ -114,7 +114,7 @@ public class AwaitIndexProcedureTest
         when( operations.labelGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.indexGetForLabelAndPropertyKey( anyInt(),  new int[]{anyInt()} ) )
-                .thenReturn( new IndexDescriptor( 0, 0 ) );
+                .thenReturn( IndexDescriptorFactory.from( new NodePropertyDescriptor( 0, 0 ) ) );
         when( operations.indexGetState( any( IndexDescriptor.class ) ) ).thenReturn( FAILED );
 
         try
@@ -156,7 +156,7 @@ public class AwaitIndexProcedureTest
         when( operations.labelGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.indexGetForLabelAndPropertyKey( anyInt(), new int[]{anyInt()} ) )
-                .thenReturn( new IndexDescriptor( 0, 0 ) );
+                .thenReturn( IndexDescriptorFactory.from( new NodePropertyDescriptor( 0, 0 ) ) );
 
         AtomicReference<InternalIndexState> state = new AtomicReference<>( POPULATING );
         when( operations.indexGetState( any( IndexDescriptor.class ) ) ).then( new Answer<InternalIndexState>()
@@ -196,7 +196,7 @@ public class AwaitIndexProcedureTest
         when( operations.labelGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.propertyKeyGetForName( anyString() ) ).thenReturn( 0 );
         when( operations.indexGetForLabelAndPropertyKey( anyInt(),  new int[]{anyInt()} ) )
-                .thenReturn( new IndexDescriptor( 0, 0 ) );
+                .thenReturn( IndexDescriptorFactory.from( new NodePropertyDescriptor( 0, 0 ) ) );
         when( operations.indexGetState( any( IndexDescriptor.class ) ) ).thenReturn( POPULATING );
 
         AtomicReference<ProcedureException> exception = new AtomicReference<>();

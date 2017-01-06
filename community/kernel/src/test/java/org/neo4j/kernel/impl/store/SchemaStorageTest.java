@@ -39,7 +39,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateEntitySchemaRuleException;
@@ -105,7 +107,7 @@ public class SchemaStorageTest
                 index( LABEL2, PROP1 ) );
 
         // When
-        IndexRule rule = storage.indexRule( labelId( LABEL1 ), propId( PROP1 ) );
+        IndexRule rule = storage.indexRule( nodeDescriptor( LABEL1, PROP1 ) );
 
         // Then
         assertNotNull( rule );
@@ -122,7 +124,7 @@ public class SchemaStorageTest
                 index( LABEL1, PROP1 ) );
 
         // When
-        IndexRule rule = storage.indexRule( labelId( LABEL1 ), propId( PROP2 ) );
+        IndexRule rule = storage.indexRule( nodeDescriptor( LABEL1, PROP2 ) );
 
         // Then
         assertNull( rule );
@@ -137,7 +139,7 @@ public class SchemaStorageTest
                 index( LABEL1, PROP2 ) );
 
         // When
-        IndexRule rule = storage.indexRule( labelId( LABEL1 ), propId( PROP1 ), IndexRuleKind.CONSTRAINT );
+        IndexRule rule = storage.indexRule( nodeDescriptor( LABEL1, PROP1 ), IndexRuleKind.CONSTRAINT );
 
         // Then
         assertNotNull( rule );
@@ -160,9 +162,9 @@ public class SchemaStorageTest
 
         // Then
         Set<IndexRule> expectedRules = new HashSet<>();
-        expectedRules.add( new IndexRule( 0, labelId( LABEL1 ), propId( PROP1 ), PROVIDER_DESCRIPTOR, null ) );
-        expectedRules.add( new IndexRule( 1, labelId( LABEL1 ), propId( PROP2 ), PROVIDER_DESCRIPTOR, null ) );
-        expectedRules.add( new IndexRule( 2, labelId( LABEL2 ), propId( PROP1 ), PROVIDER_DESCRIPTOR, 0L ) );
+        expectedRules.add( new IndexRule( 0, nodeDescriptor( LABEL1, PROP1 ), PROVIDER_DESCRIPTOR, null ) );
+        expectedRules.add( new IndexRule( 1, nodeDescriptor( LABEL1, PROP2 ), PROVIDER_DESCRIPTOR, null ) );
+        expectedRules.add( new IndexRule( 2, nodeDescriptor( LABEL2, PROP1 ), PROVIDER_DESCRIPTOR, 0L ) );
 
         assertEquals( expectedRules, listedRules );
     }
@@ -181,7 +183,7 @@ public class SchemaStorageTest
 
         // Then
         Set<NodePropertyConstraintRule> expectedRules = new HashSet<>();
-        expectedRules.add( uniquenessConstraintRule( 1, labelId( LABEL1 ), propId( PROP1 ), 0 ) );
+        expectedRules.add( uniquenessConstraintRule( 1, nodeDescriptor( LABEL1, PROP1 ), 0 ) );
 
         assertEquals( expectedRules, listedRules );
     }
@@ -200,7 +202,7 @@ public class SchemaStorageTest
 
         // Then
         Set<UniquePropertyConstraintRule> expectedRules = new HashSet<>();
-        expectedRules.add( uniquenessConstraintRule( 0, labelId( LABEL2 ), propId( PROP1 ), 0 ) );
+        expectedRules.add( uniquenessConstraintRule( 0, nodeDescriptor( LABEL2, PROP1 ), 0 ) );
 
         assertEquals( expectedRules, listedRules );
     }
@@ -215,7 +217,7 @@ public class SchemaStorageTest
                 uniquenessConstraint( LABEL2, PROP1 ) );
 
         // When
-        UniquePropertyConstraintRule rule = storage.uniquenessConstraint( labelId( LABEL1 ), propId( PROP1 ) );
+        UniquePropertyConstraintRule rule = storage.uniquenessConstraint( nodeDescriptor( LABEL1, PROP1 ) );
 
         // Then
         assertNotNull( rule );
@@ -238,7 +240,7 @@ public class SchemaStorageTest
                                                                         " 'prop1' not found." ) );
 
         // WHEN
-        storage.nodePropertyExistenceConstraint( labelId( LABEL1 ), propId( PROP1 ) );
+        storage.nodePropertyExistenceConstraint( nodeDescriptor( LABEL1, PROP1 ) );
 
     }
 
@@ -261,7 +263,7 @@ public class SchemaStorageTest
                 "Multiple constraints found for label 'Label1' and property 'prop1'." ) );
 
         // WHEN
-        schemaStorageSpy.uniquenessConstraint( labelId( LABEL1 ), propId( PROP1 ) );
+        schemaStorageSpy.uniquenessConstraint( nodeDescriptor( LABEL1, PROP1 ) );
     }
 
     @Test
@@ -314,7 +316,7 @@ public class SchemaStorageTest
             String property )
     {
         return UniquePropertyConstraintRule
-                .uniquenessConstraintRule( id, labelId( label ), propId( property ), 0L );
+                .uniquenessConstraintRule( id, nodeDescriptor( label, property ), 0L );
     }
 
     private RelationshipPropertyExistenceConstraintRule getRelationshipPropertyExistenceConstraintRule( long id,
@@ -322,7 +324,7 @@ public class SchemaStorageTest
             String property )
     {
         return RelationshipPropertyExistenceConstraintRule
-                .relPropertyExistenceConstraintRule( id, typeId( type ), propId( property )[0] );
+                .relPropertyExistenceConstraintRule( id, relDescriptor( type, property ) );
     }
 
     private static void awaitIndexes()
@@ -331,6 +333,26 @@ public class SchemaStorageTest
         {
             db.schema().awaitIndexesOnline( 10, TimeUnit.SECONDS );
             tx.success();
+        }
+    }
+
+    private NodePropertyDescriptor nodeDescriptor( String labelName, String propName )
+    {
+        try ( Transaction ignore = db.beginTx() )
+        {
+            return new NodePropertyDescriptor(
+                    readOps().labelGetForName( labelName ),
+                    readOps().propertyKeyGetForName( propName ) );
+        }
+    }
+
+    private RelationshipPropertyDescriptor relDescriptor( String typeName, String propName )
+    {
+        try ( Transaction ignore = db.beginTx() )
+        {
+            return new RelationshipPropertyDescriptor(
+                    readOps().relationshipTypeGetForName( typeName ),
+                    readOps().propertyKeyGetForName( propName ) );
         }
     }
 

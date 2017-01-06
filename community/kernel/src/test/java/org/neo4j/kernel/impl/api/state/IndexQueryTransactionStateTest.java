@@ -31,8 +31,10 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.collection.primitive.PrimitiveLongResourceIterator;
 import org.neo4j.graphdb.Resource;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.properties.Property;
 import org.neo4j.kernel.api.txstate.TransactionState;
@@ -69,9 +71,10 @@ import static org.neo4j.test.mockito.answer.Neo4jMockitoAnswers.answerAsPrimitiv
 public class IndexQueryTransactionStateTest
 {
     int labelId = 2;
-    int[] propertyKeyIds = {3};
+    int propertyKeyId = 3;
     String value = "My Value";
-    IndexDescriptor indexDescriptor = new IndexDescriptor( labelId, propertyKeyIds );
+    NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+    IndexDescriptor indexDescriptor = IndexDescriptorFactory.from( descriptor );
 
     private StoreReadLayer store;
     private StoreStatement statement;
@@ -94,8 +97,8 @@ public class IndexQueryTransactionStateTest
                 .<IndexDescriptor>emptyList() ) );
         when( store.indexesGetAll() ).then( answerAsIteratorFrom( Collections.<IndexDescriptor>emptyList() ) );
         when( store.constraintsGetForLabel( labelId ) ).thenReturn( Collections.<NodePropertyConstraint>emptyIterator() );
-        when( store.indexGetForLabelAndPropertyKey( labelId, propertyKeyIds ) )
-                .thenReturn( new IndexDescriptor( labelId, propertyKeyIds ) );
+        when( store.indexGetForLabelAndPropertyKey( descriptor ) )
+                .thenReturn( IndexDescriptorFactory.from( descriptor ) );
 
         statement = mock( StoreStatement.class );
         when( state.getStoreStatement() ).thenReturn( statement );
@@ -154,8 +157,8 @@ public class IndexQueryTransactionStateTest
         // Given
         when( indexReader.seek( value ) ).then( answerAsPrimitiveLongIteratorFrom( asList( 2L, 3L ) ) );
 
-        state.txState().nodeDoReplaceProperty( 1L, Property.noNodeProperty( 1L, propertyKeyIds[0] ),
-                Property.intProperty( propertyKeyIds[0], 10 ) );
+        state.txState().nodeDoReplaceProperty( 1L, Property.noNodeProperty( 1L, propertyKeyId ),
+                Property.intProperty( propertyKeyId, 10 ) );
 
         // When
         PrimitiveLongIterator result = txContext.nodesGetFromIndexSeek( state, indexDescriptor, value );
@@ -169,8 +172,8 @@ public class IndexQueryTransactionStateTest
     {
         // Given
         when( indexReader.seek( value ) ).thenReturn( asPrimitiveResourceIterator() );
-        state.txState().nodeDoReplaceProperty( 1L, Property.noNodeProperty( 1L, propertyKeyIds[0] ),
-                Property.intProperty( propertyKeyIds[0], 10 ) );
+        state.txState().nodeDoReplaceProperty( 1L, Property.noNodeProperty( 1L, propertyKeyId ),
+                Property.intProperty( propertyKeyId, 10 ) );
 
         // When
         long result = txContext.nodeGetFromUniqueIndexSeek( state, indexDescriptor, value );
@@ -186,12 +189,12 @@ public class IndexQueryTransactionStateTest
         when( indexReader.seek( value ) ).then( answerAsPrimitiveLongIteratorFrom( asList( 2L, 3L ) ) );
 
         long nodeId = 1L;
-        state.txState().nodeDoReplaceProperty( nodeId, noNodeProperty( nodeId, propertyKeyIds[0] ),
-                stringProperty( propertyKeyIds[0], value ) );
+        state.txState().nodeDoReplaceProperty( nodeId, noNodeProperty( nodeId, propertyKeyId ),
+                stringProperty( propertyKeyId, value ) );
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         Cursors.<LabelItem>empty() ) );
 
         List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
@@ -212,12 +215,12 @@ public class IndexQueryTransactionStateTest
         when( indexReader.seek( value ) ).thenReturn( asPrimitiveResourceIterator() );
 
         long nodeId = 1L;
-        state.txState().nodeDoReplaceProperty( nodeId, noNodeProperty( nodeId, propertyKeyIds[0] ),
-                stringProperty( propertyKeyIds[0], value ) );
+        state.txState().nodeDoReplaceProperty( nodeId, noNodeProperty( nodeId, propertyKeyId ),
+                stringProperty( propertyKeyId, value ) );
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         Cursors.<LabelItem>empty() ) );
         List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
         when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
@@ -240,7 +243,7 @@ public class IndexQueryTransactionStateTest
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         asLabelCursor() ) );
         List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
         when( store.indexesGetForLabel( labelId ) ).thenReturn( indexes.iterator() );
@@ -263,7 +266,7 @@ public class IndexQueryTransactionStateTest
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         asLabelCursor() ) );
 
         List<IndexDescriptor> indexes = Collections.singletonList( indexDescriptor );
@@ -286,7 +289,7 @@ public class IndexQueryTransactionStateTest
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         asLabelCursor( labelId ) ) );
 
         txContext.nodeRemoveLabel( state, nodeId, labelId );
@@ -307,7 +310,7 @@ public class IndexQueryTransactionStateTest
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         asLabelCursor( labelId ) ) );
 
         txContext.nodeRemoveLabel( state, nodeId, labelId );
@@ -326,8 +329,8 @@ public class IndexQueryTransactionStateTest
         when( indexReader.seek( value ) ).then( answerAsPrimitiveLongIteratorFrom( asList( 2L, 3L ) ) );
 
         long nodeId = 1L;
-        state.txState().nodeDoReplaceProperty( nodeId, Property.noNodeProperty( nodeId, propertyKeyIds[0] ),
-                Property.intProperty( propertyKeyIds[0], 10 ) );
+        state.txState().nodeDoReplaceProperty( nodeId, Property.noNodeProperty( nodeId, propertyKeyId ),
+                Property.intProperty( propertyKeyId, 10 ) );
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
@@ -352,10 +355,10 @@ public class IndexQueryTransactionStateTest
 
         when( statement.acquireSingleNodeCursor( nodeId ) ).thenReturn(
                 asNodeCursor( nodeId,
-                        asPropertyCursor( stringProperty( propertyKeyIds[0], value ) ),
+                        asPropertyCursor( stringProperty( propertyKeyId, value ) ),
                         asLabelCursor( labelId ) ) );
 
-        txContext.nodeRemoveProperty( state, nodeId, propertyKeyIds[0] );
+        txContext.nodeRemoveProperty( state, nodeId, propertyKeyId );
 
         // When
         long result = txContext.nodeGetFromUniqueIndexSeek( state, indexDescriptor, value );

@@ -1700,9 +1700,9 @@ public class TxStateTest
     private final int propertyKeyId1 = 3;
     private final int propertyKeyId2 = 4;
 
-    private final IndexDescriptor indexOn_1_1 = new IndexDescriptor( labelId1, propertyKeyId1 );
-    private final IndexDescriptor indexOn_1_2 = new IndexDescriptor( labelId1, propertyKeyId2 );
-    private final IndexDescriptor indexOn_2_1 = new IndexDescriptor( labelId2, propertyKeyId1 );
+    private final IndexDescriptor indexOn_1_1 = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId1, propertyKeyId1 ) );
+    private final IndexDescriptor indexOn_1_2 = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId1, propertyKeyId2 ) );
+    private final IndexDescriptor indexOn_2_1 = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId2, propertyKeyId1 ) );
 
     private TransactionState state;
 

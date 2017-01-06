@@ -45,6 +45,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.kernel.api.exceptions.KernelException;
@@ -490,7 +491,8 @@ public class IndexStatisticsTest
             Statement statement = bridge.get();
             int labelId = statement.tokenWriteOperations().labelGetOrCreateForName( labelName );
             int propertyKeyId = statement.tokenWriteOperations().propertyKeyGetOrCreateForName( propertyKeyName );
-            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, new int[]{propertyKeyId} );
+            NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( descriptor );
             tx.success();
             return index;
         }

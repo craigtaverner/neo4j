@@ -694,7 +694,7 @@ public class IndexPopulationJobTest
             int labelId = statement.readOperations().labelGetForName( label.name() );
             int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
             DoubleLongRegister result =
-                    statement.readOperations().indexUpdatesAndSize( new IndexDescriptor( labelId, propertyKeyId ),
+                    statement.readOperations().indexUpdatesAndSize( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ),
                             Registers.newDoubleLongRegister() );
             tx.success();
             return result;
@@ -709,7 +709,7 @@ public class IndexPopulationJobTest
             DoubleLongRegister result = Registers.newDoubleLongRegister();
             int labelId = statement.readOperations().labelGetForName( label.name() );
             int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-            statement.readOperations().indexSample( new IndexDescriptor( labelId, propertyKeyId ), result );
+            statement.readOperations().indexSample( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ), result );
             tx.success();
             return result;
         }

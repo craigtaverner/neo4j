@@ -27,10 +27,12 @@ import java.util.Set;
 
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.Pair;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 
 import static java.lang.String.format;
 
@@ -128,16 +130,20 @@ public class DbStructureCollector implements DbStructureVisitor
             @Override
             public double indexSelectivity( int labelId, int propertyKeyId )
             {
-                IndexStatistics result1 = regularIndices.getIndex( labelId, propertyKeyId );
-                IndexStatistics result2 = result1 == null ? uniqueIndices.getIndex( labelId, propertyKeyId ) : result1;
+                //TODO: Support composite indexes
+                NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+                IndexStatistics result1 = regularIndices.getIndex( descriptor );
+                IndexStatistics result2 = result1 == null ? uniqueIndices.getIndex( descriptor ) : result1;
                 return result2 == null ? Double.NaN : result2.uniqueValuesPercentage;
             }
 
             @Override
             public double indexPropertyExistsSelectivity( int labelId, int propertyKeyId )
             {
-                IndexStatistics result1 = regularIndices.getIndex( labelId, propertyKeyId );
-                IndexStatistics result2 = result1 == null ? uniqueIndices.getIndex( labelId, propertyKeyId ) : result1;
+                //TODO: Support composite indexes
+                NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+                IndexStatistics result1 = regularIndices.getIndex( descriptor );
+                IndexStatistics result2 = result1 == null ? uniqueIndices.getIndex( descriptor ) : result1;
                 return result2 == null ? Double.NaN : result2.size;
             }
         };
@@ -327,10 +333,9 @@ public class DbStructureCollector implements DbStructureVisitor
             indexMap.put( descriptor, new IndexStatistics(uniqueValuesPercentage, size) );
         }
 
-        public IndexStatistics getIndex( int labelId, int propertyKeyId )
+        public IndexStatistics getIndex( NodePropertyDescriptor descriptor )
         {
-            //TODO: Add support for composite indexes
-            return indexMap.get( new IndexDescriptor( labelId, new int[]{propertyKeyId} ) );
+            return indexMap.get( IndexDescriptorFactory.from( descriptor ) );
         }
 
         public Iterator<Pair<String, String>> iterator()

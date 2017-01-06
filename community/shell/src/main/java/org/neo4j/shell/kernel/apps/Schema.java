@@ -193,7 +193,7 @@ public class Schema extends TransactionProvidingApp
             throw new ShellException( "No property associated with '" + property + "' was found" );
         }
 
-        indexingService.triggerIndexSampling( new IndexDescriptor( labelKey, propertyKey ), samplingMode );
+        indexingService.triggerIndexSampling( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelKey, propertyKey ) ), samplingMode );
     }
 
     private IndexSamplingMode getSamplingMode( boolean forceSample )

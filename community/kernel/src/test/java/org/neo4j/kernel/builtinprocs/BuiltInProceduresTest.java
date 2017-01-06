@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.builtinprocs;
 
+import java.beans.IndexedPropertyDescriptor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,6 +37,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
@@ -43,6 +45,7 @@ import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.InternalIndexState;
 import org.neo4j.kernel.api.proc.BasicContext;
 import org.neo4j.kernel.api.proc.Key;
@@ -220,7 +223,8 @@ public class BuiltInProceduresTest
         int labelId = token( label, labels );
         int propId = token( propKey, propKeys );
 
-        indexes.add( new IndexDescriptor( labelId, propId ) );
+        IndexDescriptor index = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propId ) );
+        indexes.add( index );
     }
 
     private void givenUniqueConstraint( String label, String propKey )
@@ -228,9 +232,9 @@ public class BuiltInProceduresTest
         int labelId = token( label, labels );
         int propId = token( propKey, propKeys );
 
-        IndexDescriptor index = new IndexDescriptor( labelId, propId );
+        IndexDescriptor index = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propId ) );
         uniqueIndexes.add( index );
-        constraints.add( new UniquenessConstraint( index ) );
+        constraints.add( new UniquenessConstraint( index.descriptor() ) );
     }
 
     private void givenNodePropExistenceConstraint( String label, String propKey )
@@ -238,7 +242,8 @@ public class BuiltInProceduresTest
         int labelId = token( label, labels );
         int propId = token( propKey, propKeys );
 
-        constraints.add( new NodePropertyExistenceConstraint( new IndexDescriptor( labelId, propId ) ) );
+        NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propId );
+        constraints.add( new NodePropertyExistenceConstraint( descriptor ) );
     }
 
     private void givenPropertyKeys( String ... keys )

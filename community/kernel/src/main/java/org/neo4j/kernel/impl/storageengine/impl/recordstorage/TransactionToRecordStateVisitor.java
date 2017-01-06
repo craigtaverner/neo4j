@@ -224,8 +224,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         try
         {
             clearSchemaState = true;
-            UniquePropertyConstraintRule rule = schemaStorage
-                    .uniquenessConstraint( element.label(), element.getPropertyKeyIds() );
+            UniquePropertyConstraintRule rule = schemaStorage.uniquenessConstraint( element.descriptor() );
             recordState.dropSchemaRule( rule );
         }
         catch ( SchemaRuleNotFoundException e )
@@ -257,8 +256,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         try
         {
             clearSchemaState = true;
-            recordState.dropSchemaRule(
-                    schemaStorage.nodePropertyExistenceConstraint( element.label(), element.getPropertyKeyIds() ) );
+            recordState.dropSchemaRule( schemaStorage.nodePropertyExistenceConstraint( element.descriptor() ) );
         }
         catch ( SchemaRuleNotFoundException e )
         {

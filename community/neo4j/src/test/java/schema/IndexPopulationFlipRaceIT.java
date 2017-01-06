@@ -149,10 +149,10 @@ public class IndexPopulationFlipRaceIT
             {
                 long nodeAId = data.first()[j];
                 assertEquals( 1, statement.readOperations().nodesCountIndexed(
-                        new IndexDescriptor( labelAId, keyAId ), nodeAId, nodeAId ) );
+                        IndexDescriptorFactory.from( new NodePropertyDescriptor( labelAId, keyAId ) ), nodeAId, nodeAId ) );
                 long nodeBId = data.other()[j];
                 assertEquals( 1, statement.readOperations().nodesCountIndexed(
-                        new IndexDescriptor( labelBId, keyBId ), nodeBId, nodeBId ) );
+                        IndexDescriptorFactory.from( new NodePropertyDescriptor( labelBId, keyBId ) ), nodeBId, nodeBId ) );
             }
         }
     }

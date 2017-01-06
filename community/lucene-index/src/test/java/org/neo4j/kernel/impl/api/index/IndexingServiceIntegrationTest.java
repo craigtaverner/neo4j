@@ -118,8 +118,8 @@ public class IndexingServiceIntegrationTest
         int weatherLabelId = labelTokenHolder.getIdByName( WEATHER_LABEL );
         int propertyId = propertyKeyTokenHolder.getIdByName( PROPERTY_NAME );
 
-        IndexProxy clothesIndex = indexingService.getIndexProxy( new IndexDescriptor( clothedLabelId, propertyId) );
-        IndexProxy weatherIndex = indexingService.getIndexProxy( new IndexDescriptor( weatherLabelId, propertyId) );
+        IndexProxy clothesIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( clothedLabelId, propertyId ) ) );
+        IndexProxy weatherIndex = indexingService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( weatherLabelId, propertyId ) ) );
         assertEquals( InternalIndexState.ONLINE, clothesIndex.getState());
         assertEquals( InternalIndexState.ONLINE, weatherIndex.getState());
     }

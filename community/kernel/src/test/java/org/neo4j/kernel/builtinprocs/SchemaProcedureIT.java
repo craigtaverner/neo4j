@@ -32,6 +32,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.api.DataWriteOperations;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.properties.DefinedProperty;
@@ -72,14 +73,14 @@ public class SchemaProcedureIT extends KernelIntegrationTest
         long nodeId = ops.nodeCreate();
         int labelId = ops.labelGetOrCreateForName( "Person" );
         ops.nodeAddLabel( nodeId, labelId );
-        int[] propertyIdNames = new int[]{ops.propertyKeyGetOrCreateForName( "name" )};
-        int[] propertyIdAge = new int[]{ops.propertyKeyGetOrCreateForName( "age" )};
-        ops.nodeSetProperty( nodeId, DefinedProperty.stringProperty( propertyIdNames[0], "Emil" ) );
+        int propertyIdName = ops.propertyKeyGetOrCreateForName( "name" );
+        int propertyIdAge = ops.propertyKeyGetOrCreateForName( "age" );
+        ops.nodeSetProperty( nodeId, DefinedProperty.stringProperty( propertyIdName, "Emil" ) );
         commit();
 
         SchemaWriteOperations schemaOps = schemaWriteOperationsInNewTransaction();
-        schemaOps.indexCreate( labelId, propertyIdNames );
-        schemaOps.uniquePropertyConstraintCreate( labelId, propertyIdAge );
+        schemaOps.indexCreate( new NodePropertyDescriptor( labelId, propertyIdName ) );
+        schemaOps.uniquePropertyConstraintCreate( new NodePropertyDescriptor( labelId, propertyIdAge ) );
         commit();
 
         // When

@@ -59,7 +59,7 @@ public abstract class SchemaKernelException extends KernelException
 //            int labelId, int propertyKeyId )
 //    {
 //        //Don't seems to be used, investigate
-//        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, new IndexDescriptor( labelId, propertyKeyId) );
+//        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
 //    }
 
     protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,

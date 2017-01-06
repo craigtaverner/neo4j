@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.kernel.api.DataWriteOperations;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.StatementTokenNameLookup;
 import org.neo4j.kernel.api.TokenNameLookup;
@@ -315,8 +316,8 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
         }
 
         DataWriteOperations statement = dataWriteOperationsInNewTransaction();
-        IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( statement
-                .labelGetForName( "Person" ), new int[]{statement.propertyKeyGetForName( "id" )} );
+        IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( new NodePropertyDescriptor(
+                statement.labelGetForName( "Person" ), statement.propertyKeyGetForName( "id" ) ) );
 
         // when
         createLabeledNode( statement, "Item", "id", 2 );
@@ -340,8 +341,8 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
         }
 
         DataWriteOperations statement = dataWriteOperationsInNewTransaction();
-        IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( statement
-                .labelGetForName( "Person" ), new int[]{statement.propertyKeyGetForName( "id" )} );
+        IndexDescriptor idx = statement.uniqueIndexGetForLabelAndPropertyKey( new NodePropertyDescriptor(
+                statement.labelGetForName( "Person" ), statement.propertyKeyGetForName( "id" ) ) );
 
         // when
         createLabeledNode( statement, "Person", "id", 2 );
@@ -380,7 +381,7 @@ public class UniquenessConstraintValidationIT extends KernelIntegrationTest
 
         {
             SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
-            statement.uniquePropertyConstraintCreate( labelId, new int[]{propertyKeyId} );
+            statement.uniquePropertyConstraintCreate( new NodePropertyDescriptor( labelId, propertyKeyId ) );
             commit();
         }
     }

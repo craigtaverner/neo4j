@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.DataWriteOperations;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementConstants;
@@ -41,14 +42,14 @@ import static org.junit.Assert.assertTrue;
 public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
 {
     private int labelId;
-    private int[] propertyKeyId;
+    private int propertyKeyId;
 
     @Before
     public void createKeys() throws Exception
     {
         SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
         this.labelId = statement.labelGetOrCreateForName( "Person" );
-        this.propertyKeyId =new int[]{statement.propertyKeyGetOrCreateForName( "foo" )};
+        this.propertyKeyId = statement.propertyKeyGetOrCreateForName( "foo" );
         commit();
     }
 
@@ -134,7 +135,7 @@ public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
         dataStatement.nodeAddLabel( nodeId, labelId );
 
         // This adds the node to the unique index and should take an index write lock
-        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId[0], value ) );
+        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId, value ) );
 
         Runnable runnableForThread2 = () ->
         {
@@ -185,7 +186,7 @@ public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
         DataWriteOperations dataStatement = dataWriteOperationsInNewTransaction();
         long nodeId = dataStatement.nodeCreate();
         dataStatement.nodeAddLabel( nodeId, labelId );
-        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId[0], value ) );
+        dataStatement.nodeSetProperty( nodeId, Property.stringProperty( propertyKeyId, value ) );
         commit();
         return nodeId;
     }
@@ -193,8 +194,9 @@ public class NodeGetUniqueFromIndexSeekIT extends KernelIntegrationTest
     private IndexDescriptor createUniquenessConstraint() throws Exception
     {
         SchemaWriteOperations schemaStatement = schemaWriteOperationsInNewTransaction();
-        schemaStatement.uniquePropertyConstraintCreate( labelId, propertyKeyId );
-        IndexDescriptor result = schemaStatement.uniqueIndexGetForLabelAndPropertyKey( labelId, propertyKeyId );
+        NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+        schemaStatement.uniquePropertyConstraintCreate( descriptor );
+        IndexDescriptor result = schemaStatement.uniqueIndexGetForLabelAndPropertyKey( descriptor );
         commit();
         return result;
     }

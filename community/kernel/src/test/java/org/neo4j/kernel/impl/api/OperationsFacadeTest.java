@@ -85,8 +85,8 @@ public class OperationsFacadeTest
         SchemaReadOperations readOperations = setupSchemaReadOperations();
         Mockito.when( readOperations
                 .uniqueIndexesGetForLabel( Mockito.any( KernelStatement.class ), Mockito.eq( LABEL1_ID ) ) )
-                .thenReturn( Iterators.iterator( new IndexDescriptor( LABEL1_ID, PROP1_ID ),
-                        new IndexDescriptor( LABEL1_ID, PROP1_ID ) ) );
+                .thenReturn( Iterators.iterator( IndexDescriptorFactory.from( new NodePropertyDescriptor( LABEL1_ID, PROP1_ID ) ),
+                        IndexDescriptorFactory.from( new NodePropertyDescriptor( LABEL1_ID, PROP1_ID ) ) ) );
         TokenNameLookup tokenNameLookup = getDefaultTokenNameLookup();
 
         expectedException.expect( DuplicateIndexSchemaRuleException.class );

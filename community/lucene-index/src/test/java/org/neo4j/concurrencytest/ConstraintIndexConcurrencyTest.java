@@ -74,7 +74,7 @@ public class ConstraintIndexConcurrencyTest
             Statement statement = statementSupplier.get();
             int labelId = statement.readOperations().labelGetForName( label.name() );
             int propertyKeyId = statement.readOperations().propertyKeyGetForName( propertyKey );
-            statement.readOperations().nodesGetFromIndexSeek( new IndexDescriptor( labelId, propertyKeyId ),
+            statement.readOperations().nodesGetFromIndexSeek( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ),
                     "The value is irrelevant, we just want to perform some sort of lookup against this index" );
 
             // then let another thread come in and create a node

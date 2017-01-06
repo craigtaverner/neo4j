@@ -62,7 +62,7 @@ public class IndexSamplingJobTrackerTest
         assertTrue( jobTracker.canExecuteMoreSamplingJobs() );
         IndexSamplingJob job = new IndexSamplingJob()
         {
-            private final IndexDescriptor descriptor = new IndexDescriptor( 1, 2 );
+            private final IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 2 ) );
 
             @Override
             public void run()
@@ -106,7 +106,7 @@ public class IndexSamplingJobTrackerTest
 
         jobTracker.scheduleSamplingJob( new IndexSamplingJob()
         {
-            private final IndexDescriptor descriptor = new IndexDescriptor( 1, 2 );
+            private final IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 2 ) );
 
             @Override
             public void run()
@@ -173,7 +173,7 @@ public class IndexSamplingJobTrackerTest
             @Override
             public IndexDescriptor descriptor()
             {
-                return new IndexDescriptor( 1, 1 );
+                return IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
             }
 
             @Override
@@ -192,7 +192,7 @@ public class IndexSamplingJobTrackerTest
                 @Override
                 public IndexDescriptor descriptor()
                 {
-                    return new IndexDescriptor( 2, 2 );
+                    return IndexDescriptorFactory.from( new NodePropertyDescriptor( 2, 2 ) );
                 }
 
                 @Override
@@ -253,8 +253,8 @@ public class IndexSamplingJobTrackerTest
         final CountDownLatch latch1 = new CountDownLatch( 1 );
         final CountDownLatch latch2 = new CountDownLatch( 1 );
 
-        WaitingIndexSamplingJob job1 = new WaitingIndexSamplingJob( new IndexDescriptor( 1, 1 ), latch1 );
-        WaitingIndexSamplingJob job2 = new WaitingIndexSamplingJob( new IndexDescriptor( 2, 2 ), latch1 );
+        WaitingIndexSamplingJob job1 = new WaitingIndexSamplingJob( IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) ), latch1 );
+        WaitingIndexSamplingJob job2 = new WaitingIndexSamplingJob( IndexDescriptorFactory.from( new NodePropertyDescriptor( 2, 2 ) ), latch1 );
 
         jobTracker.scheduleSamplingJob( job1 );
         jobTracker.scheduleSamplingJob( job2 );
@@ -291,8 +291,8 @@ public class IndexSamplingJobTrackerTest
         final CountDownLatch latch1 = new CountDownLatch( 1 );
         final CountDownLatch latch2 = new CountDownLatch( 1 );
 
-        WaitingIndexSamplingJob job1 = new WaitingIndexSamplingJob( new IndexDescriptor( 1, 1 ), latch1 );
-        WaitingIndexSamplingJob job2 = new WaitingIndexSamplingJob( new IndexDescriptor( 2, 2 ), latch1 );
+        WaitingIndexSamplingJob job1 = new WaitingIndexSamplingJob( IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) ), latch1 );
+        WaitingIndexSamplingJob job2 = new WaitingIndexSamplingJob( IndexDescriptorFactory.from( new NodePropertyDescriptor( 2, 2 ) ), latch1 );
 
         jobTracker.scheduleSamplingJob( job1 );
         jobTracker.scheduleSamplingJob( job2 );

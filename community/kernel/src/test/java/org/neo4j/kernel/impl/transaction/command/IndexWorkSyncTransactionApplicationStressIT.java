@@ -99,7 +99,7 @@ public class IndexWorkSyncTransactionApplicationStressIT
         Dependencies dependencies = new Dependencies();
         storageEngine.satisfyDependencies( dependencies );
         IndexProxy index = dependencies.resolveDependency( IndexingService.class )
-                .getIndexProxy( new IndexDescriptor( labelId, propertyKeyId ) );
+                .getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
         awaitOnline( index );
 
         // WHEN

@@ -265,10 +265,10 @@ public class SchemaStorage implements SchemaRuleAccess
         return schemaStore.nextId();
     }
 
-    public NodePropertyExistenceConstraintRule nodePropertyExistenceConstraint( int labelId, int[] propertyKeyIds )
+    public NodePropertyExistenceConstraintRule nodePropertyExistenceConstraint( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException, DuplicateSchemaRuleException
     {
-        return nodeConstraintRule( NodePropertyExistenceConstraintRule.class, labelId, propertyKeyIds );
+        return nodeConstraintRule( NodePropertyExistenceConstraintRule.class, descriptor );
     }
 
     public RelationshipPropertyExistenceConstraintRule relationshipPropertyExistenceConstraint( int typeId,
@@ -277,28 +277,27 @@ public class SchemaStorage implements SchemaRuleAccess
         return relationshipConstraintRule( RelationshipPropertyExistenceConstraintRule.class, typeId, propertyKeyId );
     }
 
-    public UniquePropertyConstraintRule uniquenessConstraint( int labelId, final int[] propertyKeyIds )
+    public UniquePropertyConstraintRule uniquenessConstraint( NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException, DuplicateSchemaRuleException
     {
-        return nodeConstraintRule( UniquePropertyConstraintRule.class, labelId, propertyKeyIds );
+        return nodeConstraintRule( UniquePropertyConstraintRule.class, descriptor );
     }
 
     private <Rule extends NodePropertyConstraintRule> Rule nodeConstraintRule( Class<Rule> type,
-            final int labelId, final int[] propertyKeyIds )
+            final NodePropertyDescriptor descriptor )
             throws SchemaRuleNotFoundException, DuplicateEntitySchemaRuleException
     {
-        Iterator<Rule> rules = schemaRules( cast( type ), type, item -> item.getLabel() == labelId &&
-                                                                item.containsPropertyKeyIds( propertyKeyIds ) );
+        Iterator<Rule> rules = schemaRules( cast( type ), type, item -> item.matches(descriptor) );
         if ( !rules.hasNext() )
         {
-            throw new EntitySchemaRuleNotFoundException( new CompositeIndexDescriptor( labelId, propertyKeyIds ) );
+            throw new EntitySchemaRuleNotFoundException( descriptor );
         }
 
         Rule rule = rules.next();
 
         if ( rules.hasNext() )
         {
-            throw new DuplicateEntitySchemaRuleException( new CompositeIndexDescriptor( labelId, propertyKeyIds ) );
+            throw new DuplicateEntitySchemaRuleException( descriptor );
         }
         return rule;
     }

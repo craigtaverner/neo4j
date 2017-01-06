@@ -209,7 +209,7 @@ public class MultiIndexPopulationConcurrentUpdatesIT
 
     private IndexReader getIndexReader( int propertyId, Integer countryLabelId ) throws IndexNotFoundKernelException
     {
-        return indexService.getIndexProxy( new IndexDescriptor( countryLabelId, propertyId ) ).newReader();
+        return indexService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( countryLabelId, propertyId ) ) ).newReader();
     }
 
     private void launchCustomIndexPopulation( Map<String,Integer> labelNameIdMap, int propertyId,
@@ -276,7 +276,7 @@ public class MultiIndexPopulationConcurrentUpdatesIT
             throws IndexNotFoundKernelException, IndexPopulationFailedKernelException, InterruptedException,
             IndexActivationFailedKernelException
     {
-        IndexProxy indexProxy = indexService.getIndexProxy( new IndexDescriptor( labelId, propertyId ) );
+        IndexProxy indexProxy = indexService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyId ) ) );
         indexProxy.awaitStoreScanCompleted();
         indexProxy.activate();
     }

@@ -38,6 +38,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.EntityNotFoundException;
@@ -630,8 +631,9 @@ public class KernelIT extends KernelIntegrationTest
 
     private IndexDescriptor createIndex( SchemaWriteOperations schemaWriteOperations ) throws SchemaKernelException
     {
-        return schemaWriteOperations.indexCreate( schemaWriteOperations.labelGetOrCreateForName( "hello" ),
-                new int[]{schemaWriteOperations.propertyKeyGetOrCreateForName( "hepp" ) });
+        return schemaWriteOperations.indexCreate( new NodePropertyDescriptor(
+                schemaWriteOperations.labelGetOrCreateForName( "hello" ),
+                schemaWriteOperations.propertyKeyGetOrCreateForName( "hepp" ) ) );
     }
 
     private String getOrCreateSchemaState( String key, final String maybeSetThisState )

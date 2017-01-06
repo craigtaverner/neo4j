@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -56,9 +58,9 @@ import static org.neo4j.kernel.impl.store.record.UniquePropertyConstraintRule.un
 
 public class SchemaCacheTest
 {
-    final SchemaRule hans = newIndexRule( 1, 0, 5 );
-    final SchemaRule witch = newIndexRule( 2, 3, 6 );
-    final SchemaRule gretel = newIndexRule( 3, 0, 7 );
+    final SchemaRule hans = newIndexRule( 1, new NodePropertyDescriptor( 0, 5 ) );
+    final SchemaRule witch = newIndexRule( 2, new NodePropertyDescriptor( 3, 6 ) );
+    final SchemaRule gretel = newIndexRule( 3, new NodePropertyDescriptor( 0, 7 ) );
 
     @Test
     public void should_construct_schema_cache()
@@ -109,37 +111,37 @@ public class SchemaCacheTest
         SchemaCache cache = newSchemaCache();
 
         // WHEN
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
-        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, new int[]{4}, 133L ) );
-        cache.addSchemaRule( relPropertyExistenceConstraintRule( 2L, 5, 6 ) );
-        cache.addSchemaRule( nodePropertyExistenceConstraintRule( 3L, 7, new int[]{8} ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, new NodePropertyDescriptor( 1, 2 ), 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 1L, new NodePropertyDescriptor( 3, 4 ), 133L ) );
+        cache.addSchemaRule( relPropertyExistenceConstraintRule( 2L, new RelationshipPropertyDescriptor( 5, 6 ) ) );
+        cache.addSchemaRule( nodePropertyExistenceConstraintRule( 3L, new NodePropertyDescriptor( 7, 8 ) ) );
 
         // THEN
         assertEquals(
-                asSet( new UniquenessConstraint( 1, new int[]{2} ), new UniquenessConstraint( 3, new int[]{4} ),
-                        new RelationshipPropertyExistenceConstraint( 5, 6 ),
-                        new NodePropertyExistenceConstraint( 7, new int[]{8} ) ),
+                asSet( new UniquenessConstraint( new NodePropertyDescriptor( 1, 2 ) ), new UniquenessConstraint( new NodePropertyDescriptor( 3, 4 ) ),
+                        new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor( 5, 6 ) ),
+                        new NodePropertyExistenceConstraint( new NodePropertyDescriptor( 7, 8 ) ) ),
                 asSet( cache.constraints() ) );
 
         assertEquals(
-                asSet( new UniquenessConstraint( 1, new int[]{2} ) ),
+                asSet( new UniquenessConstraint( new NodePropertyDescriptor( 1, 2 ) ) ),
                 asSet( cache.constraintsForLabel( 1 ) ) );
 
         assertEquals(
-                asSet( new UniquenessConstraint( 1, new int[]{2} ) ),
-                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) ) );
+                asSet( new UniquenessConstraint( new NodePropertyDescriptor( 1, 2 ) ) ),
+                asSet( cache.constraintsForLabelAndProperty( new NodePropertyDescriptor( 1, 2 ) ) ) );
 
         assertEquals(
                 asSet(),
-                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{3} ) ) );
+                asSet( cache.constraintsForLabelAndProperty( new NodePropertyDescriptor( 1, 3 ) ) ) );
 
         assertEquals(
-                asSet( new RelationshipPropertyExistenceConstraint( 5, 6 ) ),
+                asSet( new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor( 5, 6 ) ) ),
                 asSet( cache.constraintsForRelationshipType( 5 ) ) );
 
         assertEquals(
-                asSet( new RelationshipPropertyExistenceConstraint( 5, 6 ) ),
-                asSet( cache.constraintsForRelationshipTypeAndProperty( 5, 6 ) ) );
+                asSet( new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor( 5, 6 ) ) ),
+                asSet( cache.constraintsForRelationshipTypeAndProperty( new RelationshipPropertyDescriptor( 5, 6 ) ) ) );
     }
 
     @Test
@@ -148,15 +150,15 @@ public class SchemaCacheTest
         // GIVEN
         SchemaCache cache = newSchemaCache();
 
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
-        cache.addSchemaRule( uniquenessConstraintRule( 1L, 3, new int[]{4}, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, new NodePropertyDescriptor( 1, 2 ), 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 1L, new NodePropertyDescriptor( 3, 4 ), 133L ) );
 
         // WHEN
         cache.removeSchemaRule( 0L );
 
         // THEN
         assertEquals(
-                asSet( new UniquenessConstraint( 3, new int[]{4} ) ),
+                asSet( new UniquenessConstraint( new NodePropertyDescriptor( 3, 4 ) ) ),
                 asSet( cache.constraints() ) );
 
         assertEquals(
@@ -165,7 +167,7 @@ public class SchemaCacheTest
 
         assertEquals(
                 asSet(),
-                asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) ) );
+                asSet( cache.constraintsForLabelAndProperty( new NodePropertyDescriptor( 1, 2 ) ) ) );
     }
 
     @Test
@@ -174,14 +176,14 @@ public class SchemaCacheTest
         // given
         SchemaCache cache = newSchemaCache();
 
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, new NodePropertyDescriptor( 1, 2 ), 133L ) );
 
         // when
-        cache.addSchemaRule( uniquenessConstraintRule( 0L, 1, new int[]{2}, 133L ) );
+        cache.addSchemaRule( uniquenessConstraintRule( 0L, new NodePropertyDescriptor( 1, 2 ), 133L ) );
 
         // then
         assertEquals(
-                asList( new UniquenessConstraint( 1, new int[]{2} ) ),
+                asList( new UniquenessConstraint( new NodePropertyDescriptor( 1, 2 ) ) ),
                 Iterators.asList( cache.constraints() ) );
     }
 
@@ -191,12 +193,12 @@ public class SchemaCacheTest
         // Given
         SchemaCache cache = newSchemaCache();
 
-        cache.addSchemaRule( newIndexRule( 1L, 1, 2 ) );
-        cache.addSchemaRule( newIndexRule( 2L, 1, 3 ) );
-        cache.addSchemaRule( newIndexRule( 3L, 2, 2 ) );
+        cache.addSchemaRule( newIndexRule( 1L, new NodePropertyDescriptor( 1, 2 ) ) );
+        cache.addSchemaRule( newIndexRule( 2L, new NodePropertyDescriptor( 1, 3 ) ) );
+        cache.addSchemaRule( newIndexRule( 3L, new NodePropertyDescriptor( 2, 2 ) ) );
 
         // When
-        IndexDescriptor descriptor = cache.indexDescriptor( 1, new int[]{3} );
+        IndexDescriptor descriptor = cache.indexDescriptor( new NodePropertyDescriptor( 1, 3 ) );
 
         // Then
         assertEquals( 1, descriptor.getLabelId() );
@@ -210,7 +212,7 @@ public class SchemaCacheTest
         SchemaCache schemaCache = newSchemaCache();
 
         // When
-        IndexDescriptor indexDescriptor = schemaCache.indexDescriptor( 1, new int[]{1} );
+        IndexDescriptor indexDescriptor = schemaCache.indexDescriptor( new NodePropertyDescriptor( 1, 1 ) );
 
         // Then
         assertNull( indexDescriptor );
@@ -220,9 +222,9 @@ public class SchemaCacheTest
     public void shouldListConstraintsForLabel()
     {
         // Given
-        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, new int[]{1}, 0 );
-        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, new int[]{1}, 0 );
-        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, new int[]{2} );
+        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, new NodePropertyDescriptor( 1, 1 ), 0 );
+        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, new NodePropertyDescriptor( 2, 1 ), 0 );
+        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, new NodePropertyDescriptor( 1, 2 ) );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
@@ -238,14 +240,14 @@ public class SchemaCacheTest
     public void shouldListConstraintsForLabelAndProperty()
     {
         // Given
-        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, 1, new int[]{1}, 0 );
-        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, 2, new int[]{1}, 0 );
-        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, 1, new int[]{2} );
+        UniquePropertyConstraintRule rule1 = uniquenessConstraintRule( 0, new NodePropertyDescriptor( 1, 1 ), 0 );
+        UniquePropertyConstraintRule rule2 = uniquenessConstraintRule( 1, new NodePropertyDescriptor( 2, 1 ), 0 );
+        NodePropertyExistenceConstraintRule rule3 = nodePropertyExistenceConstraintRule( 2, new NodePropertyDescriptor( 1, 2 ) );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
         // When
-        Set<NodePropertyConstraint> listed = asSet( cache.constraintsForLabelAndProperty( 1, new int[]{2} ) );
+        Set<NodePropertyConstraint> listed = asSet( cache.constraintsForLabelAndProperty( new NodePropertyDescriptor( 1, 2 ) ) );
 
         // Then
         assertEquals( singleton( rule3.toConstraint() ), listed );
@@ -255,9 +257,9 @@ public class SchemaCacheTest
     public void shouldListConstraintsForRelationshipType()
     {
         // Given
-        RelationshipPropertyExistenceConstraintRule rule1 = relPropertyExistenceConstraintRule( 0, 1, 1 );
-        RelationshipPropertyExistenceConstraintRule rule2 = relPropertyExistenceConstraintRule( 0, 2, 1 );
-        RelationshipPropertyExistenceConstraintRule rule3 = relPropertyExistenceConstraintRule( 0, 1, 2 );
+        RelationshipPropertyExistenceConstraintRule rule1 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 1, 1 ) );
+        RelationshipPropertyExistenceConstraintRule rule2 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 2, 1 ) );
+        RelationshipPropertyExistenceConstraintRule rule3 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 1, 2 ) );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
@@ -273,22 +275,22 @@ public class SchemaCacheTest
     public void shouldListConstraintsForRelationshipTypeAndProperty()
     {
         // Given
-        RelationshipPropertyExistenceConstraintRule rule1 = relPropertyExistenceConstraintRule( 0, 1, 1 );
-        RelationshipPropertyExistenceConstraintRule rule2 = relPropertyExistenceConstraintRule( 0, 2, 1 );
-        RelationshipPropertyExistenceConstraintRule rule3 = relPropertyExistenceConstraintRule( 0, 1, 2 );
+        RelationshipPropertyExistenceConstraintRule rule1 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 1, 1 ) );
+        RelationshipPropertyExistenceConstraintRule rule2 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 2, 1 ) );
+        RelationshipPropertyExistenceConstraintRule rule3 = relPropertyExistenceConstraintRule( 0, new RelationshipPropertyDescriptor( 1, 2 ) );
 
         SchemaCache cache = newSchemaCache( rule1, rule2, rule3 );
 
         // When
-        Set<RelationshipPropertyConstraint> listed = asSet( cache.constraintsForRelationshipTypeAndProperty( 2, 1 ) );
+        Set<RelationshipPropertyConstraint> listed = asSet( cache.constraintsForRelationshipTypeAndProperty( new RelationshipPropertyDescriptor( 2, 1 ) ) );
 
         // Then
         assertEquals( singleton( rule2.toConstraint() ), listed );
     }
 
-    private IndexRule newIndexRule( long id, int label, int propertyKey )
+    private IndexRule newIndexRule( long id, NodePropertyDescriptor descriptor )
     {
-        return IndexRule.indexRule( id, label, new int[]{propertyKey}, PROVIDER_DESCRIPTOR );
+        return IndexRule.indexRule( id, descriptor, PROVIDER_DESCRIPTOR );
     }
 
     private static SchemaCache newSchemaCache( SchemaRule... rules )

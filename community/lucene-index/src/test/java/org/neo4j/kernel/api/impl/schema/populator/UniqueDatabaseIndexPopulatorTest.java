@@ -78,7 +78,7 @@ public class UniqueDatabaseIndexPopulatorTest
     private static final String INDEX_IDENTIFIER = "42";
 
     private final DirectoryFactory directoryFactory = new DirectoryFactory.InMemoryDirectoryFactory();
-    private final IndexDescriptor descriptor = new IndexDescriptor( LABEL_ID, PROPERTY_KEY_ID );
+    private final IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( LABEL_ID, PROPERTY_KEY_ID ) );
 
     private final PropertyAccessor propertyAccessor = mock( PropertyAccessor.class );
 
