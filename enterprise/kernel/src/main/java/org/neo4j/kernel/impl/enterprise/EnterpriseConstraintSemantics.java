@@ -19,13 +19,11 @@
  */
 package org.neo4j.kernel.impl.enterprise;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.cursor.Cursor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
@@ -63,52 +61,62 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
     }
 
     @Override
-    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, int type, int[] propertyKey )
+    public PropertyConstraintRule writeNodePropertyExistenceConstraint( long ruleId, NodePropertyDescriptor descriptor )
     {
-        return nodePropertyExistenceConstraintRule( ruleId, type, propertyKey );
+        return nodePropertyExistenceConstraintRule( ruleId, descriptor );
     }
 
     @Override
-    public PropertyConstraintRule writeRelationshipPropertyExistenceConstraint( long ruleId, int type, int propertyKey )
+    public PropertyConstraintRule writeRelationshipPropertyExistenceConstraint( long ruleId, RelationshipPropertyDescriptor descriptor )
     {
-        return relPropertyExistenceConstraintRule( ruleId, type, propertyKey );
+        return relPropertyExistenceConstraintRule( ruleId, descriptor );
     }
 
     @Override
-    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, int label, int[] propertyKeys )
+    public void validateNodePropertyExistenceConstraint( Cursor<NodeItem> allNodes, NodePropertyDescriptor descriptor )
             throws CreateConstraintFailureException
     {
         while ( allNodes.next() )
         {
             NodeItem node = allNodes.get();
+            if ( descriptor.isComposite() )
+            {
+                for ( int propertyKey : descriptor.getPropertyKeyIds() )
+                {
+                    validateNodePropertyExistenceConstraint( node, propertyKey, descriptor );
+                }
+            }
+            else
+            {
+                validateNodePropertyExistenceConstraint( node, descriptor.getPropertyKeyId(), descriptor );
+            }
+        }
+    }
 
-            List<Integer> l = new ArrayList<>();
-            PrimitiveIntIterator itr = node.getPropertyKeys().iterator();
-            while ( itr.hasNext() )
-            {
-                l.add( itr.next() );
-            }
-            if ( !Arrays.equals( l.stream().mapToInt( i -> i ).toArray(), propertyKeys ) )
-            {
-                throw createConstraintFailure( new NodePropertyExistenceConstraintVerificationFailedKernelException(
-                        new NodePropertyExistenceConstraint( label, propertyKeys ), node.id() ) );
-            }
+    private void validateNodePropertyExistenceConstraint( NodeItem node, int propertyKey,
+            NodePropertyDescriptor descriptor ) throws CreateConstraintFailureException
+    {
+        if ( !node.hasProperty( propertyKey ) )
+        {
+            throw createConstraintFailure( new NodePropertyExistenceConstraintVerificationFailedKernelException(
+                    new NodePropertyExistenceConstraint( descriptor ), node.id() ) );
         }
     }
 
     @Override
     public void validateRelationshipPropertyExistenceConstraint(
-            Cursor<RelationshipItem> allRels, int type, int propertyKey )
+            Cursor<RelationshipItem> allRels, RelationshipPropertyDescriptor descriptor )
             throws CreateConstraintFailureException
     {
         while ( allRels.next() )
         {
             RelationshipItem relationship = allRels.get();
-            if ( relationship.type() == type && !relationship.hasProperty( propertyKey ) )
+            if ( relationship.type() == descriptor.getRelationshipTypeId() &&
+                 !relationship.hasProperty( descriptor.getPropertyKeyId() ) )
             {
                 throw createConstraintFailure(
                         new RelationshipPropertyExistenceConstraintVerificationFailedKernelException(
-                                new RelationshipPropertyExistenceConstraint( type, propertyKey ), relationship.id() ) );
+                                new RelationshipPropertyExistenceConstraint( descriptor ), relationship.id() ) );
             }
 
         }
