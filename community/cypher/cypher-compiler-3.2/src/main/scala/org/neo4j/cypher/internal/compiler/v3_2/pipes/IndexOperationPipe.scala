@@ -22,7 +22,7 @@ package org.neo4j.cypher.internal.compiler.v3_2.pipes
 import org.neo4j.cypher.internal.compiler.v3_2._
 import org.neo4j.cypher.internal.compiler.v3_2.commands._
 import org.neo4j.cypher.internal.compiler.v3_2.planDescription.Id
-import org.neo4j.cypher.internal.frontend.v3_2.SyntaxException
+import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, SyntaxException}
 
 case class IndexOperationPipe(indexOp: IndexOperation)(val id: Id = new Id)(implicit val monitor: PipeMonitor) extends Pipe {
   protected def internalCreateResults(state: QueryState): Iterator[ExecutionContext] = {
@@ -33,11 +33,11 @@ case class IndexOperationPipe(indexOp: IndexOperation)(val id: Id = new Id)(impl
     indexOp match {
       case CreateIndex(_, propertyKeys, _) =>
         val propertyKeyIds: Seq[Int] = propertyKeys.map( queryContext.getOrCreatePropertyKeyId )
-        queryContext.addIndexRule(labelId, propertyKeyIds)
+        queryContext.addIndexRule(IndexDescriptor(labelId, propertyKeyIds))
 
       case DropIndex(_, propertyKeys, _) =>
         val propertyKeyIds: Seq[Int] = propertyKeys.map( queryContext.getOrCreatePropertyKeyId )
-        queryContext.dropIndexRule(labelId, propertyKeyIds)
+        queryContext.dropIndexRule(IndexDescriptor(labelId, propertyKeyIds))
 
       case _ =>
         throw new UnsupportedOperationException("Unknown IndexOperation encountered")

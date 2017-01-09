@@ -21,7 +21,7 @@ package org.neo4j.cypher.internal.compiler.v3_2.spi
 
 import java.util.concurrent.atomic.AtomicInteger
 import org.neo4j.cypher.internal.compiler.v3_2.InternalQueryStatistics
-import org.neo4j.cypher.internal.frontend.v3_2.SemanticDirection
+import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, SemanticDirection}
 import org.neo4j.graphdb.{PropertyContainer, Relationship, Node}
 
 class UpdateCountingQueryContext(inner: QueryContext) extends DelegatingQueryContext(inner) {
@@ -90,25 +90,25 @@ class UpdateCountingQueryContext(inner: QueryContext) extends DelegatingQueryCon
     removed
   }
 
-  override def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) = {
-    val result = inner.addIndexRule(labelId, propertyKeyIds)
+  override def addIndexRule(descriptor: IndexDescriptor) = {
+    val result = inner.addIndexRule(descriptor)
     result.ifCreated { indexesAdded.increase() }
     result
   }
 
-  override def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int]) {
-    inner.dropIndexRule(labelId, propertyKeyIds)
+  override def dropIndexRule(descriptor: IndexDescriptor) {
+    inner.dropIndexRule(descriptor)
     indexesRemoved.increase()
   }
 
-  override def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) = {
-    val result = inner.createUniqueConstraint(labelId, propertyKeyIds)
+  override def createUniqueConstraint(descriptor: IndexDescriptor) = {
+    val result = inner.createUniqueConstraint(descriptor)
     result.ifCreated { uniqueConstraintsAdded.increase() }
     result
   }
 
-  override def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]) {
-    inner.dropUniqueConstraint(labelId, propertyKeyIds)
+  override def dropUniqueConstraint(descriptor: IndexDescriptor) {
+    inner.dropUniqueConstraint(descriptor)
     uniqueConstraintsRemoved.increase()
   }
 

@@ -37,6 +37,7 @@ import org.neo4j.consistency.report.ConsistencyReport;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.helpers.collection.BoundedIterable;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.IndexAccessor;
 import org.neo4j.kernel.api.index.IndexUpdater;
 import org.neo4j.kernel.api.index.SchemaIndexProvider.Descriptor;
@@ -63,14 +64,15 @@ public class NodeCorrectlyIndexedCheckTest
 {
     private static final int indexId = 12;
     private static final int labelId = 34;
-    private static final int[] propertyKeyIds = new int[]{56};
+    private static final int propertyKeyId = 56;
+    private static final NodePropertyDescriptor descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
     private static final long constraintId = 78;
 
     @Test
     public void shouldBeSilentWhenNodesCorrectlyIndexed() throws Exception
     {
         // given
-        IndexRule indexRule = indexRule( indexId, labelId, propertyKeyIds, new Descriptor( "provider1", "version1" ) );
+        IndexRule indexRule = indexRule( indexId, descriptor, new Descriptor( "provider1", "version1" ) );
         NodeRecord nodeRecord = nodeWithLabels( labelId );
 
         NodeCorrectlyIndexedCheck check = new NodeCorrectlyIndexedCheck(
@@ -91,7 +93,7 @@ public class NodeCorrectlyIndexedCheckTest
     public void shouldReportNodeThatIsNotIndexed() throws Exception
     {
         // given
-        IndexRule indexRule = indexRule( indexId, labelId, propertyKeyIds, new Descriptor( "provider1", "version1" ) );
+        IndexRule indexRule = indexRule( indexId, descriptor, new Descriptor( "provider1", "version1" ) );
         NodeRecord nodeRecord = nodeWithLabels( labelId );
 
         NodeCorrectlyIndexedCheck check = new NodeCorrectlyIndexedCheck(
@@ -111,8 +113,8 @@ public class NodeCorrectlyIndexedCheckTest
     public void shouldReportDuplicateNode() throws Exception
     {
         // given
-        IndexRule indexRule = constraintIndexRule( indexId, labelId, propertyKeyIds,
-                new Descriptor( "provider1", "version1" ), constraintId );
+        IndexRule indexRule =
+                constraintIndexRule( indexId, descriptor, new Descriptor( "provider1", "version1" ), constraintId );
         NodeRecord nodeRecord = nodeWithLabels( labelId );
         long duplicateNodeId1 = 1;
         long duplicateNodeId2 = 2;
@@ -136,7 +138,7 @@ public class NodeCorrectlyIndexedCheckTest
     public void shouldReportNodeIndexedMultipleTimes() throws Exception
     {
         // given
-        IndexRule indexRule = indexRule( indexId, labelId, propertyKeyIds, new Descriptor( "provider1", "version1" ) );
+        IndexRule indexRule = indexRule( indexId, descriptor, new Descriptor( "provider1", "version1" ) );
         NodeRecord nodeRecord = nodeWithLabels( labelId );
 
         long nodeId = nodeRecord.getId();
@@ -168,12 +170,12 @@ public class NodeCorrectlyIndexedCheckTest
         PropertyReader propertyReader = mock( PropertyReader.class );
         PropertyBlock propertyBlock = mock( PropertyBlock.class );
         when( propertyBlock.getKeyIndexId() )
-                .thenReturn( propertyKeyIds[0] );
+                .thenReturn( propertyKeyId );
 
         when( propertyReader.propertyBlocks( nodeRecord ) )
                 .thenReturn( asList( propertyBlock ) );
         when( propertyReader.propertyValue( any( PropertyBlock.class ) ) )
-                .thenReturn( stringProperty( propertyKeyIds[0], propertyValue ) );
+                .thenReturn( stringProperty( propertyKeyId, propertyValue ) );
         return propertyReader;
     }
 

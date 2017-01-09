@@ -47,7 +47,7 @@ import org.neo4j.graphdb.traversal.{Evaluators, TraversalDescription, Uniqueness
 import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.kernel.api.constraints.{NodePropertyExistenceConstraint, RelationshipPropertyExistenceConstraint, UniquenessConstraint}
 import org.neo4j.kernel.api.exceptions.schema.{AlreadyConstrainedException, AlreadyIndexedException}
-import org.neo4j.kernel.api.index.{IndexDescriptor, InternalIndexState}
+import org.neo4j.kernel.api.index.{IndexDescriptorFactory, IndexDescriptor, InternalIndexState}
 import org.neo4j.kernel.api.{exceptions, _}
 import org.neo4j.kernel.impl.core.NodeManager
 
@@ -456,11 +456,11 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
   }
 
   def addIndexRule(labelId: Int, propertyKeyId: Int): IdempotentResult[IndexDescriptor] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(new IndexDescriptor(labelId, propertyKeyId)))
+    IdempotentResult(tc.statement.schemaWriteOperations().indexCreate(new NodePropertyDescriptor(labelId, propertyKeyId)))
   } catch {
     case _: AlreadyIndexedException =>
 
-      val indexDescriptor = tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId))
+      val indexDescriptor = tc.statement.readOperations().indexGetForLabelAndPropertyKey(new NodePropertyDescriptor(labelId, propertyKeyId))
 
       if (tc.statement.readOperations().indexGetState(indexDescriptor) == InternalIndexState.FAILED)
         throw new FailedIndexException(indexDescriptor.userDescription(tokenNameLookup))
@@ -468,10 +468,10 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
   }
 
   def dropIndexRule(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().indexDrop(new IndexDescriptor(labelId, propertyKeyId))
+    tc.statement.schemaWriteOperations().indexDrop(IndexDescriptorFactory.from(new NodePropertyDescriptor(labelId, propertyKeyId)))
 
   def createUniqueConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[UniquenessConstraint] = try {
-    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(new IndexDescriptor(labelId,
+    IdempotentResult(tc.statement.schemaWriteOperations().uniquePropertyConstraintCreate(new NodePropertyDescriptor(labelId,
       propertyKeyId)))
   } catch {
     case existing: AlreadyConstrainedException =>
@@ -479,12 +479,12 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
   }
 
   def dropUniqueConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(new IndexDescriptor(labelId,
+    tc.statement.schemaWriteOperations().constraintDrop(new UniquenessConstraint(new NodePropertyDescriptor(labelId,
       propertyKeyId)))
 
   def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint] =
     try {
-      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(new IndexDescriptor(labelId,
+      IdempotentResult(tc.statement.schemaWriteOperations().nodePropertyExistenceConstraintCreate(new NodePropertyDescriptor(labelId,
         propertyKeyId)))
     } catch {
       case existing: AlreadyConstrainedException =>
@@ -492,12 +492,12 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
     }
 
   def dropNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int) =
-    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(new IndexDescriptor(labelId,
+    tc.statement.schemaWriteOperations().constraintDrop(new NodePropertyExistenceConstraint(new NodePropertyDescriptor(labelId,
       propertyKeyId)))
 
   def createRelationshipPropertyExistenceConstraint(relTypeId: Int, propertyKeyId: Int): IdempotentResult[RelationshipPropertyExistenceConstraint] =
     try {
-      IdempotentResult(tc.statement.schemaWriteOperations().relationshipPropertyExistenceConstraintCreate(relTypeId, propertyKeyId))
+      IdempotentResult(tc.statement.schemaWriteOperations().relationshipPropertyExistenceConstraintCreate(new RelationshipPropertyDescriptor(relTypeId, propertyKeyId)))
     } catch {
       case existing: AlreadyConstrainedException =>
         IdempotentResult(existing.constraint().asInstanceOf[RelationshipPropertyExistenceConstraint], wasCreated = false)

@@ -23,9 +23,8 @@ import org.neo4j.cypher.internal.compiler.v3_2._
 import org.neo4j.cypher.internal.compiler.v3_2.commands.expressions.Expression
 import org.neo4j.cypher.internal.compiler.v3_2.commands.{QueryExpression, indexQuery}
 import org.neo4j.cypher.internal.compiler.v3_2.planDescription.Id
+import org.neo4j.cypher.internal.frontend.v3_2.IndexDescriptor
 import org.neo4j.cypher.internal.frontend.v3_2.ast.{LabelToken, PropertyKeyToken}
-import org.neo4j.kernel.api.index.IndexDescriptor
-import scala.collection.JavaConversions._
 
 case class NodeIndexSeekPipe(ident: String,
                              label: LabelToken,
@@ -38,7 +37,7 @@ case class NodeIndexSeekPipe(ident: String,
 
   private val propertyIds: Array[Int] = propertyKeys.map(_.nameId.id).toArray
 
-  private val descriptor = new IndexDescriptor(label.nameId.id, propertyIds)
+  private val descriptor = IndexDescriptor(label.nameId.id, propertyIds)
 
   private val indexFactory = indexMode.indexFactory(descriptor)
 

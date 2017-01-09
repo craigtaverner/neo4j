@@ -24,13 +24,11 @@ import org.mockito.Mockito._
 import org.neo4j.cypher.internal.compiler.v3_2._
 import org.neo4j.cypher.internal.compiler.v3_2.commands.expressions.{ListLiteral, Literal, Variable}
 import org.neo4j.cypher.internal.compiler.v3_2.commands.{ManyQueryExpression, SingleQueryExpression}
-import org.neo4j.cypher.internal.compiler.v3_2.helpers.JavaConversionSupport
 import org.neo4j.cypher.internal.compiler.v3_2.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_2.ast._
 import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.CypherFunSuite
-import org.neo4j.cypher.internal.frontend.v3_2.{CypherTypeException, LabelId, PropertyKeyId}
+import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, CypherTypeException, LabelId, PropertyKeyId}
 import org.neo4j.graphdb.Node
-import org.neo4j.kernel.api.index.IndexDescriptor
 
 class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSupport {
 
@@ -38,7 +36,7 @@ class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSuppo
 
   val label = LabelToken(LabelName("LabelName") _, LabelId(11))
   val propertyKey = Seq(PropertyKeyToken(PropertyKeyName("PropertyName") _, PropertyKeyId(10)))
-  val descriptor = new IndexDescriptor(label.nameId.id, (propertyKey.map(_.nameId.id).toArray))
+  val descriptor = IndexDescriptor(label.nameId.id, (propertyKey.map(_.nameId.id).toArray))
   val node = mock[Node]
   val node2 = mock[Node]
 

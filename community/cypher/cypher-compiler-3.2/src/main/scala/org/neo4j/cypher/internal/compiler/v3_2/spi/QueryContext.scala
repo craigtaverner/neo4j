@@ -27,7 +27,8 @@ import org.neo4j.cypher.internal.compiler.v3_2.pipes.matching.PatternNode
 import org.neo4j.cypher.internal.frontend.v3_2.SemanticDirection
 import org.neo4j.graphdb.{Node, Path, PropertyContainer, Relationship}
 import org.neo4j.kernel.api.constraints.{NodePropertyExistenceConstraint, RelationshipPropertyExistenceConstraint, UniquenessConstraint}
-import org.neo4j.kernel.api.index.IndexDescriptor
+import org.neo4j.kernel.api.index.{IndexDescriptor => KernelIndexDescriptor}
+import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor => CypherIndexDescriptor}
 
 import scala.collection.Iterator
 
@@ -83,29 +84,29 @@ trait QueryContext extends TokenContext {
 
   def getOrCreatePropertyKeyId(propertyKey: String): Int
 
-  def addIndexRule(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[IndexDescriptor]
+  def addIndexRule(descriptor: CypherIndexDescriptor): IdempotentResult[CypherIndexDescriptor]
 
-  def dropIndexRule(labelId: Int, propertyKeyIds: Seq[Int])
+  def dropIndexRule(descriptor: CypherIndexDescriptor)
 
-  def indexSeek(index: IndexDescriptor, value: Any): Iterator[Node]
+  def indexSeek(index: CypherIndexDescriptor, value: Any): Iterator[Node]
 
-  def indexSeekByRange(index: IndexDescriptor, value: Any): Iterator[Node]
+  def indexSeekByRange(index: CypherIndexDescriptor, value: Any): Iterator[Node]
 
-  def indexScanByContains(index: IndexDescriptor, value: String): Iterator[Node]
+  def indexScanByContains(index: CypherIndexDescriptor, value: String): Iterator[Node]
 
-  def indexScanByEndsWith(index: IndexDescriptor, value: String): Iterator[Node]
+  def indexScanByEndsWith(index: CypherIndexDescriptor, value: String): Iterator[Node]
 
-  def indexScan(index: IndexDescriptor): Iterator[Node]
+  def indexScan(index: CypherIndexDescriptor): Iterator[Node]
 
-  def lockingUniqueIndexSeek(index: IndexDescriptor, value: Any): Option[Node]
+  def lockingUniqueIndexSeek(index: CypherIndexDescriptor, value: Any): Option[Node]
 
   def getNodesByLabel(id: Int): Iterator[Node]
 
   def getOrCreateFromSchemaState[K, V](key: K, creator: => V): V
 
-  def createUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int]): IdempotentResult[UniquenessConstraint]
+  def createUniqueConstraint(descriptor: CypherIndexDescriptor): IdempotentResult[UniquenessConstraint]
 
-  def dropUniqueConstraint(labelId: Int, propertyKeyIds: Seq[Int])
+  def dropUniqueConstraint(descriptor: CypherIndexDescriptor)
 
   def createNodePropertyExistenceConstraint(labelId: Int, propertyKeyId: Int): IdempotentResult[NodePropertyExistenceConstraint]
 

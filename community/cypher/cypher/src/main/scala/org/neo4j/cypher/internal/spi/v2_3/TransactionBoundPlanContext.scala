@@ -25,6 +25,7 @@ import org.neo4j.cypher.internal.compiler.v2_3.pipes.matching.ExpanderStep
 import org.neo4j.cypher.internal.compiler.v2_3.spi._
 import org.neo4j.cypher.internal.spi.v3_2.TransactionalContextWrapper
 import org.neo4j.graphdb.Node
+import org.neo4j.kernel.api.NodePropertyDescriptor
 import org.neo4j.kernel.api.constraints.UniquenessConstraint
 import org.neo4j.kernel.api.exceptions.KernelException
 import org.neo4j.kernel.api.exceptions.schema.SchemaKernelException
@@ -41,7 +42,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper)
     val labelId = tc.statement.readOperations().labelGetForName(labelName)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
-    getOnlineIndex(tc.statement.readOperations().indexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)))
+    getOnlineIndex(tc.statement.readOperations().indexGetForLabelAndPropertyKey(new NodePropertyDescriptor(labelId, propertyKeyId)))
   }
 
   def hasIndexRule(labelName: String): Boolean = {
@@ -58,7 +59,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
     // here we do not need to use getOnlineIndex method because uniqueness constraint creation is synchronous
-    Some(tc.statement.readOperations().uniqueIndexGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)))
+    Some(tc.statement.readOperations().uniqueIndexGetForLabelAndPropertyKey(new NodePropertyDescriptor(labelId, propertyKeyId)))
   }
 
   private def evalOrNone[T](f: => Option[T]): Option[T] =
@@ -75,7 +76,7 @@ class TransactionBoundPlanContext(tc: TransactionalContextWrapper)
     val propertyKeyId = tc.statement.readOperations().propertyKeyGetForName(propertyKey)
 
     import scala.collection.JavaConverters._
-    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(labelId, Array(propertyKeyId)).asScala.collectFirst {
+    tc.statement.readOperations().constraintsGetForLabelAndPropertyKey(new NodePropertyDescriptor(labelId, propertyKeyId)).asScala.collectFirst {
       case unique: UniquenessConstraint => unique
     }
   } catch {
