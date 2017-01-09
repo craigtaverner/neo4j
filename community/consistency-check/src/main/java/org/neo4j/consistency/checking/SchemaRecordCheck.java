@@ -261,7 +261,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
             RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
     {
         engine.comparativeCheck( records.label( rule.getLabel() ), VALID_LABEL );
-        //TODO: See if this composite idnex specific check can be encapsulted in the SchemaRule class structure
+        //TODO: See if this composite index specific check can be encapsulated in the SchemaRule class structure
         if ( rule.getKind().isComposite() )
         {
             for ( int propertyKey : propertyKeys )

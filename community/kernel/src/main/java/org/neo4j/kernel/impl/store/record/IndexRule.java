@@ -133,7 +133,8 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     @Override
     public int[] getPropertyKeys()
     {
-        return descriptor.getPropertyKeyIds();
+        // TODO: Refactor IndexRule and IndexSchemaRule to property separate out composite index behaviour
+        return descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
     }
 
     @Override
@@ -172,19 +173,21 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     @Override
     public int length()
     {
+        int propertyCount = descriptor.isComposite() ? descriptor.getPropertyKeyIds().length : 1;
         return 4 /* label id */
                + 1 /* kind id */
                + UTF8.computeRequiredByteBufferSize( providerDescriptor.getKey() )
                + UTF8.computeRequiredByteBufferSize( providerDescriptor.getVersion() )
                + 2                                  /* number of property keys (short) */
-               + 8 * descriptor.getPropertyKeyIds().length            /* the property keys, each 8 bytes (long) */
+               + 8 * propertyCount                 /* the property keys, each 8 bytes (long) */
                + (isConstraintIndex() ? 8 : 0)      /* constraint indexes have an owner field */;
     }
 
     @Override
     public void serialize( ByteBuffer target )
     {
-        int[] propertyKeys = descriptor.getPropertyKeyIds();
+        int[] propertyKeys =
+                descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
         target.putInt( descriptor.getLabelId() );
         // 0 is reserved, so use ordinal + 1
         target.put( (byte) (kind.ordinal()+1) );
