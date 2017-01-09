@@ -38,6 +38,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.Visitor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementTokenNameLookup;
@@ -46,6 +47,7 @@ import org.neo4j.kernel.api.exceptions.index.IndexEntryConflictException;
 import org.neo4j.kernel.api.exceptions.index.IndexNotFoundKernelException;
 import org.neo4j.kernel.api.exceptions.index.IndexPopulationFailedKernelException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.NodePropertyUpdate;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.api.labelscan.LabelScanStore;
@@ -209,7 +211,8 @@ public class MultiIndexPopulationConcurrentUpdatesIT
 
     private IndexReader getIndexReader( int propertyId, Integer countryLabelId ) throws IndexNotFoundKernelException
     {
-        return indexService.getIndexProxy( IndexDescriptorFactory.from( new NodePropertyDescriptor( countryLabelId, propertyId ) ) ).newReader();
+        return indexService.getIndexProxy( IndexDescriptorFactory
+                .from( new NodePropertyDescriptor( countryLabelId, propertyId ) ) ).newReader();
     }
 
     private void launchCustomIndexPopulation( Map<String,Integer> labelNameIdMap, int propertyId,
@@ -283,8 +286,9 @@ public class MultiIndexPopulationConcurrentUpdatesIT
 
     private IndexRule[] createIndexRules( Map<String,Integer> labelNameIdMap, int propertyId )
     {
-        return labelNameIdMap.values().stream().map( index -> new IndexRule( index, index, new int[]{propertyId},
-                new SchemaIndexProvider.Descriptor( "lucene", "version" ), null ) ).toArray( IndexRule[]::new );
+        return labelNameIdMap.values().stream()
+                .map( index -> new IndexRule( index, new NodePropertyDescriptor( index, propertyId ),
+                        new SchemaIndexProvider.Descriptor( "lucene", "version" ), null ) ).toArray( IndexRule[]::new );
     }
 
     private List<IndexRule> getIndexRules( NeoStores neoStores )

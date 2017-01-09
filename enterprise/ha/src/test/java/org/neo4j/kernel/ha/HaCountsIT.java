@@ -29,6 +29,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
@@ -182,7 +183,8 @@ public class HaCountsIT
             Statement statement = statement( db );
             int labelId = statement.tokenWriteOperations().labelGetOrCreateForName( label.name() );
             int propertyKeyId = statement.tokenWriteOperations().propertyKeyGetOrCreateForName( propertyName );
-            IndexDescriptor index = statement.schemaWriteOperations().indexCreate( labelId, new int[]{propertyKeyId} );
+            IndexDescriptor index = statement.schemaWriteOperations()
+                    .indexCreate( new NodePropertyDescriptor( labelId, propertyKeyId ) );
             tx.success();
             return index;
         }

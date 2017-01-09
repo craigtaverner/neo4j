@@ -30,7 +30,9 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.mockfs.EphemeralFileSystemAbstraction;
 import org.neo4j.kernel.api.DataWriteOperations;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.exceptions.ConstraintViolationTransactionFailureException;
 import org.neo4j.kernel.api.exceptions.KernelException;
@@ -76,11 +78,11 @@ public class PropertyExistenceConstraintValidationIT
         {
             DataWriteOperations dataWrite = dataWriteOperationsInNewTransaction();
             int label = dataWrite.labelGetOrCreateForName( key );
-            int[] propertyKey = new int[]{dataWrite.propertyKeyGetOrCreateForName( property )};
+            int propertyKey = dataWrite.propertyKeyGetOrCreateForName( property );
             commit();
 
             SchemaWriteOperations schemaWrite = schemaWriteOperationsInNewTransaction();
-            schemaWrite.nodePropertyExistenceConstraintCreate( label, propertyKey );
+            schemaWrite.nodePropertyExistenceConstraintCreate( new NodePropertyDescriptor( label, propertyKey ) );
             commit();
         }
 
@@ -160,7 +162,8 @@ public class PropertyExistenceConstraintValidationIT
             commit();
 
             SchemaWriteOperations schemaWrite = schemaWriteOperationsInNewTransaction();
-            schemaWrite.relationshipPropertyExistenceConstraintCreate( relTypeId, propertyKeyId );
+            schemaWrite.relationshipPropertyExistenceConstraintCreate(
+                    new RelationshipPropertyDescriptor( relTypeId, propertyKeyId ) );
             commit();
         }
 

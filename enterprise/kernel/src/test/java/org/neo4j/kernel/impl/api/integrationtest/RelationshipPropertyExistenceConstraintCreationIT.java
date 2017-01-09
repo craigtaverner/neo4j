@@ -23,6 +23,9 @@ import org.neo4j.SchemaHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.exceptions.KernelException;
@@ -30,7 +33,7 @@ import org.neo4j.kernel.api.exceptions.KernelException;
 import static org.neo4j.graphdb.RelationshipType.withName;
 
 public class RelationshipPropertyExistenceConstraintCreationIT
-        extends AbstractConstraintCreationIT<RelationshipPropertyExistenceConstraint>
+        extends AbstractConstraintCreationIT<RelationshipPropertyExistenceConstraint,RelationshipPropertyDescriptor>
 {
     @Override
     int initializeLabelOrRelType( SchemaWriteOperations writeOps, String name ) throws KernelException
@@ -39,10 +42,10 @@ public class RelationshipPropertyExistenceConstraintCreationIT
     }
 
     @Override
-    RelationshipPropertyExistenceConstraint createConstraint( SchemaWriteOperations writeOps, int type,
-            int[] property ) throws Exception
+    RelationshipPropertyExistenceConstraint createConstraint( SchemaWriteOperations writeOps,
+            RelationshipPropertyDescriptor descriptor ) throws Exception
     {
-        return writeOps.relationshipPropertyExistenceConstraintCreate( type, property[0] );
+        return writeOps.relationshipPropertyExistenceConstraintCreate( descriptor );
     }
 
     @Override
@@ -52,9 +55,9 @@ public class RelationshipPropertyExistenceConstraintCreationIT
     }
 
     @Override
-    RelationshipPropertyExistenceConstraint newConstraintObject( int type, int[] property )
+    RelationshipPropertyExistenceConstraint newConstraintObject( RelationshipPropertyDescriptor descriptor )
     {
-        return new RelationshipPropertyExistenceConstraint( type, property[0] );
+        return new RelationshipPropertyExistenceConstraint( descriptor );
     }
 
     @Override
@@ -80,5 +83,11 @@ public class RelationshipPropertyExistenceConstraintCreationIT
         {
             relationship.delete();
         }
+    }
+
+    @Override
+    RelationshipPropertyDescriptor makeDescriptor( int typeId, int propertyKeyId )
+    {
+        return new RelationshipPropertyDescriptor( typeId, propertyKeyId );
     }
 }
