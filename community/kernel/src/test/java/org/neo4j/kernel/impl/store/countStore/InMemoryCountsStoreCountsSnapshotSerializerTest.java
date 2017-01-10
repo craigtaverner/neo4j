@@ -29,6 +29,9 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKey;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyType;
@@ -235,13 +238,15 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
     public static IndexSampleKey indexSampleKey( int labelId, int propertyKeyId )
     {
         //TODO: Consider enhancing stests for composite indexes
-        return CountsKeyFactory.indexSampleKey( labelId, new int[]{propertyKeyId} );
+        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) ;
+        return CountsKeyFactory.indexSampleKey( descriptor );
     }
 
     public static IndexStatisticsKey indexStatisticsKey( int labelId, int propertyKeyId )
     {
         //TODO: Consider enhancing stests for composite indexes
-        return CountsKeyFactory.indexStatisticsKey( labelId, new int[]{propertyKeyId} );
+        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) ;
+        return CountsKeyFactory.indexStatisticsKey( descriptor );
     }
 
     private void initializeBuffers( int serializedLength )

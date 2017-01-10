@@ -204,15 +204,15 @@ public class HaCountsIT
 
     private void assertOnIndexCounts( int expectedIndexUpdates, int expectedIndexSize,
                                       int expectedUniqueValues, int expectedSampleSize,
-                                      IndexDescriptor indexDescriptor, HighlyAvailableGraphDatabase db )
+                                      IndexDescriptor descriptor, HighlyAvailableGraphDatabase db )
     {
         CountsTracker counts = counts( db );
-        int labelId = indexDescriptor.getLabelId();
-        int[] propertyKeyId = indexDescriptor.getPropertyKeyIds();
+        int labelId = descriptor.getLabelId();
+        int[] propertyKeyId = descriptor.getPropertyKeyIds();
         assertDoubleLongEquals( expectedIndexUpdates, expectedIndexSize,
-                counts.indexUpdatesAndSize( labelId, propertyKeyId, newDoubleLongRegister() ) );
+                counts.indexUpdatesAndSize( descriptor, newDoubleLongRegister() ) );
         assertDoubleLongEquals( expectedUniqueValues, expectedSampleSize,
-                counts.indexSample( labelId, propertyKeyId, newDoubleLongRegister() ) );
+                counts.indexSample( descriptor, newDoubleLongRegister() ) );
     }
 
     private void assertDoubleLongEquals( int expectedFirst, int expectedSecond, DoubleLongRegister actualValues )

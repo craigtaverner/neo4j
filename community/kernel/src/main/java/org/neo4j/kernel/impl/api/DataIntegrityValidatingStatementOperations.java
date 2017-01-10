@@ -272,7 +272,7 @@ public class DataIntegrityValidatingStatementOperations implements
         while ( uniqueIndexes.hasNext() )
         {
             IndexDescriptor uniqueIndex = uniqueIndexes.next();
-            if ( Arrays.equals( uniqueIndex.getPropertyKeyIds(), descriptor.getPropertyKeyIds() ) )
+            if ( uniqueIndex.equals( descriptor ) )
             {
                 throw new IndexBelongsToConstraintException( descriptor.descriptor() );
             }
@@ -284,7 +284,7 @@ public class DataIntegrityValidatingStatementOperations implements
     {
         for ( IndexDescriptor existing : loop( indexes ) )
         {
-            if ( Arrays.equals( existing.getPropertyKeyIds(), descriptor.getPropertyKeyIds() ) )
+            if ( existing.equals( descriptor ) )
             {
                 return;
             }

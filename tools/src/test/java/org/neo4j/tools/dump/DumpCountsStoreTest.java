@@ -27,6 +27,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.impl.core.RelationshipTypeToken;
 import org.neo4j.kernel.impl.store.LabelTokenStore;
 import org.neo4j.kernel.impl.store.NeoStores;
@@ -60,7 +63,7 @@ public class DumpCountsStoreTest
     private static final int TYPE_ID = 1;
     private static final String TYPE_LABEL = "testType";
 
-    private static final int[] INDEX_PROPERTY_KEY_ID = new int[]{1};
+    private static final int INDEX_PROPERTY_KEY_ID = 1;
     private static final String INDEX_PROPERTY = "indexProperty";
 
     @Rule
@@ -120,7 +123,9 @@ public class DumpCountsStoreTest
     public void dumpIndexStatistic()
     {
         DumpCountsStore countsStore = getCountStore();
-        countsStore.visitIndexStatistics( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID, 3, 4 );
+        IndexDescriptor descriptor =
+                IndexDescriptorFactory.from( new NodePropertyDescriptor( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID ) );
+        countsStore.visitIndexStatistics( descriptor, 3, 4 );
         assertThat( suppressOutput.getOutputVoice().toString(),
                 containsString( "IndexStatistics[(:indexLabel [labelId=3] {indexProperty [keyId=1]})" +
                                     "]:\tupdates=3, size=4" ) );
@@ -130,7 +135,9 @@ public class DumpCountsStoreTest
     public void dumpIndexSample()
     {
         DumpCountsStore countsStore = getCountStore();
-        countsStore.visitIndexSample( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID, 1, 2 );
+        IndexDescriptor descriptor =
+                IndexDescriptorFactory.from( new NodePropertyDescriptor( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID ) );
+        countsStore.visitIndexSample( descriptor, 1, 2 );
         assertThat( suppressOutput.getOutputVoice().toString(),
                 containsString( "IndexSample[(:indexLabel [labelId=3] {indexProperty [keyId=1]})]:\tunique=1, size=2" ));
     }
@@ -160,7 +167,7 @@ public class DumpCountsStoreTest
 
     private List<Token> getPropertyTokens()
     {
-        return Collections.singletonList( new Token( INDEX_PROPERTY, INDEX_PROPERTY_KEY_ID[0] ) );
+        return Collections.singletonList( new Token( INDEX_PROPERTY, INDEX_PROPERTY_KEY_ID ) );
     }
 
     private List<RelationshipTypeToken> getTypeTokes()

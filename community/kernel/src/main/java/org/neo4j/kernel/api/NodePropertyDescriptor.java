@@ -19,12 +19,8 @@
  */
 package org.neo4j.kernel.api;
 
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
-import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.storageengine.api.EntityType;
-import org.neo4j.storageengine.api.schema.SchemaRule;
 
-import static java.lang.String.format;
+import org.neo4j.storageengine.api.EntityType;
 
 /**
  * Description of a combination of a relationship type and one property.

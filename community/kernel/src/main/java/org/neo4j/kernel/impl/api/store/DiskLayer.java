@@ -608,15 +608,15 @@ public class DiskLayer implements StoreReadLayer
     }
 
     @Override
-    public DoubleLongRegister indexUpdatesAndSize( IndexDescriptor index, DoubleLongRegister target )
+    public DoubleLongRegister indexUpdatesAndSize( IndexDescriptor descriptor, DoubleLongRegister target )
     {
-        return counts.indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyIds(), target );
+        return counts.indexUpdatesAndSize( descriptor, target );
     }
 
     @Override
-    public DoubleLongRegister indexSample( IndexDescriptor index, DoubleLongRegister target )
+    public DoubleLongRegister indexSample( IndexDescriptor descriptor, DoubleLongRegister target )
     {
-        return counts.indexSample( index.getLabelId(), index.getPropertyKeyIds(), target );
+        return counts.indexSample( descriptor, target );
     }
 
     @Override

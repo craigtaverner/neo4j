@@ -51,6 +51,7 @@ import org.neo4j.graphdb.mockfs.UncloseableDelegatingFileSystemAbstraction;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.api.CountsAccessor;
 import org.neo4j.kernel.impl.api.CountsVisitor;
@@ -425,13 +426,13 @@ public class CountsRotationTest
             }
 
             @Override
-            public void visitIndexStatistics(int labelId, int[] propertyKeyIds, long updates, long size) {
-                records.add( Pair.of( CountsKeyFactory.indexStatisticsKey( labelId, propertyKeyIds ), size ) );
+            public void visitIndexStatistics( IndexDescriptor descriptor, long updates, long size) {
+                records.add( Pair.of( CountsKeyFactory.indexStatisticsKey( descriptor ), size ) );
             }
 
             @Override
-            public void visitIndexSample(int labelId, int[] propertyKeyIds, long unique, long size) {
-                records.add( Pair.of( CountsKeyFactory.indexSampleKey( labelId, propertyKeyIds ), size ) );
+            public void visitIndexSample( IndexDescriptor descriptor, long unique, long size) {
+                records.add( Pair.of( CountsKeyFactory.indexSampleKey( descriptor ), size ) );
             }
         } );
         return records;

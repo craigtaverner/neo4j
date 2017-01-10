@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api;
 
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.register.Register.DoubleLongRegister;
 
 public interface CountsAccessor extends CountsVisitor.Visitable
@@ -39,13 +40,13 @@ public interface CountsAccessor extends CountsVisitor.Visitable
      * @param target a register to store the read values in
      * @return the input register for convenience
      */
-    DoubleLongRegister indexUpdatesAndSize( int labelId, int[] propertyKeyIds, DoubleLongRegister target );
+    DoubleLongRegister indexUpdatesAndSize( IndexDescriptor descriptor, DoubleLongRegister target );
 
     /**
      * @param target a register to store the read values in
      * @return the input register for convenience
      */
-    DoubleLongRegister indexSample( int labelId, int[] propertyKeyIds, DoubleLongRegister target );
+    DoubleLongRegister indexSample( IndexDescriptor descriptor, DoubleLongRegister target );
 
     interface Updater extends AutoCloseable
     {
@@ -59,11 +60,11 @@ public interface CountsAccessor extends CountsVisitor.Visitable
 
     interface IndexStatsUpdater extends AutoCloseable
     {
-        void replaceIndexUpdateAndSize( int labelId, int[] propertyKeyIds, long updates, long size );
+        void replaceIndexUpdateAndSize( IndexDescriptor descriptor, long updates, long size );
 
-        void replaceIndexSample( int labelId, int[] propertyKeyIds, long unique, long size );
+        void replaceIndexSample( IndexDescriptor descriptor, long unique, long size );
 
-        void incrementIndexUpdates( int labelId, int[] propertyKeyIds, long delta );
+        void incrementIndexUpdates( IndexDescriptor descriptor, long delta );
 
         @Override
         void close();
@@ -93,15 +94,15 @@ public interface CountsAccessor extends CountsVisitor.Visitable
         }
 
         @Override
-        public void visitIndexStatistics( int labelId, int[] propertyKeyIds, long updates, long size )
+        public void visitIndexStatistics( IndexDescriptor descriptor, long updates, long size )
         {
-            stats.replaceIndexUpdateAndSize( labelId, propertyKeyIds, updates, size );
+            stats.replaceIndexUpdateAndSize( descriptor, updates, size );
         }
 
         @Override
-        public void visitIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
+        public void visitIndexSample( IndexDescriptor descriptor, long unique, long size )
         {
-            stats.replaceIndexSample( labelId, propertyKeyIds, unique, size );
+            stats.replaceIndexSample( descriptor, unique, size );
         }
     }
 }

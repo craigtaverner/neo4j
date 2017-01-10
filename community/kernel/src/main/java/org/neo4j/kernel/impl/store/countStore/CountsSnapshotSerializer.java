@@ -22,6 +22,7 @@ package org.neo4j.kernel.impl.store.countStore;
 import java.io.IOException;
 import java.util.Map;
 
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKey;
 import org.neo4j.kernel.impl.store.counts.keys.IndexSampleKey;
 import org.neo4j.kernel.impl.store.counts.keys.IndexStatisticsKey;
@@ -85,8 +86,7 @@ public class CountsSnapshotSerializer
                 }
                 IndexSampleKey indexSampleKey = (IndexSampleKey) key;
                 channel.put( INDEX_SAMPLE.code );
-                channel.putInt( indexSampleKey.labelId() );
-                writePropertyKeyIds( channel, indexSampleKey.propertyKeyIds() );
+                writeIndexDescription( channel, indexSampleKey.descriptor() );
                 channel.putLong( value[0] );
                 channel.putLong( value[1] );
                 break;
@@ -99,8 +99,7 @@ public class CountsSnapshotSerializer
                 }
                 IndexStatisticsKey indexStatisticsKey = (IndexStatisticsKey) key;
                 channel.put( INDEX_STATISTICS.code );
-                channel.putInt( indexStatisticsKey.labelId() );
-                writePropertyKeyIds( channel, indexStatisticsKey.propertyKeyIds() );
+                writeIndexDescription( channel, indexStatisticsKey.descriptor() );
                 channel.putLong( value[0] );
                 channel.putLong( value[1] );
                 break;
@@ -114,12 +113,20 @@ public class CountsSnapshotSerializer
         }
     }
 
-    private static void writePropertyKeyIds( FlushableChannel channel, int[] propertyKeyIds ) throws IOException
+    private static void writeIndexDescription( FlushableChannel channel, IndexDescriptor descriptor ) throws IOException
     {
-        channel.putShort( (short) propertyKeyIds.length );
-        for ( int prop : propertyKeyIds )
+        channel.putInt( descriptor.getLabelId() );
+        if(descriptor.isComposite())
         {
-            channel.putInt( prop );
+            //TODO: Support composite indexes
+            throw new UnsupportedOperationException( "Composite indexes not yet supported" );
+//            channel.putShort( (short) descriptor.getPropertyKeyIds().length );
+//            for ( int prop : descriptor.getPropertyKeyIds() )
+//            {
+//                channel.putInt( prop );
+//            }
+        }else{
+            channel.putInt( descriptor.getPropertyKeyId() );
         }
     }
 }

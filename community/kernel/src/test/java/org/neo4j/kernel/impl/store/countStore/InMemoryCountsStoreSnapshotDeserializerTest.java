@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKey;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyFactory;
 import org.neo4j.kernel.impl.store.counts.keys.IndexSampleKey;
@@ -162,9 +165,9 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putInt( 1 );
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );
-
+        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
         //WHEN
-        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( 1, new int[]{1} );
+        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( descriptor );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN
@@ -186,8 +189,10 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );
 
+        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
+
         //WHEN
-        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( 1, new int[]{1} );
+        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( descriptor );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN

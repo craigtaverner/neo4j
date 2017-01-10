@@ -1140,7 +1140,7 @@ public class StateHandlingStatementOperations implements
     {
         // TODO: Update this to handle composite indexes
         IndexDescriptor indexDescriptor = indexGetForLabelAndPropertyKey( state, descriptor );
-        if ( descriptor != null )
+        if ( descriptor != null && indexDescriptor != null )
         {
             if (after != null)
             {

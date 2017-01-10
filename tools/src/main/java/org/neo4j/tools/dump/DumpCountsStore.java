@@ -29,6 +29,7 @@ import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.ReadOperations;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.api.CountsVisitor;
 import org.neo4j.kernel.impl.core.RelationshipTypeToken;
@@ -149,19 +150,17 @@ public class DumpCountsStore implements CountsVisitor, MetadataVisitor, UnknownK
     }
 
     @Override
-    public void visitIndexStatistics( int labelId, int[] propertyKeyIds, long updates, long size )
+    public void visitIndexStatistics( IndexDescriptor descriptor, long updates, long size )
     {
-        out.printf( "\tIndexStatistics[(%s {%s})]:\tupdates=%d, size=%d%n",
-                    label( labelId ), propertyKey( propertyKeyIds[0] ),
-                    updates, size );
+        out.printf( "\tIndexStatistics[(%s {%s})]:\tupdates=%d, size=%d%n", label( descriptor.getLabelId() ),
+                descriptor.descriptor().propertyIdText(), updates, size );
     }
 
     @Override
-    public void visitIndexSample( int labelId, int[] propertyKeyIds, long unique, long size )
+    public void visitIndexSample( IndexDescriptor descriptor, long unique, long size )
     {
-        out.printf( "\tIndexSample[(%s {%s})]:\tunique=%d, size=%d%n",
-                    label( labelId ), propertyKey( propertyKeyIds[0] ),
-                    unique, size );
+        out.printf( "\tIndexSample[(%s {%s})]:\tunique=%d, size=%d%n", label( descriptor.getLabelId() ),
+                descriptor.descriptor().propertyIdText(), unique, size );
     }
 
     @Override

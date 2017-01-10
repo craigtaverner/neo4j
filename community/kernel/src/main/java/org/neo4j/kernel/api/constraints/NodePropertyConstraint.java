@@ -36,7 +36,7 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint imp
 
     public NodePropertyConstraint( NodePropertyDescriptor descriptor )
     {
-        super( descriptor instanceof DescriptorWithProperties ? descriptor.getPropertyKeyIds()
+        super( descriptor.isComposite() ? descriptor.getPropertyKeyIds()
                                                               : new int[]{descriptor.getPropertyKeyId()} );
         this.descriptor = descriptor;
     }

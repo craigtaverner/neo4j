@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKey;
 import org.neo4j.kernel.impl.store.counts.keys.CountsKeyType;
 import org.neo4j.kernel.impl.transaction.log.ReadableClosableChannel;
@@ -46,6 +49,7 @@ public class CountsSnapshotDeserializer
         for ( int i = 0; i < size; i++ )
         {
             CountsKeyType type = value( channel.get() );
+            IndexDescriptor descriptor;
             switch ( type )
             {
             case ENTITY_NODE:
@@ -64,13 +68,17 @@ public class CountsSnapshotDeserializer
                 break;
 
             case INDEX_SAMPLE:
-                key = indexSampleKey( channel.getInt(), readPropertyKeyIds( channel ) );
+                descriptor = IndexDescriptorFactory.from(
+                        new NodePropertyDescriptor( channel.getInt(), readPropertyKeyIds( channel ) ) );
+                key = indexSampleKey( descriptor );
                 value = new long[]{channel.getLong(), channel.getLong()};
                 map.put( key, value );
                 break;
 
             case INDEX_STATISTICS:
-                key = indexStatisticsKey( channel.getInt(), readPropertyKeyIds( channel ) );
+                descriptor = IndexDescriptorFactory.from(
+                        new NodePropertyDescriptor( channel.getInt(), readPropertyKeyIds( channel ) ) );
+                key = indexStatisticsKey( descriptor );
                 value = new long[]{channel.getLong(), channel.getLong()};
                 map.put( key, value );
                 break;
@@ -85,14 +93,16 @@ public class CountsSnapshotDeserializer
         return new CountsSnapshot( txid, map );
     }
 
-    private static int[] readPropertyKeyIds( ReadableClosableChannel channel ) throws IOException
+    private static int readPropertyKeyIds( ReadableClosableChannel channel ) throws IOException
     {
-        short length = channel.getShort();
-        int[] propertyKeyIds = new int[length];
-        for ( int ip = 0; ip < length; ip++ )
-        {
-            propertyKeyIds[ip] = channel.getInt();
-        }
-        return propertyKeyIds;
+        return channel.getInt();
+        //TODO: Support composite indexes
+//        short length = channel.getShort();
+//        int[] propertyKeyIds = new int[length];
+//        for ( int ip = 0; ip < length; ip++ )
+//        {
+//            propertyKeyIds[ip] = channel.getInt();
+//        }
+//        return propertyKeyIds;
     }
 }

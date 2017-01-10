@@ -30,7 +30,7 @@ import static java.lang.String.format;
  *
  * @see SchemaRule
  */
-public abstract class EntityPropertyDescriptor implements DescriptorWithProperties
+public abstract class EntityPropertyDescriptor implements DescriptorWithProperties, Comparable<EntityPropertyDescriptor>
 {
     protected final int entityId;
     private final int propertyKeyId;
@@ -116,5 +116,16 @@ public abstract class EntityPropertyDescriptor implements DescriptorWithProperti
     public String userDescription( TokenNameLookup tokenNameLookup )
     {
         return format( ":%s(%s)", entityNameText( tokenNameLookup ), propertyNameText( tokenNameLookup ) );
+    }
+
+
+    public int compareTo( EntityPropertyDescriptor that )
+    {
+        int cmp = this.entityId - that.entityId;
+        if ( cmp == 0 )
+        {
+            return this.propertyKeyId - that.propertyKeyId;
+        }
+        return cmp;
     }
 }

@@ -187,13 +187,13 @@ public class IndexStatisticsTest
         catch ( IndexNotFoundKernelException e )
         {
             DoubleLongRegister actual = getTracker()
-                    .indexSample( index.getLabelId(), index.getPropertyKeyIds(), Registers.newDoubleLongRegister() );
+                    .indexSample( index, Registers.newDoubleLongRegister() );
             assertDoubleLongEquals( 0L, 0L, actual );
         }
 
         // and then index size and index updates are zero on disk
         DoubleLongRegister actual = getTracker()
-                .indexUpdatesAndSize( index.getLabelId(), index.getPropertyKeyIds(), Registers.newDoubleLongRegister() );
+                .indexUpdatesAndSize( index, Registers.newDoubleLongRegister() );
         assertDoubleLongEquals( 0L, 0L, actual );
     }
 

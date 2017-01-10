@@ -21,19 +21,20 @@ package org.neo4j.kernel.impl.store.counts.keys;
 
 import java.util.Arrays;
 
+import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.impl.api.CountsVisitor;
 
 public final class IndexStatisticsKey extends IndexKey
 {
-    IndexStatisticsKey( int labelId, int[] propertyKeyIds )
+    IndexStatisticsKey( IndexDescriptor descriptor )
     {
-        super( labelId, propertyKeyIds, CountsKeyType.INDEX_STATISTICS );
+        super( descriptor, CountsKeyType.INDEX_STATISTICS );
     }
 
     @Override
     public void accept( CountsVisitor visitor, long updates, long size )
     {
-        visitor.visitIndexStatistics( labelId(), propertyKeyIds(), updates, size );
+        visitor.visitIndexStatistics( descriptor(), updates, size );
     }
 
     @Override

@@ -22,38 +22,32 @@ package org.neo4j.kernel.impl.store.counts.keys;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.neo4j.kernel.api.index.IndexDescriptor;
+
 import static org.neo4j.kernel.impl.util.IdPrettyPrinter.label;
 import static org.neo4j.kernel.impl.util.IdPrettyPrinter.propertyKey;
 
 abstract class IndexKey implements CountsKey
 {
-    private final int labelId;
-    private final int[] propertyKeyIds;
     private final CountsKeyType type;
+    private final IndexDescriptor descriptor;
 
-    IndexKey( int labelId, int[] propertyKeyIds, CountsKeyType type )
+    IndexKey( IndexDescriptor descriptor, CountsKeyType type )
     {
-        this.labelId = labelId;
-        this.propertyKeyIds = propertyKeyIds;
         this.type = type;
+        this.descriptor = descriptor;
     }
 
-    public int labelId()
+    public IndexDescriptor descriptor()
     {
-        return labelId;
-    }
-
-    public int[] propertyKeyIds()
-    {
-        return propertyKeyIds;
+        return descriptor;
     }
 
     @Override
     public String toString()
     {
-        String propertyText = Arrays.stream( propertyKeyIds ).mapToObj( id -> propertyKey( id ) )
-                .collect( Collectors.joining( "," ) );
-        return String.format( "IndexKey[%s (%s {%s})]", type.name(), label( labelId ), propertyText );
+        String propertyText = descriptor.descriptor().propertyIdText();
+        return String.format( "IndexKey[%s (%s {%s})]", type.name(), label( descriptor.getLabelId() ), propertyText );
     }
 
     @Override
@@ -65,13 +59,7 @@ abstract class IndexKey implements CountsKey
     @Override
     public int hashCode()
     {
-        int result = labelId;
-        for ( int propertyKeyId : propertyKeyIds )
-        {
-            result = 31 * result + propertyKeyId;
-        }
-        result = 31 * result + type.hashCode();
-        return result;
+        return descriptor.hashCode();
     }
 
     @Override
@@ -87,8 +75,7 @@ abstract class IndexKey implements CountsKey
         }
 
         IndexKey indexKey = (IndexKey) other;
-        return labelId == indexKey.labelId && Arrays.equals( propertyKeyIds, indexKey.propertyKeyIds ) &&
-               type == indexKey.type;
+        return indexKey.equals( descriptor );
     }
 
     @Override
@@ -97,23 +84,7 @@ abstract class IndexKey implements CountsKey
         if ( other instanceof IndexKey )
         {
             IndexKey that = (IndexKey) other;
-            int cmp = this.labelId() - that.labelId();
-            if ( cmp == 0 && !Arrays.equals( this.propertyKeyIds(), that.propertyKeyIds() ) )
-            {
-                cmp = this.propertyKeyIds().length - that.propertyKeyIds().length;
-                if ( cmp == 0 )
-                {
-                    for ( int i = 0; i < this.propertyKeyIds().length; i++ )
-                    {
-                        cmp = this.propertyKeyIds()[i] - that.propertyKeyIds()[i];
-                        if ( cmp != 0 )
-                        {
-                            return cmp;
-                        }
-                    }
-                }
-            }
-            return cmp;
+            return this.descriptor.descriptor().compareTo( that.descriptor.descriptor() );
         }
         return recordType().ordinal() - other.recordType().ordinal();
     }

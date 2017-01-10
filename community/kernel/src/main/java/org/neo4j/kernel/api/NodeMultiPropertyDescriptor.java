@@ -105,6 +105,33 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
                 propertyNameText( tokenNameLookup ) );
     }
 
+    @Override
+    public int compareTo( EntityPropertyDescriptor other )
+    {
+        if ( other instanceof NodeMultiPropertyDescriptor )
+        {
+            NodeMultiPropertyDescriptor that = (NodeMultiPropertyDescriptor) other;
+            int cmp = this.entityId - that.entityId;
+            if ( cmp == 0 && !Arrays.equals( this.propertyKeyIds, that.propertyKeyIds ) )
+            {
+                cmp = this.propertyKeyIds.length - that.propertyKeyIds.length;
+                if ( cmp == 0 )
+                {
+                    for ( int i = 0; i < this.propertyKeyIds.length; i++ )
+                    {
+                        cmp = this.propertyKeyIds[i] - that.propertyKeyIds[i];
+                        if ( cmp != 0 )
+                        {
+                            return cmp;
+                        }
+                    }
+                }
+            }
+            return cmp;
+        }
+        return -1;
+    }
+
     //TODO: remove and inline above
     public static int hashcode( int labelId, int[] propertyKeyIds )
     {
