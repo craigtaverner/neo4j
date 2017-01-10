@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +63,6 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.Iterators.asSet;
 import static org.neo4j.kernel.impl.api.index.inmemory.InMemoryIndexProviderFactory.PROVIDER_DESCRIPTOR;
 import static org.neo4j.kernel.impl.store.record.UniquePropertyConstraintRule.uniquenessConstraintRule;
@@ -112,7 +110,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
+        assertEquals( propId( PROP1 ), rule.descriptor().getPropertyKeyId() );
         assertEquals( SchemaRule.Kind.INDEX_RULE, rule.getKind() );
     }
 
@@ -144,7 +142,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
+        assertEquals( propId( PROP1 ), rule.descriptor().getPropertyKeyId() );
         assertEquals( SchemaRule.Kind.CONSTRAINT_INDEX_RULE, rule.getKind() );
     }
 
@@ -222,7 +220,7 @@ public class SchemaStorageTest
         // Then
         assertNotNull( rule );
         assertEquals( labelId( LABEL1 ), rule.getLabel() );
-        assertTrue( Arrays.equals( propId( PROP1 ), rule.getPropertyKeys() ) );
+        assertEquals( propId( PROP1 ), rule.descriptor().getPropertyKeyId() );
         assertEquals( SchemaRule.Kind.UNIQUENESS_CONSTRAINT, rule.getKind() );
     }
 
@@ -278,7 +276,7 @@ public class SchemaStorageTest
                 "Constraint for relationship type 'Type1' and property 'prop1' not found." ) );
 
         //WHEN
-        storage.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 )[0] );
+        storage.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 ) );
     }
 
     @Test
@@ -300,14 +298,14 @@ public class SchemaStorageTest
                 "Multiple constraints found for relationship type 'Type1' and property 'prop1'." ) );
 
         // WHEN
-        schemaStorageSpy.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 )[0] );
+        schemaStorageSpy.relationshipPropertyExistenceConstraint( typeId( TYPE1 ), propId( PROP1 ) );
     }
 
     private TokenNameLookup getDefaultTokenNameLookup()
     {
         TokenNameLookup tokenNameLookup = Mockito.mock( TokenNameLookup.class );
         Mockito.when( tokenNameLookup.labelGetName( labelId( LABEL1 ) ) ).thenReturn( LABEL1 );
-        Mockito.when( tokenNameLookup.propertyKeyGetName( propId( PROP1 )[0] ) ).thenReturn( PROP1 );
+        Mockito.when( tokenNameLookup.propertyKeyGetName( propId( PROP1 ) ) ).thenReturn( PROP1 );
         Mockito.when( tokenNameLookup.relationshipTypeGetName( typeId( TYPE1 ) ) ).thenReturn( TYPE1 );
         return tokenNameLookup;
     }
@@ -364,11 +362,11 @@ public class SchemaStorageTest
         }
     }
 
-    private int[] propId( String propName )
+    private int propId( String propName )
     {
         try ( Transaction ignore = db.beginTx() )
         {
-            return new int[]{readOps().propertyKeyGetForName( propName )};
+            return readOps().propertyKeyGetForName( propName );
         }
     }
 

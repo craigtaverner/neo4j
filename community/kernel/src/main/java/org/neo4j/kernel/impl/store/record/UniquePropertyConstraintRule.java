@@ -20,7 +20,6 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
@@ -40,8 +39,7 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
 
     public static UniquePropertyConstraintRule readUniquenessConstraintRule( long id, int labelId, ByteBuffer buffer )
     {
-        return new UniquePropertyConstraintRule( id, new NodeMultiPropertyDescriptor( labelId, readPropertyKeys( buffer ) ),
-                readOwnedIndexRule( buffer ) );
+        return new UniquePropertyConstraintRule( id, readDescriptor( labelId, buffer ), readOwnedIndexRule( buffer ) );
     }
 
     private UniquePropertyConstraintRule( long id, NodePropertyDescriptor descriptor, long ownedIndexRule )
@@ -62,17 +60,20 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
     @Override
     public int length()
     {
+        //TODO: Change format to rather use short/int for length/propertyId, much like count store does
+        int propertyCount = descriptor.isComposite() ? descriptor.getPropertyKeyIds().length : 1;
         return 4 /* label */ +
                1 /* kind id */ +
                1 +  /* the number of properties that form a unique tuple */
-               8 * descriptor.getPropertyKeyIds().length + /* the property keys themselves */
+               8 * propertyCount + /* the property keys themselves */
                8; /* owned index rule */
     }
 
     @Override
     public void serialize( ByteBuffer target )
     {
-        int[] propertyKeyIds = descriptor.getPropertyKeyIds();
+        int[] propertyKeyIds =
+                descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
         target.putInt( descriptor.getLabelId() );
         target.put( kind.id() );
         target.put( (byte) propertyKeyIds.length );
@@ -83,14 +84,21 @@ public class UniquePropertyConstraintRule extends NodePropertyConstraintRule
         target.putLong( ownedIndexRule );
     }
 
-    private static int[] readPropertyKeys( ByteBuffer buffer )
+    private static NodePropertyDescriptor readDescriptor(int labelId, ByteBuffer buffer)
     {
         int[] keys = new int[buffer.get()];
-        for ( int i = 0; i < keys.length; i++ )
+        if ( keys.length > 1 )
         {
-            keys[i] = safeCastLongToInt( buffer.getLong() );
+            for ( int i = 0; i < keys.length; i++ )
+            {
+                keys[i] = safeCastLongToInt( buffer.getLong() );
+            }
+            return new NodeMultiPropertyDescriptor( labelId, keys );
         }
-        return keys;
+        else
+        {
+            return new NodePropertyDescriptor( labelId, safeCastLongToInt( buffer.getLong() ) );
+        }
     }
 
     private static long readOwnedIndexRule( ByteBuffer buffer )

@@ -46,9 +46,13 @@ public class IndexDescriptorFactory
 
     public static IndexDescriptor from( IndexRule rule )
     {
-        int[] propertyIds = rule.getPropertyKeys();
-        return propertyIds.length > 1 ? new CompositeIndexDescriptor( rule.getLabel(), propertyIds )
-                                      : new SinglePropertyIndexDescriptor( rule.getLabel(), propertyIds[0] );
+        return from( rule.descriptor() );
+    }
+
+    public static NodePropertyDescriptor getNodePropertyDescriptor( int labelId, int[] propertyKeyIds)
+    {
+        return (propertyKeyIds.length > 1) ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
+                                           : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
     }
 
     public static NodePropertyDescriptor getOrCreateTokens( SchemaWriteOperations schemaWriteOperations,

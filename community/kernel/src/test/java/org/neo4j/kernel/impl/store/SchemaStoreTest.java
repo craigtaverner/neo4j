@@ -103,7 +103,7 @@ public class SchemaStoreTest
         assertEquals( indexRule.getId(), readIndexRule.getId() );
         assertEquals( indexRule.getKind(), readIndexRule.getKind() );
         assertEquals( indexRule.getLabel(), readIndexRule.getLabel() );
-        assertTrue( Arrays.equals( indexRule.getPropertyKeys(), readIndexRule.getPropertyKeys() ) );
+        assertTrue( indexRule.descriptor().equals( readIndexRule.descriptor() ) );
         assertEquals( indexRule.getProviderDescriptor(), readIndexRule.getProviderDescriptor() );
     }
 

@@ -244,7 +244,7 @@ public class SchemaRuleCommandTest
         assertEquals( id, readSchemaCommand.getKey() );
         assertEquals( labelId, readSchemaCommand.getSchemaRule().getLabel() );
         //TODO: Consider generalizing to composite indexes
-        assertEquals( propertyKey, ((IndexRule)readSchemaCommand.getSchemaRule()).getPropertyKeys()[0] );
+        assertEquals( propertyKey, ((IndexRule) readSchemaCommand.getSchemaRule()).descriptor().getPropertyKeyId() );
     }
 
     private void visitSchemaRuleCommand( BatchTransactionApplier applier, SchemaRuleCommand command ) throws Exception

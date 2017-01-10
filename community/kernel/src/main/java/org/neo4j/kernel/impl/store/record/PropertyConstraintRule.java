@@ -30,7 +30,5 @@ public abstract class PropertyConstraintRule extends AbstractSchemaRule
 
     public abstract PropertyConstraint toConstraint();
 
-    public abstract boolean containsPropertyKeyIds( int[] propertyKeyIds );
-
     public abstract boolean containsPropertyKeyId( int propertyKeyId );
 }

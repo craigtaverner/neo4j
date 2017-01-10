@@ -80,7 +80,7 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     public IndexRule( long id, NodePropertyDescriptor descriptor, SchemaIndexProvider.Descriptor providerDescriptor,
                        Long owningConstraint )
     {
-        super( id, indexKind( owningConstraint, descriptor.isComposite() ) );
+        super( id, indexKind( owningConstraint ) );
         this.owningConstraint = owningConstraint;
 
         if ( providerDescriptor == null )
@@ -92,10 +92,9 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         this.descriptor = descriptor;
     }
 
-    private static Kind indexKind( Long owningConstraint, boolean isComposite )
+    private static Kind indexKind( Long owningConstraint )
     {
-        return owningConstraint == null ? (isComposite ? Kind.COMPOSITE_INDEX_RULE : Kind.INDEX_RULE)
-                                        : Kind.CONSTRAINT_INDEX_RULE;
+        return owningConstraint == null ? Kind.INDEX_RULE : Kind.CONSTRAINT_INDEX_RULE;
     }
 
     private static SchemaIndexProvider.Descriptor readProviderDescriptor( ByteBuffer serialized )
@@ -131,10 +130,9 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     }
 
     @Override
-    public int[] getPropertyKeys()
+    public NodePropertyDescriptor descriptor()
     {
-        // TODO: Refactor IndexRule and IndexSchemaRule to property separate out composite index behaviour
-        return descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
+        return descriptor;
     }
 
     @Override

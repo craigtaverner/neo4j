@@ -22,6 +22,7 @@ package org.neo4j.kernel.impl.store.record;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
@@ -47,6 +48,12 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
     {
         super( id, descriptor.getRelationshipTypeId(), Kind.RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT );
         this.descriptor = descriptor;
+    }
+
+    @Override
+    public final EntityPropertyDescriptor descriptor()
+    {
+        return descriptor;
     }
 
     @Override
@@ -86,12 +93,6 @@ public class RelationshipPropertyExistenceConstraintRule extends RelationshipPro
     public RelationshipPropertyConstraint toConstraint()
     {
         return new RelationshipPropertyExistenceConstraint( descriptor );
-    }
-
-    @Override
-    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
-    {
-        return propertyKeyIds.length == 1 && descriptor.getPropertyKeyId() == propertyKeyIds[0];
     }
 
     @Override

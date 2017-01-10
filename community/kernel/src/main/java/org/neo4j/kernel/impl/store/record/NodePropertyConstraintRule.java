@@ -22,6 +22,7 @@ package org.neo4j.kernel.impl.store.record;
 import java.util.Arrays;
 
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
@@ -38,6 +39,12 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
     }
 
     @Override
+    public final NodePropertyDescriptor descriptor()
+    {
+        return descriptor;
+    }
+
+    @Override
     public final int getLabel()
     {
         return descriptor.getLabelId();
@@ -49,21 +56,10 @@ public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
         throw new IllegalStateException( "Constraint rule is associated with nodes" );
     }
 
-    public int[] getPropertyKeys()
-    {
-        return descriptor.getPropertyKeyIds();
-    }
-
     @Override
     public boolean containsPropertyKeyId( int propertyKeyId )
     {
         return this.descriptor.getPropertyKeyId() == propertyKeyId;
-    }
-
-    @Override
-    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
-    {
-        return Arrays.equals( propertyKeyIds, this.descriptor.getPropertyKeyIds() );
     }
 
     public boolean matches(NodePropertyDescriptor descriptor)

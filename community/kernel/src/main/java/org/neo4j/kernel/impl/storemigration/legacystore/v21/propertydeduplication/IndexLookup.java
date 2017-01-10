@@ -63,9 +63,13 @@ class IndexLookup implements AutoCloseable
             if ( schemaRule.getKind() == SchemaRule.Kind.INDEX_RULE )
             {
                 IndexRule rule = (IndexRule) schemaRule;
-                if(rule.getPropertyKeys().length == 1)
+                if ( rule.descriptor().isComposite() )
                 {
-                    int propertyKey = rule.getPropertyKeys()[0];
+                    throw new UnsupportedOperationException( "Composite Index not yet supported" );
+                }
+                else
+                {
+                    int propertyKey = rule.descriptor().getPropertyKeyId();
                     List<IndexRule> ruleList = indexRuleIndex.get( propertyKey );
                     if ( ruleList == null )
                     {
@@ -100,10 +104,16 @@ class IndexLookup implements AutoCloseable
             {
                 if ( indexRule.getLabel() == labelId )
                 {
-                    int[] propertyKeys = indexRule.getPropertyKeys();
-                    if ( propertyKeys.length == 1 && propertyKeys[0] == propertyKeyId )
+                    if ( indexRule.descriptor().isComposite() )
                     {
-                        return indexRule;
+                        throw new UnsupportedOperationException( "Composite Index not yet supported" );
+                    }
+                    else
+                    {
+                        if ( indexRule.descriptor().getPropertyKeyId() == propertyKeyId )
+                        {
+                            return indexRule;
+                        }
                     }
                 }
             }

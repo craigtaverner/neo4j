@@ -24,6 +24,8 @@ import java.util.Map;
 
 import org.neo4j.consistency.report.ConsistencyReport;
 import org.neo4j.consistency.store.RecordAccess;
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.schema.MalformedSchemaRuleException;
 import org.neo4j.kernel.impl.store.SchemaRuleAccess;
 import org.neo4j.kernel.impl.store.record.DynamicRecord;
@@ -105,7 +107,6 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
             switch ( kind )
             {
                 case INDEX_RULE:
-                case COMPOSITE_INDEX_RULE:
                 case CONSTRAINT_INDEX_RULE:
                     strategy.checkIndexRule( (IndexRule) rule, record, records, engine );
                     break;
@@ -154,7 +155,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkIndexRule( IndexRule rule, DynamicRecord record, RecordAccess records,
                 CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.descriptor(), record, records, engine );
 
             if ( rule.isConstraintIndex() && rule.getOwningConstraint() != null )
             {
@@ -170,7 +171,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkUniquenessConstraintRule( UniquePropertyConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.descriptor(), record, records, engine );
 
             DynamicRecord previousObligation = indexObligations.put( rule.getOwnedIndex(), record.clone() );
             if ( previousObligation != null )
@@ -183,7 +184,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         public void checkNodePropertyExistenceRule( NodePropertyExistenceConstraintRule rule, DynamicRecord record,
                 RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
         {
-            checkLabelAndPropertyRule( rule, rule.getPropertyKeys(), record, records, engine );
+            checkLabelAndPropertyRule( rule, rule.descriptor(), record, records, engine );
         }
 
         @Override
@@ -257,13 +258,13 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         }
     }
 
-    private void checkLabelAndPropertyRule( SchemaRule rule, int[] propertyKeys, DynamicRecord record,
+    private void checkLabelAndPropertyRule( SchemaRule rule, EntityPropertyDescriptor descriptor, DynamicRecord record,
             RecordAccess records, CheckerEngine<DynamicRecord,ConsistencyReport.SchemaConsistencyReport> engine )
     {
         engine.comparativeCheck( records.label( rule.getLabel() ), VALID_LABEL );
-        //TODO: See if this composite index specific check can be encapsulated in the SchemaRule class structure
-        if ( rule.getKind().isComposite() )
+        if ( descriptor instanceof NodePropertyDescriptor && ((NodePropertyDescriptor) descriptor).isComposite() )
         {
+            int[] propertyKeys = descriptor.getPropertyKeyIds();
             for ( int propertyKey : propertyKeys )
             {
                 engine.comparativeCheck( records.propertyKey( propertyKey ), VALID_PROPERTY_KEY );
@@ -271,7 +272,7 @@ public class SchemaRecordCheck implements RecordCheck<DynamicRecord, Consistency
         }
         else
         {
-            engine.comparativeCheck( records.propertyKey( propertyKeys[0] ), VALID_PROPERTY_KEY );
+            engine.comparativeCheck( records.propertyKey( descriptor.getPropertyKeyId() ), VALID_PROPERTY_KEY );
         }
         checkForDuplicates( rule, record, engine );
     }
