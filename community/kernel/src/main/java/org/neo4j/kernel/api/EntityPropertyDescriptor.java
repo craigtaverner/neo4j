@@ -118,7 +118,6 @@ public abstract class EntityPropertyDescriptor implements DescriptorWithProperti
         return format( ":%s(%s)", entityNameText( tokenNameLookup ), propertyNameText( tokenNameLookup ) );
     }
 
-
     public int compareTo( EntityPropertyDescriptor that )
     {
         int cmp = this.entityId - that.entityId;

@@ -66,6 +66,9 @@ public class DumpCountsStoreTest
     private static final int INDEX_PROPERTY_KEY_ID = 1;
     private static final String INDEX_PROPERTY = "indexProperty";
 
+    private static final IndexDescriptor descriptor =
+            IndexDescriptorFactory.from( new NodePropertyDescriptor( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID ) );
+
     @Rule
     public SuppressOutput suppressOutput = SuppressOutput.suppressAll();
 
@@ -123,8 +126,6 @@ public class DumpCountsStoreTest
     public void dumpIndexStatistic()
     {
         DumpCountsStore countsStore = getCountStore();
-        IndexDescriptor descriptor =
-                IndexDescriptorFactory.from( new NodePropertyDescriptor( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID ) );
         countsStore.visitIndexStatistics( descriptor, 3, 4 );
         assertThat( suppressOutput.getOutputVoice().toString(),
                 containsString( "IndexStatistics[(:indexLabel [labelId=3] {indexProperty [keyId=1]})" +
@@ -135,8 +136,6 @@ public class DumpCountsStoreTest
     public void dumpIndexSample()
     {
         DumpCountsStore countsStore = getCountStore();
-        IndexDescriptor descriptor =
-                IndexDescriptorFactory.from( new NodePropertyDescriptor( INDEX_LABEL_ID, INDEX_PROPERTY_KEY_ID ) );
         countsStore.visitIndexSample( descriptor, 1, 2 );
         assertThat( suppressOutput.getOutputVoice().toString(),
                 containsString( "IndexSample[(:indexLabel [labelId=3] {indexProperty [keyId=1]})]:\tunique=1, size=2" ));

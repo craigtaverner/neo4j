@@ -129,7 +129,7 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
             }
             return cmp;
         }
-        return -1;
+        return -1;  //TODO: We can compare single and composite indexes, by sorting one type always above the other
     }
 
     //TODO: remove and inline above

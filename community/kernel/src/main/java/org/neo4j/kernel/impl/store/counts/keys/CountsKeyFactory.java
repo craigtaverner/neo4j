@@ -42,5 +42,4 @@ public class CountsKeyFactory
     {
         return new IndexSampleKey( descriptor );
     }
-
 }

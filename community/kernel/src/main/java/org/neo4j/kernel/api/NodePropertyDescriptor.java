@@ -19,7 +19,6 @@
  */
 package org.neo4j.kernel.api;
 
-
 import org.neo4j.storageengine.api.EntityType;
 
 /**

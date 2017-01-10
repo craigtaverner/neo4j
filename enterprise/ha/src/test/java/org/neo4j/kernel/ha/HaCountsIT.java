@@ -207,8 +207,6 @@ public class HaCountsIT
                                       IndexDescriptor descriptor, HighlyAvailableGraphDatabase db )
     {
         CountsTracker counts = counts( db );
-        int labelId = descriptor.getLabelId();
-        int[] propertyKeyId = descriptor.getPropertyKeyIds();
         assertDoubleLongEquals( expectedIndexUpdates, expectedIndexSize,
                 counts.indexUpdatesAndSize( descriptor, newDoubleLongRegister() ) );
         assertDoubleLongEquals( expectedUniqueValues, expectedSampleSize,

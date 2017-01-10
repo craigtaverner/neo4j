@@ -186,14 +186,12 @@ public class IndexStatisticsTest
         }
         catch ( IndexNotFoundKernelException e )
         {
-            DoubleLongRegister actual = getTracker()
-                    .indexSample( index, Registers.newDoubleLongRegister() );
+            DoubleLongRegister actual = getTracker().indexSample( index, Registers.newDoubleLongRegister() );
             assertDoubleLongEquals( 0L, 0L, actual );
         }
 
         // and then index size and index updates are zero on disk
-        DoubleLongRegister actual = getTracker()
-                .indexUpdatesAndSize( index, Registers.newDoubleLongRegister() );
+        DoubleLongRegister actual = getTracker().indexUpdatesAndSize( index, Registers.newDoubleLongRegister() );
         assertDoubleLongEquals( 0L, 0L, actual );
     }
 

@@ -238,15 +238,18 @@ public class InMemoryCountsStoreCountsSnapshotSerializerTest
     public static IndexSampleKey indexSampleKey( int labelId, int propertyKeyId )
     {
         //TODO: Consider enhancing stests for composite indexes
-        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) ;
-        return CountsKeyFactory.indexSampleKey( descriptor );
+        return CountsKeyFactory.indexSampleKey( indexFor( labelId, propertyKeyId ) );
     }
 
     public static IndexStatisticsKey indexStatisticsKey( int labelId, int propertyKeyId )
     {
         //TODO: Consider enhancing stests for composite indexes
-        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) ;
-        return CountsKeyFactory.indexStatisticsKey( descriptor );
+        return CountsKeyFactory.indexStatisticsKey( indexFor( labelId, propertyKeyId ) );
+    }
+
+    private static IndexDescriptor indexFor( int labelId, int propertyKeyId )
+    {
+        return IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) );
     }
 
     private void initializeBuffers( int serializedLength )

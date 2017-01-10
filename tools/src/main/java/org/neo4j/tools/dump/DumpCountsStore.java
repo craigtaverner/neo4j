@@ -150,17 +150,17 @@ public class DumpCountsStore implements CountsVisitor, MetadataVisitor, UnknownK
     }
 
     @Override
-    public void visitIndexStatistics( IndexDescriptor descriptor, long updates, long size )
+    public void visitIndexStatistics( IndexDescriptor index, long updates, long size )
     {
-        out.printf( "\tIndexStatistics[(%s {%s})]:\tupdates=%d, size=%d%n", label( descriptor.getLabelId() ),
-                descriptor.descriptor().propertyIdText(), updates, size );
+        out.printf( "\tIndexStatistics[(%s {%s})]:\tupdates=%d, size=%d%n",
+                label( index.getLabelId() ), index.descriptor().propertyIdText(), updates, size );
     }
 
     @Override
-    public void visitIndexSample( IndexDescriptor descriptor, long unique, long size )
+    public void visitIndexSample( IndexDescriptor index, long unique, long size )
     {
-        out.printf( "\tIndexSample[(%s {%s})]:\tunique=%d, size=%d%n", label( descriptor.getLabelId() ),
-                descriptor.descriptor().propertyIdText(), unique, size );
+        out.printf( "\tIndexSample[(%s {%s})]:\tunique=%d, size=%d%n",
+                label( index.getLabelId() ), index.descriptor().propertyIdText(), unique, size );
     }
 
     @Override

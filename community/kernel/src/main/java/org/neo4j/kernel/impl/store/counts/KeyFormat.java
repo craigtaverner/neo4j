@@ -130,7 +130,9 @@ class KeyFormat implements CountsVisitor
 //                buffer.putInt( 10 + 4 * i, propertyKeyIds[i] );
 //            }
 //            buffer.putByte( 10 + 4 * propertyKeyIds.length, indexKey );
-        }else{
+        }
+        else
+        {
             buffer.putByte( 0, INDEX )
                     .putInt( 4, descriptor.descriptor().getLabelId() )
                     .putInt( 8, descriptor.descriptor().getPropertyKeyId() )

@@ -19,8 +19,6 @@
  */
 package org.neo4j.kernel.impl.store.counts.keys;
 
-import java.util.Arrays;
-
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.impl.api.CountsVisitor;
 

@@ -165,9 +165,10 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putInt( 1 );
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );
-        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
+        IndexDescriptor index = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
+
         //WHEN
-        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( descriptor );
+        IndexSampleKey expectedNode = CountsKeyFactory.indexSampleKey( index );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN
@@ -188,11 +189,10 @@ public class InMemoryCountsStoreSnapshotDeserializerTest
         logChannel.putInt( 1 );
         logChannel.putLong( 1 );
         logChannel.putLong( 1 );
-
-        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
+        IndexDescriptor index = IndexDescriptorFactory.from( new NodePropertyDescriptor( 1, 1 ) );
 
         //WHEN
-        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( descriptor );
+        IndexStatisticsKey expectedNode = CountsKeyFactory.indexStatisticsKey( index );
         CountsSnapshot countsSnapshot = deserialize( logChannel );
 
         //THEN

@@ -19,7 +19,6 @@
  */
 package org.neo4j.kernel.impl.api;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.neo4j.kernel.api.NodePropertyDescriptor;
@@ -110,33 +109,33 @@ public class DataIntegrityValidatingStatementOperations implements
     }
 
     @Override
-    public IndexDescriptor indexCreate( KernelStatement state,  NodePropertyDescriptor descriptor )
+    public IndexDescriptor indexCreate( KernelStatement state, NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         checkIndexExistence( state, OperationContext.INDEX_CREATION, descriptor );
-        return schemaWriteDelegate.indexCreate( state,  descriptor );
+        return schemaWriteDelegate.indexCreate( state, descriptor );
     }
 
     @Override
-    public void indexDrop( KernelStatement state, IndexDescriptor descriptor ) throws DropIndexFailureException
+    public void indexDrop( KernelStatement state, IndexDescriptor index ) throws DropIndexFailureException
     {
         try
         {
-            assertIsNotUniqueIndex( descriptor, schemaReadDelegate.uniqueIndexesGetForLabel(
-                    state, descriptor.getLabelId() ) );
-            assertIndexExists( descriptor, schemaReadDelegate.indexesGetForLabel( state, descriptor.getLabelId() ) );
+            assertIsNotUniqueIndex( index, schemaReadDelegate.uniqueIndexesGetForLabel(
+                    state, index.getLabelId() ) );
+            assertIndexExists( index, schemaReadDelegate.indexesGetForLabel( state, index.getLabelId() ) );
         }
         catch ( IndexBelongsToConstraintException | NoSuchIndexException e )
         {
-            throw new DropIndexFailureException( descriptor.descriptor(), e );
+            throw new DropIndexFailureException( index.descriptor(), e );
         }
-        schemaWriteDelegate.indexDrop( state, descriptor );
+        schemaWriteDelegate.indexDrop( state, index );
     }
 
     @Override
-    public void uniqueIndexDrop( KernelStatement state, IndexDescriptor descriptor ) throws DropIndexFailureException
+    public void uniqueIndexDrop( KernelStatement state, IndexDescriptor index ) throws DropIndexFailureException
     {
-        schemaWriteDelegate.uniqueIndexDrop( state, descriptor );
+        schemaWriteDelegate.uniqueIndexDrop( state, index );
     }
 
     @Override
@@ -231,26 +230,26 @@ public class DataIntegrityValidatingStatementOperations implements
         schemaWriteDelegate.constraintDrop( state, constraint );
     }
 
-    private void checkIndexExistence( KernelStatement state, OperationContext context, NodePropertyDescriptor
-            nodeDescriptor )
+    private void checkIndexExistence( KernelStatement state, OperationContext context,
+            NodePropertyDescriptor descriptor )
             throws AlreadyIndexedException, AlreadyConstrainedException
     {
         //TODO: Consider using schemaReadDelegate.indexGetForLabelAndPropertyKey(state, indexDescriptor)
-        for ( IndexDescriptor descriptor : loop( schemaReadDelegate.indexesGetForLabel( state, nodeDescriptor.getLabelId() ) ) )
+        for ( IndexDescriptor index : loop( schemaReadDelegate.indexesGetForLabel( state, descriptor.getLabelId() ) ) )
         {
-            if ( nodeDescriptor.equals( descriptor ) )
+            if ( index.equals( descriptor ) )
             {
-                throw new AlreadyIndexedException( descriptor.descriptor(), context );
+                throw new AlreadyIndexedException( index.descriptor(), context );
             }
 
         }
-        for ( IndexDescriptor descriptor : loop(
-                schemaReadDelegate.uniqueIndexesGetForLabel( state, nodeDescriptor.getLabelId() ) ) )
+        for ( IndexDescriptor index : loop(
+                schemaReadDelegate.uniqueIndexesGetForLabel( state, descriptor.getLabelId() ) ) )
         {
-            if ( nodeDescriptor.equals( descriptor ) )
+            if ( index.equals( descriptor ) )
             {
                 throw new AlreadyConstrainedException(
-                        new UniquenessConstraint( nodeDescriptor ), context,
+                        new UniquenessConstraint( descriptor ), context,
                         new StatementTokenNameLookup( state.readOperations() ) );
             }
         }
@@ -265,31 +264,31 @@ public class DataIntegrityValidatingStatementOperations implements
         return name;
     }
 
-    private void assertIsNotUniqueIndex( IndexDescriptor descriptor, Iterator<IndexDescriptor> uniqueIndexes )
+    private void assertIsNotUniqueIndex( IndexDescriptor index, Iterator<IndexDescriptor> uniqueIndexes )
             throws IndexBelongsToConstraintException
 
     {
         while ( uniqueIndexes.hasNext() )
         {
             IndexDescriptor uniqueIndex = uniqueIndexes.next();
-            if ( uniqueIndex.equals( descriptor ) )
+            if ( uniqueIndex.equals( index ) )
             {
-                throw new IndexBelongsToConstraintException( descriptor.descriptor() );
+                throw new IndexBelongsToConstraintException( index.descriptor() );
             }
         }
     }
 
-    private void assertIndexExists( IndexDescriptor descriptor, Iterator<IndexDescriptor> indexes )
+    private void assertIndexExists( IndexDescriptor index, Iterator<IndexDescriptor> indexes )
             throws NoSuchIndexException
     {
         for ( IndexDescriptor existing : loop( indexes ) )
         {
-            if ( existing.equals( descriptor ) )
+            if ( existing.equals( index ) )
             {
                 return;
             }
         }
-        throw new NoSuchIndexException( descriptor.descriptor() );
+        throw new NoSuchIndexException( index.descriptor() );
     }
 
     private <C extends PropertyConstraint> void assertConstraintExists( C constraint, Iterator<C> existingConstraints )

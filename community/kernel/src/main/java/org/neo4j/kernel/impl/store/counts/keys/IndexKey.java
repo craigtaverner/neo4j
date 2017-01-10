@@ -19,23 +19,18 @@
  */
 package org.neo4j.kernel.impl.store.counts.keys;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import org.neo4j.kernel.api.index.IndexDescriptor;
-
 import static org.neo4j.kernel.impl.util.IdPrettyPrinter.label;
-import static org.neo4j.kernel.impl.util.IdPrettyPrinter.propertyKey;
+import org.neo4j.kernel.api.index.IndexDescriptor;
 
 abstract class IndexKey implements CountsKey
 {
-    private final CountsKeyType type;
     private final IndexDescriptor descriptor;
+    private final CountsKeyType type;
 
     IndexKey( IndexDescriptor descriptor, CountsKeyType type )
     {
-        this.type = type;
         this.descriptor = descriptor;
+        this.type = type;
     }
 
     public IndexDescriptor descriptor()
@@ -59,7 +54,7 @@ abstract class IndexKey implements CountsKey
     @Override
     public int hashCode()
     {
-        return descriptor.hashCode();
+        return 31 * descriptor.hashCode() + type.hashCode();
     }
 
     @Override
@@ -75,7 +70,7 @@ abstract class IndexKey implements CountsKey
         }
 
         IndexKey indexKey = (IndexKey) other;
-        return indexKey.equals( descriptor );
+        return indexKey.descriptor.equals( descriptor );
     }
 
     @Override

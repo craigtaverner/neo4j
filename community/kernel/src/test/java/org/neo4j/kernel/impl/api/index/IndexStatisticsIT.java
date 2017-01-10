@@ -97,11 +97,11 @@ public class IndexStatisticsIT
         awaitIndexOnline( indexAliensBySpecimen() );
 
         // where ALIEN and SPECIMEN are both the first ids of their kind
-        int labelId = labelId( ALIEN );
-        int pkId = pkId( SPECIMEN );
-        IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId,pkId ) );
+        IndexDescriptor index =
+                IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId( ALIEN ), pkId( SPECIMEN ) ) );
+
         // for which we don't have index counts
-        resetIndexCounts( descriptor );
+        resetIndexCounts( index );
 
         // when we shutdown the database and restart it
         restart();
@@ -111,11 +111,11 @@ public class IndexStatisticsIT
         assertEqualRegisters(
                 "Unexpected updates and size for the index",
                 newDoubleLongRegister( 0, 32 ),
-                tracker.indexUpdatesAndSize( descriptor, newDoubleLongRegister() ) );
+                tracker.indexUpdatesAndSize( index, newDoubleLongRegister() ) );
         assertEqualRegisters(
             "Unexpected sampling result",
             newDoubleLongRegister( 16, 32 ),
-            tracker.indexSample( descriptor, newDoubleLongRegister() )
+            tracker.indexSample( index, newDoubleLongRegister() )
         );
 
         // and also
@@ -190,12 +190,12 @@ public class IndexStatisticsIT
         }
     }
 
-    private void resetIndexCounts( IndexDescriptor descriptor )
+    private void resetIndexCounts( IndexDescriptor index )
     {
         try ( CountsAccessor.IndexStatsUpdater updater = neoStores().getCounts().updateIndexCounts() )
         {
-            updater.replaceIndexSample( descriptor, 0, 0 );
-            updater.replaceIndexUpdateAndSize( descriptor, 0, 0 );
+            updater.replaceIndexSample( index, 0, 0 );
+            updater.replaceIndexUpdateAndSize( index, 0, 0 );
         }
     }
 
