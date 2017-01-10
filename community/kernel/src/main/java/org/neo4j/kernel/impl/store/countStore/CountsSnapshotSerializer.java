@@ -29,7 +29,6 @@ import org.neo4j.kernel.impl.store.counts.keys.IndexStatisticsKey;
 import org.neo4j.kernel.impl.store.counts.keys.NodeKey;
 import org.neo4j.kernel.impl.store.counts.keys.RelationshipKey;
 import org.neo4j.kernel.impl.transaction.log.FlushableChannel;
-import org.neo4j.kernel.impl.transaction.log.ReadableClosableChannel;
 
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyType.ENTITY_NODE;
 import static org.neo4j.kernel.impl.store.counts.keys.CountsKeyType.ENTITY_RELATIONSHIP;
@@ -116,16 +115,18 @@ public class CountsSnapshotSerializer
     private static void writeIndexDescription( FlushableChannel channel, IndexDescriptor descriptor ) throws IOException
     {
         channel.putInt( descriptor.getLabelId() );
-        if(descriptor.isComposite())
+        if ( descriptor.isComposite() )
         {
-            //TODO: Support composite indexes
-            throw new UnsupportedOperationException( "Composite indexes not yet supported" );
-//            channel.putShort( (short) descriptor.getPropertyKeyIds().length );
-//            for ( int prop : descriptor.getPropertyKeyIds() )
-//            {
-//                channel.putInt( prop );
-//            }
-        }else{
+            int[] propertyKeyIds = descriptor.getPropertyKeyIds();
+            channel.putShort( (short) propertyKeyIds.length );
+            for ( int prop : propertyKeyIds )
+            {
+                channel.putInt( prop );
+            }
+        }
+        else
+        {
+            channel.putShort( (short) 1 );
             channel.putInt( descriptor.getPropertyKeyId() );
         }
     }

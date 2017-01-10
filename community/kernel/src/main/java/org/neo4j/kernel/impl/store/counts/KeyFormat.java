@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.store.counts;
 
+import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptorFactory;
@@ -118,26 +119,16 @@ class KeyFormat implements CountsVisitor
 
     private void indexKey( byte indexKey, IndexDescriptor descriptor )
     {
-        if ( descriptor.isComposite() )
+        int[] propertyKeyIds =
+                descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
+        buffer.putByte( 0, INDEX );
+        buffer.putInt( 4, descriptor.getLabelId() );
+        buffer.putShort( 8, (short) propertyKeyIds.length );
+        for ( int i = 0; i < propertyKeyIds.length; i++ )
         {
-            //TODO: Support composite indexes
-            throw new UnsupportedOperationException( "Composite indexes not yet supported" );
-//            buffer.putByte( 0, INDEX );
-//            buffer.putInt( 4, labelId );
-//            buffer.putShort( 8, (short) propertyKeyIds.length );
-//            for ( int i = 0; i < propertyKeyIds.length; i++ )
-//            {
-//                buffer.putInt( 10 + 4 * i, propertyKeyIds[i] );
-//            }
-//            buffer.putByte( 10 + 4 * propertyKeyIds.length, indexKey );
+            buffer.putInt( 10 + 4 * i, propertyKeyIds[i] );
         }
-        else
-        {
-            buffer.putByte( 0, INDEX )
-                    .putInt( 4, descriptor.descriptor().getLabelId() )
-                    .putInt( 8, descriptor.descriptor().getPropertyKeyId() )
-                    .putByte( 15, indexKey );
-        }
+        buffer.putByte( 10 + 4 * propertyKeyIds.length, indexKey );
     }
 
     public static CountsKey readKey( ReadableBuffer key ) throws UnknownKey
@@ -149,16 +140,23 @@ class KeyFormat implements CountsVisitor
         case KeyFormat.RELATIONSHIP_COUNT:
             return CountsKeyFactory.relationshipKey( key.getInt( 4 ), key.getInt( 8 ), key.getInt( 12 ) );
         case KeyFormat.INDEX:
-            //TODO: Support composite indexes
-            byte indexKeyByte = key.getByte( 15 );
-            IndexDescriptor descriptor = IndexDescriptorFactory.from( new NodePropertyDescriptor( key.getInt( 4 ),
-                    key.getInt( 8 )  ) );
+            int labelId = key.getInt( 4 );
+            int[] propertyKeyIds = new int[key.getShort( 8 )];
+            for ( int i = 0; i < propertyKeyIds.length; i++ )
+            {
+                propertyKeyIds[i] = key.getInt( 10 + 4 * i );
+            }
+            NodePropertyDescriptor descriptor =
+                    propertyKeyIds.length > 1 ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
+                                          : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
+            IndexDescriptor index = IndexDescriptorFactory.from( descriptor );
+            byte indexKeyByte = key.getByte( 10 + 4 * propertyKeyIds.length );
             switch ( indexKeyByte )
             {
             case KeyFormat.INDEX_STATS:
-                return indexStatisticsKey( descriptor );
+                return indexStatisticsKey( index );
             case KeyFormat.INDEX_SAMPLE:
-                return CountsKeyFactory.indexSampleKey( descriptor );
+                return CountsKeyFactory.indexSampleKey( index );
             default:
                 throw new IllegalStateException( "Unknown index key: " + indexKeyByte );
             }
