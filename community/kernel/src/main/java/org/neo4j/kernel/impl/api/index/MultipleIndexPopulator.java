@@ -21,7 +21,6 @@ package org.neo4j.kernel.impl.api.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -515,7 +514,8 @@ public class MultipleIndexPopulator implements IndexPopulator
         private boolean isApplicable( NodePropertyUpdate update )
         {
             //TODO: This code and the methods calling it need to be updated to find composite indexes
-            return update.forLabel( descriptor.getLabelId() ) && update.equals( descriptor );
+            return update.forLabel( descriptor.getLabelId() ) &&
+                   update.getPropertyKeyId() == descriptor.getPropertyKeyId();
         }
 
         private void flip() throws FlipFailedKernelException

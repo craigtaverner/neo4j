@@ -224,10 +224,11 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         return descriptor.equals( ((IndexRule) o).descriptor );
     }
 
-    public boolean match(NodePropertyDescriptor descriptor)
+    public boolean matches(NodePropertyDescriptor descriptor)
     {
         return descriptor.equals( this.descriptor );
     }
+
     @Override
     public String toString()
     {

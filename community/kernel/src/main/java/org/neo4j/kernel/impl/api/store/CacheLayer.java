@@ -141,8 +141,8 @@ public class CacheLayer implements StoreReadLayer
         {
             if ( rule instanceof IndexSchemaRule )
             {
-                IndexRule indexRule = (IndexRule) rule;
-                if ( filter.test( indexRule.getKind() ) && indexRule.match( index.descriptor() ))
+                IndexSchemaRule indexRule = (IndexSchemaRule) rule;
+                if ( filter.test( indexRule.getKind() ) && indexRule.matches( index.descriptor() ))
                 {
                     return indexRule;
                 }

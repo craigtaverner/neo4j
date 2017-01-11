@@ -33,7 +33,6 @@ import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.IndexBackedConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
-import org.neo4j.kernel.api.constraints.PropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
@@ -52,7 +51,6 @@ import org.neo4j.kernel.api.exceptions.schema.IndexBrokenKernelException;
 import org.neo4j.kernel.api.exceptions.schema.UnableToValidateConstraintKernelException;
 import org.neo4j.kernel.api.exceptions.schema.UniquePropertyConstraintViolationKernelException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.properties.DefinedProperty;
 import org.neo4j.kernel.api.properties.Property;
 import org.neo4j.kernel.impl.api.operations.EntityOperations;
@@ -326,9 +324,8 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
             throws IndexNotFoundKernelException, IndexBrokenKernelException
     {
         assertIndexOnline( state, index );
-        // TODO: Support composite index, either by allowing value to be an array, or by creating a new method
-        index.getPropertyKeyId();
 
+        // TODO: Support composite index, either by allowing value to be an array, or by creating a new method
         int labelId = index.getLabelId();
         int propertyKeyId = index.getPropertyKeyId();
         String stringVal = "";

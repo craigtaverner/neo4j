@@ -19,6 +19,7 @@
  */
 package org.neo4j.storageengine.api.schema;
 
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
@@ -26,6 +27,13 @@ import org.neo4j.kernel.api.index.IndexDescriptor;
  */
 public interface IndexSchemaRule extends SchemaRule
 {
+    /**
+     * Tests if this rule is specific to the label and property/properties specified
+     * @param descriptor specifying label and one or more properties
+     * @return true on matching label and property/properties
+     */
+    boolean matches(NodePropertyDescriptor descriptor);
+
     /**
      * @return whether or not this index is related to a uniqueness constraint.
      */
