@@ -19,6 +19,8 @@
  */
 package org.neo4j.kernel.api.constraints;
 
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
 
@@ -47,6 +49,8 @@ public interface PropertyConstraint
     void added( ChangeVisitor visitor ) throws CreateConstraintFailureException;
 
     void removed( ChangeVisitor visitor );
+
+    EntityPropertyDescriptor descriptor();
 
     String userDescription( TokenNameLookup tokenNameLookup );
 

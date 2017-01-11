@@ -355,10 +355,10 @@ public class SchemaImpl implements Schema
         else if ( constraint instanceof RelationshipPropertyExistenceConstraint )
         {
             StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
-            RelationshipPropertyConstraint relConstraint = (RelationshipPropertyConstraint) constraint;
+            RelationshipPropertyDescriptor descriptor = ((RelationshipPropertyConstraint) constraint).descriptor();
             return new RelationshipPropertyExistenceConstraintDefinition( actions,
-                    RelationshipType.withName( lookup.relationshipTypeGetName( relConstraint.relationshipType() ) ),
-                    lookup.propertyKeyGetName( relConstraint.propertyKey() ) );
+                    RelationshipType.withName( lookup.relationshipTypeGetName( descriptor.getRelationshipTypeId() ) ),
+                    lookup.propertyKeyGetName( descriptor.getPropertyKeyId() ) );
         }
         throw new IllegalArgumentException( "Unknown constraint " + constraint );
     }

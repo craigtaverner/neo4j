@@ -25,7 +25,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.neo4j.helpers.Strings;
+import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
@@ -102,9 +104,9 @@ public enum DbStructureArgumentFormatter implements ArgumentFormatter
         }
         else if ( arg instanceof RelationshipPropertyExistenceConstraint )
         {
-            RelationshipPropertyExistenceConstraint constraint = (RelationshipPropertyExistenceConstraint) arg;
-            int relTypeId = constraint.relationshipType();
-            int propertyKey = constraint.propertyKey();
+            RelationshipPropertyDescriptor descriptor = ((RelationshipPropertyExistenceConstraint) arg).descriptor();
+            int relTypeId = descriptor.getRelationshipTypeId();
+            int propertyKey = descriptor.getPropertyKeyId();
             builder.append( format( "new RelationshipPropertyExistenceConstraint( %s, %s )", relTypeId, propertyKey ) );
         }
         else

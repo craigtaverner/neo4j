@@ -1092,7 +1092,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     public void constraintDoAdd( RelationshipPropertyExistenceConstraint constraint )
     {
         constraintsChangesDiffSets().add( constraint );
-        relationshipConstraintChangesByType( constraint.relationshipType() ).add( constraint );
+        relationshipConstraintChangesByType( constraint.descriptor().getRelationshipTypeId() ).add( constraint );
         hasChanges = true;
     }
 
@@ -1125,7 +1125,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
             (RelationshipPropertyDescriptor descriptor )
     {
         return constraintsChangesForRelationshipType( descriptor.getRelationshipTypeId() )
-                .filterAdded( constraint -> constraint.propertyKey() == descriptor.getPropertyKeyId() );
+                .filterAdded( constraint -> constraint.matches( descriptor ) );
     }
 
     @Override
@@ -1160,7 +1160,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     public void constraintDoDrop( RelationshipPropertyConstraint constraint )
     {
         constraintsChangesDiffSets().remove( constraint );
-        relationshipConstraintChangesByType( constraint.relationshipType() ).remove( constraint );
+        relationshipConstraintChangesByType( constraint.descriptor().getRelationshipTypeId() ).remove( constraint );
         hasChanges = true;
     }
 

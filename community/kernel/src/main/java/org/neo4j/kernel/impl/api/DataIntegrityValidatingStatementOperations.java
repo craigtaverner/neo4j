@@ -221,7 +221,7 @@ public class DataIntegrityValidatingStatementOperations implements
         try
         {
             assertConstraintExists( constraint, schemaReadDelegate.constraintsGetForRelationshipTypeAndPropertyKey(
-                    state, constraint.getDescriptor() ) );
+                    state, constraint.descriptor() ) );
         }
         catch ( NoSuchConstraintException e )
         {

@@ -24,8 +24,6 @@ import java.util.function.Predicate
 
 import org.neo4j.cypher.internal.frontend.v3_2.IndexDescriptor.toKernelEncode
 
-import scala.collection.JavaConversions._
-
 import org.neo4j.collection.RawIterator
 import org.neo4j.collection.primitive.PrimitiveLongIterator
 import org.neo4j.collection.primitive.base.Empty.EMPTY_PRIMITIVE_LONG_COLLECTION

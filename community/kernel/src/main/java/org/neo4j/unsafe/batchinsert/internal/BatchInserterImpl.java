@@ -631,7 +631,7 @@ public class BatchInserterImpl implements BatchInserter, IndexConfigStoreProvide
     private void createConstraintRule( RelationshipPropertyExistenceConstraint constraint )
     {
         SchemaRule rule = RelationshipPropertyExistenceConstraintRule.relPropertyExistenceConstraintRule(
-                schemaStore.nextId(), constraint.getDescriptor() );
+                schemaStore.nextId(), constraint.descriptor() );
 
         for ( DynamicRecord record : schemaStore.allocateFrom( rule ) )
         {

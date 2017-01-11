@@ -62,7 +62,12 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
     @Override
     public int hashCode()
     {
-        return hashcode( getLabelId(), propertyKeyIds );
+        int result = getLabelId();
+        for ( int element : propertyKeyIds )
+        {
+            result = 31 * result + element;
+        }
+        return result;
     }
 
     /**
@@ -130,16 +135,5 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
             return cmp;
         }
         return -1;  //TODO: We can compare single and composite indexes, by sorting one type always above the other
-    }
-
-    //TODO: remove and inline above
-    public static int hashcode( int labelId, int[] propertyKeyIds )
-    {
-        int result = labelId;
-        for ( int element : propertyKeyIds )
-        {
-            result = 31 * result + element;
-        }
-        return result;
     }
 }

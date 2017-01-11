@@ -27,7 +27,6 @@ import static java.lang.String.format;
 
 /**
  * Description of a single index based on one label and one or more properties.
- *
  * @see SchemaRule
  */
 public interface IndexDescriptor

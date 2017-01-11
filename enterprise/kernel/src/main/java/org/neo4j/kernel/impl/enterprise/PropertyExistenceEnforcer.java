@@ -210,11 +210,10 @@ class PropertyExistenceEnforcer extends TxStateVisitor.Delegator
                     }
 
                     // Check if this relationship has the mandatory property set
-                    if ( !propertyKeyIds.contains( constraint.propertyKey() ) )
+                    if ( !propertyKeyIds.contains( constraint.descriptor().getPropertyKeyId() ) )
                     {
                         throw new RelationshipPropertyExistenceConstraintViolationKernelException(
-                                constraint.relationshipType(),
-                                constraint.propertyKey(), id );
+                                constraint.descriptor(), id );
                     }
                 }
 

@@ -29,14 +29,12 @@ import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 /**
  * Base class describing property constraint on nodes.
  */
-public abstract class NodePropertyConstraint extends MultiPropertyConstraint implements IndexBackedConstraint
+public abstract class NodePropertyConstraint implements PropertyConstraint, IndexBackedConstraint
 {
     protected final NodePropertyDescriptor descriptor;
 
     public NodePropertyConstraint( NodePropertyDescriptor descriptor )
     {
-        super( descriptor.isComposite() ? descriptor.getPropertyKeyIds()
-                                        : new int[]{descriptor.getPropertyKeyId()} );
         this.descriptor = descriptor;
     }
 
@@ -73,8 +71,7 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint imp
             return false;
         }
         NodePropertyConstraint that = (NodePropertyConstraint) o;
-        return Arrays.equals( propertyKeyIds, that.propertyKeyIds ) &&
-               descriptor.getLabelId() == that.descriptor.getLabelId();
+        return this.descriptor.equals( that.descriptor );
 
     }
 

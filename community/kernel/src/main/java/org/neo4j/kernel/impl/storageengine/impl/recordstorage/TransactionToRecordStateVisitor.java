@@ -277,7 +277,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
     {
         clearSchemaState = true;
         recordState.createSchemaRule( constraintSemantics.writeRelationshipPropertyExistenceConstraint(
-                schemaStorage.newRuleId(), element.getDescriptor() ) );
+                schemaStorage.newRuleId(), element.descriptor() ) );
     }
 
     @Override
@@ -285,9 +285,10 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
     {
         try
         {
+            //TODO: Support composite indexes
             clearSchemaState = true;
-            SchemaRule rule = schemaStorage.relationshipPropertyExistenceConstraint( element.relationshipType(),
-                    element.propertyKey() );
+            SchemaRule rule = schemaStorage.relationshipPropertyExistenceConstraint( element.descriptor().getRelationshipTypeId(),
+                    element.descriptor().getPropertyKeyId() );
             recordState.dropSchemaRule( rule );
         }
         catch ( SchemaRuleNotFoundException e )

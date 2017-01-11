@@ -117,7 +117,7 @@ public class SchemaCache
     public Iterator<RelationshipPropertyConstraint> constraintsForRelationshipType( final int typeId )
     {
         return Iterators.filter(
-                constraint -> constraint.relationshipType() == typeId,
+                constraint -> constraint.descriptor().getRelationshipTypeId() == typeId,
                 relationshipConstraints.iterator() );
     }
 
