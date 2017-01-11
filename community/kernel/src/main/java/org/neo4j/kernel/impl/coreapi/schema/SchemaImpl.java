@@ -129,14 +129,14 @@ public class SchemaImpl implements Schema
     }
 
     //TODO: Consider moving to PropertyNameUtils or IndexDescriptorFactory or similar
-    private IndexDefinition from( final ReadOperations statement, IndexDescriptor descriptor,
+    private IndexDefinition from( final ReadOperations statement, IndexDescriptor index,
             final boolean constraintIndex )
     {
         try
         {
-            Label label = label( statement.labelGetName( descriptor.getLabelId() ) );
+            Label label = label( statement.labelGetName( index.getLabelId() ) );
             return new IndexDefinitionImpl( actions, label,
-                    getPropertyKeys( statement, (DescriptorWithProperties) descriptor ), constraintIndex );
+                    getPropertyKeys( statement, index.descriptor() ), constraintIndex );
         }
         catch ( LabelNotFoundKernelException | PropertyKeyIdNotFoundKernelException e )
         {
@@ -345,14 +345,14 @@ public class SchemaImpl implements Schema
                 StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
                 return new NodePropertyExistenceConstraintDefinition( actions,
                         Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
-                        getPropertyKeys( lookup, nodePropertyConstraint ) );
+                        getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ) );
             }
             else if ( constraint instanceof UniquenessConstraint )
             {
                 StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
                 return new UniquenessConstraintDefinition( actions,
                         Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
-                        getPropertyKeys( lookup, nodePropertyConstraint ) );
+                        getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ) );
             }
         }
         else if ( constraint instanceof RelationshipPropertyExistenceConstraint )

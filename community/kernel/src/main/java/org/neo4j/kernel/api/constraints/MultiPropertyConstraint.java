@@ -24,8 +24,9 @@ import org.neo4j.kernel.api.DescriptorWithProperties;
 /**
  * Base class describing a property constraint on multiple properties.
  */
-public abstract class MultiPropertyConstraint implements PropertyConstraint, DescriptorWithProperties
+public abstract class MultiPropertyConstraint implements PropertyConstraint
 {
+    //TODO: Consider removing now that constraints contain NodePropertyDescriptors
     protected final int[] propertyKeyIds;
 
     public MultiPropertyConstraint( int[] propertyKeyIds )

@@ -30,7 +30,7 @@ import static java.lang.String.format;
  *
  * @see SchemaRule
  */
-public abstract class EntityPropertyDescriptor implements DescriptorWithProperties, Comparable<EntityPropertyDescriptor>
+public abstract class EntityPropertyDescriptor implements Comparable<EntityPropertyDescriptor>
 {
     protected final int entityId;
     private final int propertyKeyId;

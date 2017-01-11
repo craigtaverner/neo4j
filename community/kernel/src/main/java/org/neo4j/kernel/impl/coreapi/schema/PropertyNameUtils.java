@@ -97,10 +97,11 @@ public class PropertyNameUtils
         return readOperations.indexGetForLabelAndPropertyKey( descriptor );
     }
 
-    public static String[] getPropertyKeys( ReadOperations readOperations, DescriptorWithProperties index )
+    public static String[] getPropertyKeys( ReadOperations readOperations, NodePropertyDescriptor descriptor )
             throws PropertyKeyIdNotFoundKernelException
     {
-        int[] propertyKeyIds = index.getPropertyKeyIds();
+        int[] propertyKeyIds =
+                descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
         String[] propertyKeys = new String[propertyKeyIds.length];
         for ( int i = 0; i < propertyKeyIds.length; i++ )
         {
@@ -109,9 +110,10 @@ public class PropertyNameUtils
         return propertyKeys;
     }
 
-    public static String[] getPropertyKeys( TokenNameLookup tokenNameLookup, DescriptorWithProperties index )
+    public static String[] getPropertyKeys( TokenNameLookup tokenNameLookup, NodePropertyDescriptor descriptor )
     {
-        int[] propertyKeyIds = index.getPropertyKeyIds();
+        int[] propertyKeyIds =
+                descriptor.isComposite() ? descriptor.getPropertyKeyIds() : new int[]{descriptor.getPropertyKeyId()};
         String[] propertyKeys = new String[propertyKeyIds.length];
         for ( int i = 0; i < propertyKeyIds.length; i++ )
         {

@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.DescriptorWithProperties;
 import org.neo4j.kernel.api.index.IndexDescriptor;
 import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 
@@ -91,11 +90,6 @@ public abstract class NodePropertyConstraint extends MultiPropertyConstraint imp
         {
             return labelName;
         }
-    }
-
-    public boolean containsPropertyKeyIds( int[] propertyKeyIds )
-    {
-        return Arrays.equals( this.propertyKeyIds, propertyKeyIds );
     }
 
     @Override
