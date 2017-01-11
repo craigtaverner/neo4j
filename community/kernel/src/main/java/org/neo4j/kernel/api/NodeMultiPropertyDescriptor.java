@@ -44,7 +44,7 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
         {
             return true;
         }
-        if ( obj != null && getClass() == obj.getClass() )
+        if ( obj != null && obj instanceof NodeMultiPropertyDescriptor )
         {
             NodeMultiPropertyDescriptor that = (NodeMultiPropertyDescriptor) obj;
             return this.getLabelId() == that.getLabelId() &&

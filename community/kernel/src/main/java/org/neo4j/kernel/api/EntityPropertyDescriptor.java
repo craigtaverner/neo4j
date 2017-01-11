@@ -48,7 +48,7 @@ public abstract class EntityPropertyDescriptor implements Comparable<EntityPrope
         {
             return true;
         }
-        if ( obj != null && getClass() == obj.getClass() )
+        if ( obj != null && obj instanceof EntityPropertyDescriptor )
         {
             EntityPropertyDescriptor that = (EntityPropertyDescriptor) obj;
             return this.entityId == that.entityId &&

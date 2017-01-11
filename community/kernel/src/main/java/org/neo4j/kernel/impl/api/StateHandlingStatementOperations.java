@@ -19,15 +19,11 @@
  */
 package org.neo4j.kernel.impl.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.neo4j.collection.primitive.PrimitiveIntCollection;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.collection.primitive.PrimitiveLongCollection;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.collection.primitive.PrimitiveLongResourceIterator;
@@ -404,6 +400,7 @@ public class StateHandlingStatementOperations implements
             }
 
             state.txState().nodeDoAddLabel( labelId, node.id() );
+
             try ( Cursor<PropertyItem> properties = node.properties() )
             {
                 while ( properties.next() )
@@ -658,8 +655,7 @@ public class StateHandlingStatementOperations implements
             Iterator<IndexDescriptor> descriptorIterator,
             NodePropertyDescriptor descriptor )
     {
-        Predicate<IndexDescriptor> predicate = item ->(item.descriptor().equals( descriptor ));
-        return Iterators.filter( predicate, descriptorIterator );
+        return Iterators.filter( item -> descriptor.equals( item ), descriptorIterator );
     }
 
     @Override
