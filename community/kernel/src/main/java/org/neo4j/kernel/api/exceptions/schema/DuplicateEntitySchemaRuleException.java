@@ -35,15 +35,14 @@ public class DuplicateEntitySchemaRuleException extends DuplicateSchemaRuleExcep
 
     public DuplicateEntitySchemaRuleException( EntityPropertyDescriptor descriptor, boolean unique )
     {
-        super( "Multiple %s found for %s '%s' and property '%s'.", descriptor,
-                unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
+        super( "Multiple %s found for " + descriptor.entityType().getTypeDescriptor() + " '%s' and property '%s'.",
+                descriptor, unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
     }
 
     @Override
     public String getUserMessage( TokenNameLookup tokenNameLookup )
     {
-        return format( messageTemplate, messagePrefix, descriptor.entityType().getTypeDescriptor(),
-                descriptor.entityNameText( tokenNameLookup ),
+        return format( messageTemplate, messagePrefix, descriptor.entityNameText( tokenNameLookup ),
                 descriptor.propertyNameText( tokenNameLookup ) );
     }
 }

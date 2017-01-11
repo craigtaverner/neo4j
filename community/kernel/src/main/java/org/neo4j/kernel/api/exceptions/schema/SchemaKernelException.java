@@ -19,14 +19,10 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 /**
  * Signals that some constraint has been violated, for example a name containing invalid characters or length.
@@ -53,14 +49,6 @@ public abstract class SchemaKernelException extends KernelException
     {
         super( statusCode, message );
     }
-
-    //TODO: Remove this pre-composite index API
-//    protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
-//            int labelId, int propertyKeyId )
-//    {
-//        //Don't seems to be used, investigate
-//        return messageWithLabelAndPropertyName( tokenNameLookup, formatString, IndexDescriptorFactory.from( new NodePropertyDescriptor( labelId, propertyKeyId ) ) );
-//    }
 
     protected static String messageWithLabelAndPropertyName( TokenNameLookup tokenNameLookup, String formatString,
             NodePropertyDescriptor descriptor )

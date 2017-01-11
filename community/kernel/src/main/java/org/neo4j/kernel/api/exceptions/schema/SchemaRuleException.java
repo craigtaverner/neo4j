@@ -21,7 +21,6 @@ package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 import static java.lang.String.format;
 
