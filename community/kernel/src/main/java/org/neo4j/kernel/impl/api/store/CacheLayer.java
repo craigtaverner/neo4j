@@ -141,10 +141,8 @@ public class CacheLayer implements StoreReadLayer
         {
             if ( rule instanceof IndexSchemaRule )
             {
-                //TODO: Support composite indexes
-                IndexSchemaRule indexRule = (IndexSchemaRule) rule;
-                if ( filter.test( indexRule.getKind() ) &&
-                     indexRule.descriptor().getPropertyKeyId() == index.getPropertyKeyId() )
+                IndexRule indexRule = (IndexRule) rule;
+                if ( filter.test( indexRule.getKind() ) && indexRule.match( index.descriptor() ))
                 {
                     return indexRule;
                 }

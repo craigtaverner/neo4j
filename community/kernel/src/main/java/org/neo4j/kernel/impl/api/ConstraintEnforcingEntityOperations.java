@@ -327,10 +327,10 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     {
         assertIndexOnline( state, index );
         // TODO: Support composite index, either by allowing value to be an array, or by creating a new method
-        assert (index.getPropertyKeyIds().length == 1);
+        index.getPropertyKeyId();
 
         int labelId = index.getLabelId();
-        int propertyKeyId = index.getPropertyKeyIds()[0];
+        int propertyKeyId = index.getPropertyKeyId();
         String stringVal = "";
         if ( null != value )
         {

@@ -1225,12 +1225,12 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         return ReadableDiffSets.Empty.ifNull( (value == null) ?
             getIndexUpdatesForScanOrSeek(
                     descriptor.getLabelId(),
-                    descriptor.getPropertyKeyIds()
+                    descriptor.getPropertyKeyId()
             )
             :
             getIndexUpdatesForScanOrSeek(
                     descriptor.getLabelId(), /*create=*/false,
-                    Property.property( descriptor.getPropertyKeyIds()[0], value )
+                    Property.property( descriptor.getPropertyKeyId(), value )
             )
         );
     }
@@ -1262,7 +1262,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         boolean selectedIncludeUpper;
 
         //TODO: Get working with composite indexes
-        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
+        int propertyKeyId = descriptor.getPropertyKeyId();
 
         if ( lower == null )
         {
@@ -1323,7 +1323,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         boolean selectedIncludeUpper;
 
         //TODO: Get working with composite indexes
-        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
+        int propertyKeyId = descriptor.getPropertyKeyId();
 
         if ( lower == null )
         {
@@ -1371,7 +1371,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
             return null;
         }
         //TODO: get working with composite indexes
-        int propertyKeyId = descriptor.getPropertyKeyIds()[0];
+        int propertyKeyId = descriptor.getPropertyKeyId();
         DefinedProperty floor = Property.stringProperty( propertyKeyId, prefix );
         DiffSets<Long> diffs = new DiffSets<>();
         for ( Map.Entry<DefinedProperty,DiffSets<Long>> entry : sortedUpdates.tailMap( floor ).entrySet() )
@@ -1483,7 +1483,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         return diffs;
     }
 
-    private DiffSets<Long> getIndexUpdatesForScanOrSeek( int label, int[] propertyKeyIds )
+    private DiffSets<Long> getIndexUpdatesForScanOrSeek( int label, int propertyKeyIds )
     {
         if ( indexUpdates == null )
         {
@@ -1498,7 +1498,7 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         for ( Map.Entry<DefinedProperty, DiffSets<Long>> entry : updates.entrySet() )
         {
             //TODO: Make this work for composite indexes
-            if ( propertyKeyIds.length == 1 && entry.getKey().propertyKeyId() == propertyKeyIds[0] )
+            if ( entry.getKey().propertyKeyId() == propertyKeyIds )
             {
                 diffs.addAll( entry.getValue().getAdded().iterator() );
                 diffs.removeAll( entry.getValue().getRemoved().iterator() );

@@ -124,7 +124,7 @@ public class SchemaStorage implements SchemaRuleAccess
     public IndexRule indexRule( NodePropertyDescriptor descriptor, IndexRuleKind kind )
     {
         Iterator<IndexRule> rules = schemaRules( cast( IndexRule.class ), IndexRule.class,
-                rule -> rule.getLabel() == descriptor.getLabelId() && rule.equals( descriptor ) );
+                rule -> rule.match( descriptor ) );
 
         IndexRule foundRule = null;
 

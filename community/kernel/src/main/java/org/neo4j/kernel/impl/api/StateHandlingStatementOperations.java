@@ -658,7 +658,7 @@ public class StateHandlingStatementOperations implements
             Iterator<IndexDescriptor> descriptorIterator,
             NodePropertyDescriptor descriptor )
     {
-        Predicate<IndexDescriptor> predicate = item ->(item.equals( descriptor ));
+        Predicate<IndexDescriptor> predicate = item ->(item.descriptor().equals( descriptor ));
         return Iterators.filter( predicate, descriptorIterator );
     }
 
@@ -881,9 +881,9 @@ public class StateHandlingStatementOperations implements
     private PrimitiveLongIterator filterExactIndexMatches( final KernelStatement state, IndexDescriptor index,
             Object value, PrimitiveLongIterator committed )
     {
-        if ( index.getPropertyKeyIds().length == 1 )
+        if ( !index.isComposite() )
         {
-            return LookupFilter.exactIndexMatches( this, state, committed, index.getPropertyKeyIds()[0], value );
+            return LookupFilter.exactIndexMatches( this, state, committed, index.getPropertyKeyId(), value );
         }
         else
         {
@@ -894,10 +894,10 @@ public class StateHandlingStatementOperations implements
     private PrimitiveLongIterator filterExactRangeMatches( final KernelStatement state, IndexDescriptor index,
             PrimitiveLongIterator committed, Number lower, boolean includeLower, Number upper, boolean includeUpper )
     {
-        if ( index.getPropertyKeyIds().length == 1 )
+        if ( !index.isComposite() )
         {
             return LookupFilter
-                    .exactRangeMatches( this, state, committed, index.getPropertyKeyIds()[0], lower, includeLower,
+                    .exactRangeMatches( this, state, committed, index.getPropertyKeyId(), lower, includeLower,
                             upper, includeUpper );
         }
         else

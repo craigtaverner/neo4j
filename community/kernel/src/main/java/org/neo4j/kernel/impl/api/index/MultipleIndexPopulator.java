@@ -311,8 +311,7 @@ public class MultipleIndexPopulator implements IndexPopulator
 
     private int[] propertyKeyIds()
     {
-        return populations.stream()
-                .flatMapToInt( population -> Arrays.stream( population.descriptor.getPropertyKeyIds() ) ).toArray();
+        return populations.stream().mapToInt( population -> population.descriptor.getPropertyKeyId() ).toArray();
     }
 
     private int[] labelIds()
@@ -516,8 +515,7 @@ public class MultipleIndexPopulator implements IndexPopulator
         private boolean isApplicable( NodePropertyUpdate update )
         {
             //TODO: This code and the methods calling it need to be updated to find composite indexes
-            return update.forLabel( descriptor.getLabelId() ) &&
-                   Arrays.equals( new int[]{update.getPropertyKeyId()}, descriptor.getPropertyKeyIds() );
+            return update.forLabel( descriptor.getLabelId() ) && update.equals( descriptor );
         }
 
         private void flip() throws FlipFailedKernelException

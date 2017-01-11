@@ -20,13 +20,10 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.api.NodePropertyDescriptor;
-import org.neo4j.kernel.api.index.CompositeIndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.index.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.storageengine.api.schema.IndexSchemaRule;
 import org.neo4j.string.UTF8;
@@ -51,7 +48,7 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
     static IndexRule readIndexRule( long id, boolean constraintIndex, int label, ByteBuffer serialized )
     {
         SchemaIndexProvider.Descriptor providerDescriptor = readProviderDescriptor( serialized );
-        NodePropertyDescriptor descriptor = new CompositeIndexDescriptor( label, readPropertyKeys( serialized ) );
+        NodePropertyDescriptor descriptor = IndexDescriptorFactory.getNodePropertyDescriptor( label, readPropertyKeys( serialized ) );
         if ( constraintIndex )
         {
             long owningConstraint = readOwningConstraint( serialized );
@@ -227,6 +224,10 @@ public class IndexRule extends AbstractSchemaRule implements IndexSchemaRule
         return descriptor.equals( ((IndexRule) o).descriptor );
     }
 
+    public boolean match(NodePropertyDescriptor descriptor)
+    {
+        return descriptor.equals( this.descriptor );
+    }
     @Override
     public String toString()
     {
