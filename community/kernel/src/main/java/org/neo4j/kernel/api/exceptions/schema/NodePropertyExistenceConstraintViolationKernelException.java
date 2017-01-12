@@ -32,7 +32,8 @@ public class NodePropertyExistenceConstraintViolationKernelException extends Con
 
     public NodePropertyExistenceConstraintViolationKernelException( NodePropertyDescriptor descriptor, long nodeId )
     {
-        super( "Node %d with label %d must have the property %d", nodeId, descriptor);
+        super( "Node %d with label %d must have the property %d",
+                nodeId, descriptor.getEntityId(), descriptor.getPropertyKeyId() );
         this.descriptor = descriptor;
         this.nodeId = nodeId;
     }

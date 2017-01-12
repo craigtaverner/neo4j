@@ -19,7 +19,8 @@
  */
 package org.neo4j.cypher.internal.compiler.v3_2.pipes
 
-import org.mockito.Matchers._
+import org.mockito.Matchers
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.neo4j.cypher.internal.compiler.v3_2._
 import org.neo4j.cypher.internal.compiler.v3_2.commands.expressions.{ListLiteral, Literal, Variable}
@@ -27,7 +28,7 @@ import org.neo4j.cypher.internal.compiler.v3_2.commands.{ManyQueryExpression, Si
 import org.neo4j.cypher.internal.compiler.v3_2.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_2.ast._
 import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.CypherFunSuite
-import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, CypherTypeException, LabelId, PropertyKeyId}
+import org.neo4j.cypher.internal.frontend.v3_2.{CypherTypeException, IndexDescriptor, LabelId, PropertyKeyId}
 import org.neo4j.graphdb.Node
 
 class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSupport {
@@ -224,7 +225,7 @@ class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSuppo
     when(query.indexSeek(any(), any())).thenReturn(Iterator.empty)
 
     values.foreach {
-      case (searchTerm, result) => when(query.indexSeek(descriptor, searchTerm)).thenReturn(result)
+      case (searchTerm, result) => when(query.indexSeek(any(), Matchers.eq(searchTerm))).thenReturn(result)
     }
 
     query

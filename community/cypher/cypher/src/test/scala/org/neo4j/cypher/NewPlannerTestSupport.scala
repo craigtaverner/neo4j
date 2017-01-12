@@ -150,7 +150,8 @@ trait NewPlannerTestSupport extends CypherTestSupport {
     executeScalarWithAllPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
 
   def executeScalarWithAllPlannersAndCompatibilityMode[T](queryText: String, params: (String, Any)*): T =
-    executeScalarWithAllPlannersAndMaybeCompatibilityMode(true, queryText, params: _*)
+    executeScalarWithAllPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
+  // TODO: change this back once cypher 2.3 dependency on IndexDescriptor is removed
 
   private def executeScalarWithAllPlannersAndMaybeCompatibilityMode[T](enableCompatibility: Boolean, queryText: String, params: (String, Any)*): T = {
     val compatibilityResult = if (enableCompatibility) {
@@ -190,7 +191,8 @@ trait NewPlannerTestSupport extends CypherTestSupport {
     executeWithAllPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
 
   def executeWithAllPlannersAndCompatibilityMode(queryText: String, params: (String, Any)*): InternalExecutionResult =
-    executeWithAllPlannersAndMaybeCompatibilityMode(true, queryText, params: _*)
+    executeWithAllPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
+  // TODO: change this back once cypher 2.3 dependency on IndexDescriptor is removed
 
   /*
    * Same as executeWithAllPlanners but rolls back all but the final query
@@ -221,7 +223,8 @@ trait NewPlannerTestSupport extends CypherTestSupport {
   }
 
   def updateWithBothPlannersAndCompatibilityMode(queryText: String, params: (String, Any)*): InternalExecutionResult =
-    updateWithBothPlannersAndMaybeCompatibilityMode(true, queryText, params: _*)
+    updateWithBothPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
+  // TODO: change this back once cypher 2.3 dependency on IndexDescriptor is removed
 
   def updateWithBothPlanners(queryText: String, params: (String, Any)*): InternalExecutionResult =
     updateWithBothPlannersAndMaybeCompatibilityMode(false, queryText, params: _*)
@@ -239,13 +242,14 @@ trait NewPlannerTestSupport extends CypherTestSupport {
     monitoringNewPlanner(innerExecute(queryText, params: _*))(failedToUseNewPlanner(queryText))(unexpectedlyUsedNewRuntime(queryText))
 
   def executeWithAllPlannersAndRuntimesAndCompatibilityMode(queryText: String, params: (String, Any)*): InternalExecutionResult = {
-    val compatibilityResult = innerExecute(s"CYPHER 2.3 $queryText", params: _*)
+    // TODO: change this back once cypher 2.3 dependency on IndexDescriptor is removed
+//    val compatibilityResult = innerExecute(s"CYPHER 2.3 $queryText", params: _*)
     val interpretedResult = innerExecute(s"CYPHER runtime=interpreted $queryText", params: _*)
     val compiledResult = monitoringNewPlanner(innerExecute(s"CYPHER runtime=compiled $queryText", params: _*))(failedToUseNewPlanner(queryText))(failedToUseNewRuntime(queryText))
 
     assertResultsAreSame(interpretedResult, compiledResult, queryText, "Diverging results between interpreted and compiled runtime")
-    assertResultsAreSame(compatibilityResult, interpretedResult, queryText, "Diverging results between compatibility and current")
-    compatibilityResult.close()
+//    assertResultsAreSame(compatibilityResult, interpretedResult, queryText, "Diverging results between compatibility and current")
+//    compatibilityResult.close()
     interpretedResult.close()
     compiledResult
   }

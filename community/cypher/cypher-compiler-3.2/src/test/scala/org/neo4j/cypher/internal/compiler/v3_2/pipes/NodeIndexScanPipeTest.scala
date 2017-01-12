@@ -19,6 +19,7 @@
  */
 package org.neo4j.cypher.internal.compiler.v3_2.pipes
 
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.neo4j.cypher.internal.compiler.v3_2.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_2.ast.{LabelToken, PropertyKeyToken, _}
@@ -51,7 +52,7 @@ class NodeIndexScanPipeTest extends CypherFunSuite with AstConstructionTestSuppo
 
   private def scanFor(nodes: Iterator[Node]): QueryContext = {
     val query = mock[QueryContext]
-    when(query.indexScan(descriptor)).thenReturn(nodes)
+    when(query.indexScan(any())).thenReturn(nodes)
     query
   }
 }

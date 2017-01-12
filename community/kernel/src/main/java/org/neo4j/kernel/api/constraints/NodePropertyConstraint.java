@@ -19,8 +19,6 @@
  */
 package org.neo4j.kernel.api.constraints;
 
-import java.util.Arrays;
-
 import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.index.IndexDescriptor;

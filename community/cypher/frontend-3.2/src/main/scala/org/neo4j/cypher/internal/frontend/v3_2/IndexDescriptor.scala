@@ -32,6 +32,8 @@ object IndexDescriptor {
 }
 
 case class IndexDescriptor(label: LabelId, properties: Array[PropertyKeyId]) {
+  def this(label: Int, property: Int) = this( LabelId(label), Array(PropertyKeyId(property)) )
+
   def isComposite: Boolean = properties.length > 1
 
   def property = if (isComposite) throw new IllegalArgumentException("Cannot get single property of multi-property index") else properties(0)
