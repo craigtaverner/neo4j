@@ -355,7 +355,7 @@ public class DbStructureCollector implements DbStructureVisitor
                     //TODO: Add support for composite indexes
                     IndexDescriptor next = iterator.next();
                     String label = labels.byIdOrFail( next.getLabelId() );
-                    String propertyKey = propertyKeys.byIdOrFail( next.getPropertyKeyIds()[0] );
+                    String propertyKey = propertyKeys.byIdOrFail( next.getPropertyKeyId() );
                     return Pair.of( label, propertyKey );
                 }
 

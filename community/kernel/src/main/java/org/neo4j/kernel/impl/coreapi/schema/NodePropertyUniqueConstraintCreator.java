@@ -39,12 +39,7 @@ public class NodePropertyUniqueConstraintCreator extends BaseNodeConstraintCreat
     @Override
     public final NodePropertyUniqueConstraintCreator assertPropertyIsUnique( String propertyKey )
     {
-        if ( propertyKeys.contains( propertyKey ) )
-        {
-            throw new UnsupportedOperationException( "Constraint already contains property '" + propertyKey + "'" );
-        }
-        this.propertyKeys.add( propertyKey );
-        return this;
+        throw new UnsupportedOperationException( "You can only create one unique constraint at a time." );
     }
 
     @Override

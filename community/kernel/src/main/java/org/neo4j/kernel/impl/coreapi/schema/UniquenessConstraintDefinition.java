@@ -19,20 +19,13 @@
  */
 package org.neo4j.kernel.impl.coreapi.schema;
 
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.schema.ConstraintType;
 import org.neo4j.graphdb.schema.IndexDefinition;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 
 public class UniquenessConstraintDefinition extends NodeConstraintDefinition
 {
-    public UniquenessConstraintDefinition( InternalSchemaActions actions, Label label, String[] propertyKeys )
-    {
-        super( actions, label, propertyKeys );
-    }
-
     public UniquenessConstraintDefinition( InternalSchemaActions actions, IndexDefinition indexDefinition )
     {
         super( actions, indexDefinition );
@@ -42,7 +35,7 @@ public class UniquenessConstraintDefinition extends NodeConstraintDefinition
     public void drop()
     {
         assertInUnterminatedTransaction();
-        actions.dropPropertyUniquenessConstraint( actions.createIndexDefinition( label, propertyKeys ) );
+        actions.dropPropertyUniquenessConstraint( new IndexDefinitionImpl( actions, label, propertyKeys, true ) );
     }
 
     @Override

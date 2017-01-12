@@ -32,12 +32,10 @@ import org.neo4j.kernel.api.index.IndexUpdater;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,7 +97,7 @@ public class IndexUpdaterMapTest
 
         // when
         List<IndexUpdater> updaters =
-                updaterMap.getUpdaters( indexDescriptor1.getLabelId(), indexDescriptor1.getPropertyKeyIds()[0] );
+                updaterMap.getUpdaters( indexDescriptor1.getLabelId(), indexDescriptor1.getPropertyKeyId() );
 
         // then
         assertThat( updaters, containsInAnyOrder( indexUpdater1 ) );
@@ -110,7 +108,7 @@ public class IndexUpdaterMapTest
     {
         // when
         List<IndexUpdater> updaters =
-                updaterMap.getUpdaters( indexDescriptor1.getLabelId(), indexDescriptor1.getPropertyKeyIds()[0] );
+                updaterMap.getUpdaters( indexDescriptor1.getLabelId(), indexDescriptor1.getPropertyKeyId() );
 
         // then
         assertThat( updaters, containsInAnyOrder( ) );

@@ -347,9 +347,9 @@ public class SchemaImpl implements Schema
             else if ( constraint instanceof UniquenessConstraint )
             {
                 StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
-                return new UniquenessConstraintDefinition( actions,
+                return new UniquenessConstraintDefinition( actions, new IndexDefinitionImpl( actions,
                         Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
-                        getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ) );
+                        getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ), true ) );
             }
         }
         else if ( constraint instanceof RelationshipPropertyExistenceConstraint )

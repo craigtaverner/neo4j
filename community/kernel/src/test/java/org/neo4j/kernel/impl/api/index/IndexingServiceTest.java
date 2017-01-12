@@ -843,9 +843,9 @@ public class IndexingServiceTest
         // THEN
         verify( indexProvider ).getPopulator( eq( 0L ), eq( IndexDescriptorFactory.from(descriptor1) ),
                 eq( IndexConfiguration.NON_UNIQUE ), any( IndexSamplingConfig.class ) );
-        verify( indexProvider ).getPopulator( eq( 1L ), eq( IndexDescriptorFactory.from(descriptor1) ),
+        verify( indexProvider ).getPopulator( eq( 1L ), eq( IndexDescriptorFactory.from(descriptor2) ),
                 eq( IndexConfiguration.NON_UNIQUE ), any( IndexSamplingConfig.class ) );
-        verify( indexProvider ).getPopulator( eq( 2L ), eq( IndexDescriptorFactory.from(descriptor1) ),
+        verify( indexProvider ).getPopulator( eq( 2L ), eq( IndexDescriptorFactory.from(descriptor3) ),
                 eq( IndexConfiguration.NON_UNIQUE ), any( IndexSamplingConfig.class ) );
 
         waitForIndexesToComeOnline( indexing, 0, 1, 2 );

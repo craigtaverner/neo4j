@@ -21,8 +21,6 @@ package org.neo4j.kernel.api.exceptions.schema;
 
 import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.storageengine.api.EntityType;
 
 public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundException
 {
@@ -33,7 +31,8 @@ public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundExcepti
 
     public EntitySchemaRuleNotFoundException( EntityPropertyDescriptor descriptor, boolean unique )
     {
-        super( "%s for %s '%s' and property '%s' not found.", descriptor,
+        super( "%s for " + descriptor.entityType().getTypeDescriptor() + " '%s' and property '%s' not found.",
+                descriptor,
                 unique ? UNIQUE_CONSTRAINT_PREFIX : CONSTRAINT_PREFIX );
     }
 
@@ -41,7 +40,7 @@ public class EntitySchemaRuleNotFoundException extends SchemaRuleNotFoundExcepti
     public String getUserMessage( TokenNameLookup tokenNameLookup )
     {
         return String
-                .format( messageTemplate, messagePrefix, descriptor.entityType().getTypeDescriptor(),
+                .format( messageTemplate, messagePrefix,
                         descriptor.entityNameText( tokenNameLookup ),
                         descriptor.propertyNameText( tokenNameLookup ) );
     }

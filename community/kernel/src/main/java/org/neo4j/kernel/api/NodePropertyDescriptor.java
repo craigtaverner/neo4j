@@ -44,7 +44,7 @@ public class NodePropertyDescriptor extends EntityPropertyDescriptor
     @Override
     public String entityNameText( TokenNameLookup tokenNameLookup )
     {
-        return tokenNameLookup.labelGetName( getPropertyKeyId() );
+        return tokenNameLookup.labelGetName( getEntityId() );
     }
 
     public EntityType entityType()
