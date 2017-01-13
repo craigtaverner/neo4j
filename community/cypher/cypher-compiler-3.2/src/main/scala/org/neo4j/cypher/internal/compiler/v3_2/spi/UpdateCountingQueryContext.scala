@@ -20,9 +20,10 @@
 package org.neo4j.cypher.internal.compiler.v3_2.spi
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.neo4j.cypher.internal.compiler.v3_2.InternalQueryStatistics
-import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, SemanticDirection}
-import org.neo4j.graphdb.{PropertyContainer, Relationship, Node}
+
+import org.neo4j.cypher.internal.compiler.v3_2.{IndexDescriptor, InternalQueryStatistics}
+import org.neo4j.cypher.internal.frontend.v3_2.SemanticDirection
+import org.neo4j.graphdb.{Node, PropertyContainer, Relationship}
 
 class UpdateCountingQueryContext(inner: QueryContext) extends DelegatingQueryContext(inner) {
 

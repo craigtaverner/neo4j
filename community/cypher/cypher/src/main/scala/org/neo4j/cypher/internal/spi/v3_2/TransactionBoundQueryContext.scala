@@ -22,7 +22,7 @@ package org.neo4j.cypher.internal.spi.v3_2
 import java.net.URL
 import java.util.function.Predicate
 
-import org.neo4j.cypher.internal.frontend.v3_2.IndexDescriptor.toKernelEncode
+import org.neo4j.cypher.internal.compiler.v3_2.IndexDescriptor.toKernelEncode
 
 import org.neo4j.collection.RawIterator
 import org.neo4j.collection.primitive.PrimitiveLongIterator
@@ -36,7 +36,8 @@ import org.neo4j.cypher.internal.compiler.v3_2.helpers.JavaConversionSupport
 import org.neo4j.cypher.internal.compiler.v3_2.helpers.JavaConversionSupport._
 import org.neo4j.cypher.internal.compiler.v3_2.pipes.matching.PatternNode
 import org.neo4j.cypher.internal.compiler.v3_2.spi._
-import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor => CypherIndexDescriptor, _}
+import org.neo4j.cypher.internal.compiler.v3_2.{IndexDescriptor => CypherIndexDescriptor}
+import org.neo4j.cypher.internal.frontend.v3_2._
 import org.neo4j.cypher.internal.spi.BeansAPIRelationshipIterator
 import org.neo4j.cypher.internal.spi.v3_2.TransactionBoundQueryContext.IndexSearchMonitor
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService

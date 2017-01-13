@@ -28,7 +28,7 @@ import org.neo4j.cypher.internal.compiler.v3_2.commands.{ManyQueryExpression, Si
 import org.neo4j.cypher.internal.compiler.v3_2.spi.QueryContext
 import org.neo4j.cypher.internal.frontend.v3_2.ast._
 import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.CypherFunSuite
-import org.neo4j.cypher.internal.frontend.v3_2.{CypherTypeException, IndexDescriptor, LabelId, PropertyKeyId}
+import org.neo4j.cypher.internal.frontend.v3_2.{CypherTypeException, LabelId, PropertyKeyId}
 import org.neo4j.graphdb.Node
 
 class NodeIndexSeekPipeTest extends CypherFunSuite with AstConstructionTestSupport {

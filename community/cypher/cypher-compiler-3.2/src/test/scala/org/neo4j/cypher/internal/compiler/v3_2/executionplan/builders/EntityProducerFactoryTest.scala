@@ -20,14 +20,13 @@
 package org.neo4j.cypher.internal.compiler.v3_2.executionplan.builders
 
 import org.mockito.Mockito._
-import org.neo4j.cypher.internal.compiler.v3_2.ExecutionContext
+import org.neo4j.cypher.internal.compiler.v3_2.{ExecutionContext, IndexDescriptor}
 import org.neo4j.cypher.internal.compiler.v3_2.commands._
 import org.neo4j.cypher.internal.compiler.v3_2.commands.expressions.Literal
 import org.neo4j.cypher.internal.compiler.v3_2.pipes.QueryStateHelper
 import org.neo4j.cypher.internal.compiler.v3_2.spi.{PlanContext, QueryContext}
-import org.neo4j.cypher.internal.frontend.v3_2.{IndexDescriptor, IndexHintException}
+import org.neo4j.cypher.internal.frontend.v3_2.IndexHintException
 import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.CypherFunSuite
-import org.neo4j.kernel.api.NodePropertyDescriptor
 
 class EntityProducerFactoryTest extends CypherFunSuite {
   var planContext: PlanContext = null
