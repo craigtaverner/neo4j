@@ -19,8 +19,6 @@
  */
 package org.neo4j.kernel.api;
 
-import java.util.List;
-
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
