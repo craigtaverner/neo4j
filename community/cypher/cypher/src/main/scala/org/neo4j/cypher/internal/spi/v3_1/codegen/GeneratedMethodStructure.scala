@@ -38,7 +38,7 @@ import org.neo4j.cypher.internal.frontend.v3_1.{ParameterNotFoundException, Sema
 import org.neo4j.cypher.internal.spi.v3_1.codegen.Methods._
 import org.neo4j.cypher.internal.spi.v3_1.codegen.Templates.{createNewInstance, handleKernelExceptions, newRelationshipDataExtractor, tryCatch}
 import org.neo4j.graphdb.Direction
-import org.neo4j.cypher.internal.compiler.v3_2.IndexDescriptor
+import org.neo4j.kernel.api.index.IndexDescriptor
 import org.neo4j.kernel.impl.api.RelationshipDataExtractor
 import org.neo4j.kernel.impl.api.store.RelationshipIterator
 

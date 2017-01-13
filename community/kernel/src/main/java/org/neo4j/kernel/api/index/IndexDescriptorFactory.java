@@ -25,7 +25,6 @@ import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.exceptions.schema.IllegalTokenNameException;
-import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.TooManyLabelsException;
 import org.neo4j.kernel.impl.store.record.IndexRule;
 
@@ -49,10 +48,15 @@ public class IndexDescriptorFactory
         return from( rule.descriptor() );
     }
 
-    public static NodePropertyDescriptor getNodePropertyDescriptor( int labelId, int[] propertyKeyIds)
+    public static NodePropertyDescriptor getNodePropertyDescriptor( int labelId, int[] propertyKeyIds )
     {
         return (propertyKeyIds.length > 1) ? new NodeMultiPropertyDescriptor( labelId, propertyKeyIds )
                                            : new NodePropertyDescriptor( labelId, propertyKeyIds[0] );
+    }
+
+    public static NodePropertyDescriptor getNodePropertyDescriptor( int labelId, int propertyKeyId )
+    {
+        return new NodePropertyDescriptor( labelId, propertyKeyId );
     }
 
     public static NodePropertyDescriptor getOrCreateTokens( SchemaWriteOperations schemaWriteOperations,
