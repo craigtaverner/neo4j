@@ -19,8 +19,8 @@
  */
 package org.neo4j.cypher
 
+import org.neo4j.cypher.internal.compiler.v3_2.IndexDescriptor
 import org.neo4j.cypher.internal.spi.v3_2.TransactionBoundQueryContext.IndexSearchMonitor
-import org.neo4j.kernel.api.schema.IndexDescriptor
 
 class UniqueIndexUsageAcceptanceTest extends ExecutionEngineFunSuite with NewPlannerTestSupport {
   test("should be able to use indexes") {
