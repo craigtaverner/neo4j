@@ -19,7 +19,6 @@
  */
 package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 
 import static java.lang.String.format;
@@ -35,7 +34,7 @@ import static java.lang.String.format;
  * <p>
  * //TODO: Delete this class!
  */
-public class IndexDescriptor implements org.neo4j.kernel.api.schema.IndexDescriptor
+public class IndexDescriptor
 {
     private NodePropertyDescriptor descriptor;
 
@@ -68,7 +67,6 @@ public class IndexDescriptor implements org.neo4j.kernel.api.schema.IndexDescrip
     /**
      * @return label token id this index is for.
      */
-    @Override
     public int getLabelId()
     {
         return descriptor.getLabelId();
@@ -77,7 +75,6 @@ public class IndexDescriptor implements org.neo4j.kernel.api.schema.IndexDescrip
     /**
      * @return property key token id this index is for.
      */
-    @Override
     public int getPropertyKeyId()
     {
         return descriptor.getPropertyKeyId();
@@ -87,33 +84,5 @@ public class IndexDescriptor implements org.neo4j.kernel.api.schema.IndexDescrip
     public String toString()
     {
         return format( ":label[%d](property[%d])", descriptor.getLabelId(), descriptor.getPropertyKeyId() );
-    }
-
-    @Override
-    public int[] getPropertyKeyIds()
-    {
-        return descriptor.getPropertyKeyIds();  // will throw exception, because this is not a composite index
-    }
-
-    @Override
-    public boolean isComposite()
-    {
-        return false;
-    }
-
-    @Override
-    public NodePropertyDescriptor descriptor()
-    {
-        return descriptor;
-    }
-
-    /**
-     * @param tokenNameLookup used for looking up names for token ids.
-     * @return a user friendly description of what this index indexes.
-     */
-    @Override
-    public String userDescription( TokenNameLookup tokenNameLookup )
-    {
-        return descriptor.userDescription( tokenNameLookup );
     }
 }

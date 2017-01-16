@@ -20,8 +20,12 @@
 package org.neo4j.cypher.internal.spi
 
 import org.neo4j.kernel.api.index.IndexDescriptor
+import org.neo4j.kernel.api.schema.IndexDescriptorFactory
 
 trait IndexDescriptorCompatibility {
   implicit def toOldIndexDescriptor(index: org.neo4j.kernel.api.schema.IndexDescriptor): IndexDescriptor =
     new IndexDescriptor(index.getLabelId(), index.getPropertyKeyId);
+
+  implicit def toNewIndexDescriptor(index: IndexDescriptor): org.neo4j.kernel.api.schema.IndexDescriptor =
+    IndexDescriptorFactory.from(IndexDescriptorFactory.getNodePropertyDescriptor(index.getLabelId(), index.getPropertyKeyId));
 }

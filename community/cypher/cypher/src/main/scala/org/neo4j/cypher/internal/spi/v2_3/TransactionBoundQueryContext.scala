@@ -224,7 +224,6 @@ final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
 
   private def indexSeekByStringRange(index: IndexDescriptor, range: InequalitySeekRange[String]): scala.Iterator[Node] = {
     val readOps = tc.statement.readOperations()
-    val propertyKeyId = index.getPropertyKeyIds
     val matchingNodes: PrimitiveLongIterator = range match {
 
       case rangeLessThan: RangeLessThan[String] =>
