@@ -21,8 +21,8 @@ package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
 
-import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodeMultiPropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 
 import static org.neo4j.kernel.impl.util.IoPrimitiveUtils.safeCastLongToInt;

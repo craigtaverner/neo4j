@@ -25,9 +25,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptorFactory;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.IndexDescriptor;
+import org.neo4j.kernel.api.schema.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.IndexUpdater;
 
 import static org.hamcrest.MatcherAssert.assertThat;

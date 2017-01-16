@@ -22,7 +22,7 @@ package org.neo4j.kernel.impl.transaction.command;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.PropertyType;
 import org.neo4j.kernel.impl.store.record.NodeRecord;

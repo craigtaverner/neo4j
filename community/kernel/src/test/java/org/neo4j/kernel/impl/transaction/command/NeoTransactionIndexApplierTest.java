@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.function.Supplier;
 
 import org.neo4j.concurrent.WorkSync;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.index.SchemaIndexProvider.Descriptor;
 import org.neo4j.kernel.api.labelscan.LabelScanWriter;
 import org.neo4j.kernel.impl.api.TransactionApplier;

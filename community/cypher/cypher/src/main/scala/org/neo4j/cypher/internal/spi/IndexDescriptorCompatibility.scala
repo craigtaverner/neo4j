@@ -17,20 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.api.index;
+package org.neo4j.cypher.internal.spi
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
-import org.neo4j.storageengine.api.schema.SchemaRule;
+import org.neo4j.kernel.api.index.IndexDescriptor
 
-/**
- * Description of a single index based on one label and one property.
- *
- * @see SchemaRule
- */
-public class SinglePropertyIndexDescriptor extends NodePropertyDescriptor implements IndexDescriptor
-{
-    SinglePropertyIndexDescriptor( int labelId, int propertyKeyId )
-    {
-        super(labelId, propertyKeyId);
-    }
+trait IndexDescriptorCompatibility {
+  implicit def toOldIndexDescriptor(index: org.neo4j.kernel.api.schema.IndexDescriptor): IndexDescriptor =
+    new IndexDescriptor(index.getLabelId(), index.getPropertyKeyId);
 }

@@ -19,22 +19,101 @@
  */
 package org.neo4j.kernel.api.index;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.storageengine.api.schema.SchemaRule;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 
 import static java.lang.String.format;
 
 /**
- * Description of a single index based on one label and one or more properties.
- * @see SchemaRule
+ * This is a new version of the old IndexDescriptor interface created here only to allow
+ * older versions of Cypher to run on newer kernels. This is because Cypher supports older
+ * cypher-compiler modules to be instantiated and run within newer versions of Neo4j, and they
+ * assume certain kernel API's remain unchanged. However, the IndexDescriptor was refactored
+ * considerably during the 3.2 development process to allow for composite indexes and constraints.
+ * We should remove this class as soon as older Cypher compilers are re-released without any
+ * kernel dependency on this.
+ * <p>
+ * //TODO: Delete this class!
  */
-public interface IndexDescriptor
+public class IndexDescriptor implements org.neo4j.kernel.api.schema.IndexDescriptor
 {
-    int getLabelId();
-    int getPropertyKeyId();
-    int[] getPropertyKeyIds();
-    boolean isComposite();
-    String userDescription( TokenNameLookup tokenNameLookup );
-    NodePropertyDescriptor descriptor();
+    private NodePropertyDescriptor descriptor;
+
+    public IndexDescriptor( int labelId, int propertyKeyId )
+    {
+        this.descriptor = new NodePropertyDescriptor( labelId, propertyKeyId );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj != null && obj instanceof IndexDescriptor )
+        {
+            IndexDescriptor that = (IndexDescriptor) obj;
+            return this.descriptor.equals( that.descriptor );
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return this.descriptor.hashCode();
+    }
+
+    /**
+     * @return label token id this index is for.
+     */
+    @Override
+    public int getLabelId()
+    {
+        return descriptor.getLabelId();
+    }
+
+    /**
+     * @return property key token id this index is for.
+     */
+    @Override
+    public int getPropertyKeyId()
+    {
+        return descriptor.getPropertyKeyId();
+    }
+
+    @Override
+    public String toString()
+    {
+        return format( ":label[%d](property[%d])", descriptor.getLabelId(), descriptor.getPropertyKeyId() );
+    }
+
+    @Override
+    public int[] getPropertyKeyIds()
+    {
+        return descriptor.getPropertyKeyIds();  // will throw exception, because this is not a composite index
+    }
+
+    @Override
+    public boolean isComposite()
+    {
+        return false;
+    }
+
+    @Override
+    public NodePropertyDescriptor descriptor()
+    {
+        return descriptor;
+    }
+
+    /**
+     * @param tokenNameLookup used for looking up names for token ids.
+     * @return a user friendly description of what this index indexes.
+     */
+    @Override
+    public String userDescription( TokenNameLookup tokenNameLookup )
+    {
+        return descriptor.userDescription( tokenNameLookup );
+    }
 }

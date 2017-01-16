@@ -19,7 +19,7 @@
  */
 package org.neo4j.kernel.api.constraints;
 
-import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
+import org.neo4j.kernel.api.schema.RelationshipPropertyDescriptor;
 
 /**
  * Base class describing property constraint on relationships.

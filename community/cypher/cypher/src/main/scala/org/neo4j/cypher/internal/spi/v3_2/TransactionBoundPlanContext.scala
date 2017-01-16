@@ -30,10 +30,12 @@ import org.neo4j.cypher.internal.frontend.v3_2.{CypherExecutionException, symbol
 import org.neo4j.kernel.api.constraints.UniquenessConstraint
 import org.neo4j.kernel.api.exceptions.KernelException
 import org.neo4j.kernel.api.exceptions.schema.SchemaKernelException
-import org.neo4j.kernel.api.index.{InternalIndexState, IndexDescriptor => KernelIndexDescriptor}
-import org.neo4j.kernel.api.{NodePropertyDescriptor, proc}
+import org.neo4j.kernel.api.index.InternalIndexState
+import org.neo4j.kernel.api.proc
 import org.neo4j.kernel.api.proc.Neo4jTypes.AnyType
 import org.neo4j.kernel.api.proc.{Neo4jTypes, QualifiedName => KernelQualifiedName}
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor
+import org.neo4j.kernel.api.schema.{IndexDescriptor => KernelIndexDescriptor}
 import org.neo4j.kernel.impl.proc.Neo4jValue
 
 import scala.collection.JavaConverters._

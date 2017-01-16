@@ -35,7 +35,7 @@ import org.neo4j.cypher.internal.compiler.v2_3.helpers.JavaConversionSupport._
 import org.neo4j.cypher.internal.compiler.v2_3.pipes.matching.PatternNode
 import org.neo4j.cypher.internal.compiler.v2_3.spi._
 import org.neo4j.cypher.internal.frontend.v2_3.{Bound, EntityNotFoundException, FailedIndexException, SemanticDirection}
-import org.neo4j.cypher.internal.spi.BeansAPIRelationshipIterator
+import org.neo4j.cypher.internal.spi.{BeansAPIRelationshipIterator, IndexDescriptorCompatibility}
 import org.neo4j.cypher.internal.spi.v3_2.TransactionalContextWrapper
 import org.neo4j.cypher.javacompat.internal.GraphDatabaseCypherService
 import org.neo4j.graphalgo.impl.path.ShortestPath
@@ -47,7 +47,8 @@ import org.neo4j.graphdb.traversal.{Evaluators, TraversalDescription, Uniqueness
 import org.neo4j.kernel.GraphDatabaseQueryService
 import org.neo4j.kernel.api.constraints.{NodePropertyExistenceConstraint, RelationshipPropertyExistenceConstraint, UniquenessConstraint}
 import org.neo4j.kernel.api.exceptions.schema.{AlreadyConstrainedException, AlreadyIndexedException}
-import org.neo4j.kernel.api.index.{IndexDescriptorFactory, IndexDescriptor, InternalIndexState}
+import org.neo4j.kernel.api.index.{IndexDescriptor, InternalIndexState}
+import org.neo4j.kernel.api.schema.{IndexDescriptorFactory, NodePropertyDescriptor, RelationshipPropertyDescriptor}
 import org.neo4j.kernel.api.{exceptions, _}
 import org.neo4j.kernel.impl.core.NodeManager
 
@@ -55,7 +56,7 @@ import scala.collection.JavaConverters._
 import scala.collection.{Iterator, mutable}
 
 final class TransactionBoundQueryContext(tc: TransactionalContextWrapper)
-  extends TransactionBoundTokenContext(tc.statement) with QueryContext {
+  extends TransactionBoundTokenContext(tc.statement) with QueryContext with IndexDescriptorCompatibility {
 
   override val nodeOps = new NodeOperations
   override val relationshipOps = new RelationshipOperations

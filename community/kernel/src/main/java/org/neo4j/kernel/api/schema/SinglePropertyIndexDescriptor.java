@@ -17,11 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.impl.api.index.sampling;
+package org.neo4j.kernel.api.schema;
 
-import org.neo4j.kernel.api.schema.IndexDescriptor;
+import org.neo4j.storageengine.api.schema.SchemaRule;
 
-public interface IndexSamplingJob extends Runnable
+/**
+ * Description of a single index based on one label and one property.
+ *
+ * @see SchemaRule
+ */
+public class SinglePropertyIndexDescriptor extends NodePropertyDescriptor implements IndexDescriptor
 {
-    IndexDescriptor descriptor();
+    SinglePropertyIndexDescriptor( int labelId, int propertyKeyId )
+    {
+        super(labelId, propertyKeyId);
+    }
 }

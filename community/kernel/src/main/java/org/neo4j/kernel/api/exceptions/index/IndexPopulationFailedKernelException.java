@@ -19,10 +19,9 @@
  */
 package org.neo4j.kernel.api.exceptions.index;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class IndexPopulationFailedKernelException extends KernelException
 {

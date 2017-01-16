@@ -19,11 +19,9 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
-import org.neo4j.kernel.api.NodeMultiPropertyDescriptor;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class AlreadyIndexedException extends SchemaKernelException
 {

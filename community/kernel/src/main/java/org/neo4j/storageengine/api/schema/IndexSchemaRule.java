@@ -19,8 +19,8 @@
  */
 package org.neo4j.storageengine.api.schema;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.IndexDescriptor;
 
 /**
  * Basically {@link IndexDescriptor} with access to storage data, such as id and ownder.

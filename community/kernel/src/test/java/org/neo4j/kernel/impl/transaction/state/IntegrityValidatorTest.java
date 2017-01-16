@@ -21,7 +21,7 @@ package org.neo4j.kernel.impl.transaction.state;
 
 import org.junit.Test;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.schema.UniquenessConstraintVerificationFailedKernelException;
 import org.neo4j.kernel.impl.api.index.IndexingService;
 import org.neo4j.kernel.impl.store.MetaDataStore;

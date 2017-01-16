@@ -20,10 +20,9 @@
 package org.neo4j.kernel.impl.util.dbstructure;
 
 import org.neo4j.helpers.collection.Visitable;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
-import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptorFactory;
+import org.neo4j.kernel.api.schema.IndexDescriptorFactory;
 
 //
 // GENERATED FILE. DO NOT EDIT.

@@ -22,10 +22,9 @@ package org.neo4j.kernel.impl.util.dbstructure;
 import org.junit.Test;
 
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
-import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.kernel.api.index.IndexDescriptorFactory;
+import org.neo4j.kernel.api.schema.IndexDescriptorFactory;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;

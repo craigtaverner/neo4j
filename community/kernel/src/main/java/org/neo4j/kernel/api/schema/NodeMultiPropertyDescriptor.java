@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.api;
+package org.neo4j.kernel.api.schema;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import org.neo4j.kernel.api.TokenNameLookup;
 
 import static java.lang.String.format;
 
@@ -98,7 +100,6 @@ public class NodeMultiPropertyDescriptor extends NodePropertyDescriptor
         return Arrays.stream( propertyKeyIds ).mapToObj( id -> tokenNameLookup.propertyKeyGetName( id ) )
                 .collect( Collectors.joining( "," ) );
     }
-
 
     /**
      * @param tokenNameLookup used for looking up names for token ids.

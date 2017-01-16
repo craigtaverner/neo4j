@@ -23,7 +23,6 @@ import java.net.URL
 import java.util.function.Predicate
 
 import org.neo4j.cypher.internal.compiler.v3_2.IndexDescriptor.toKernelEncode
-
 import org.neo4j.collection.RawIterator
 import org.neo4j.collection.primitive.PrimitiveLongIterator
 import org.neo4j.collection.primitive.base.Empty.EMPTY_PRIMITIVE_LONG_COLLECTION
@@ -53,9 +52,10 @@ import org.neo4j.kernel.api._
 import org.neo4j.kernel.api.constraints.{NodePropertyExistenceConstraint, RelationshipPropertyExistenceConstraint, UniquenessConstraint}
 import org.neo4j.kernel.api.exceptions.ProcedureException
 import org.neo4j.kernel.api.exceptions.schema.{AlreadyConstrainedException, AlreadyIndexedException}
-import org.neo4j.kernel.api.index.{IndexDescriptorFactory, IndexDescriptor, InternalIndexState}
+import org.neo4j.kernel.api.index.InternalIndexState
 import org.neo4j.kernel.api.proc.CallableUserAggregationFunction.Aggregator
 import org.neo4j.kernel.api.proc.{QualifiedName => KernelQualifiedName}
+import org.neo4j.kernel.api.schema.{IndexDescriptor, IndexDescriptorFactory, NodeMultiPropertyDescriptor, NodePropertyDescriptor, RelationshipPropertyDescriptor}
 import org.neo4j.kernel.impl.core.NodeManager
 import org.neo4j.kernel.impl.locking.ResourceTypes
 

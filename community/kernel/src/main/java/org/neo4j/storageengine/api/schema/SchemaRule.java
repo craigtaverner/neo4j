@@ -19,7 +19,7 @@
  */
 package org.neo4j.storageengine.api.schema;
 
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.schema.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.schema.MalformedSchemaRuleException;
 
 /**

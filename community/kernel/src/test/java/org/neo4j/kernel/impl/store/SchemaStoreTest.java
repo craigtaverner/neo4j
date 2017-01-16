@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.neo4j.helpers.collection.Iterables;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.store.id.DefaultIdGeneratorFactory;
 import org.neo4j.kernel.impl.store.record.AbstractSchemaRule;

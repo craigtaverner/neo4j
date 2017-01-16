@@ -17,29 +17,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.impl.store.counts.keys;
+package org.neo4j.kernel.api.schema;
 
-import org.neo4j.kernel.api.schema.IndexDescriptor;
+import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.storageengine.api.EntityType;
 
-public class CountsKeyFactory
+/**
+ * Description of a combination of a relationship type and one property.
+ */
+public class NodePropertyDescriptor extends EntityPropertyDescriptor
 {
-    public static NodeKey nodeKey( int labelId )
+    public NodePropertyDescriptor( int labelId, int propertyKeyId )
     {
-        return new NodeKey( labelId );
+        super(labelId, propertyKeyId);
     }
 
-    public static RelationshipKey relationshipKey( int startLabelId, int typeId, int endLabelId )
+    public int getLabelId()
     {
-        return new RelationshipKey( startLabelId, typeId, endLabelId );
+        return getEntityId();
     }
 
-    public static IndexStatisticsKey indexStatisticsKey( IndexDescriptor descriptor )
+    public boolean isComposite()
     {
-        return new IndexStatisticsKey( descriptor );
+        return false;
     }
 
-    public static IndexSampleKey indexSampleKey( IndexDescriptor descriptor )
+    @Override
+    public String entityNameText( TokenNameLookup tokenNameLookup )
     {
-        return new IndexSampleKey( descriptor );
+        return tokenNameLookup.labelGetName( getEntityId() );
+    }
+
+    public EntityType entityType()
+    {
+        return EntityType.NODE;
+    }
+
+    public NodePropertyDescriptor descriptor()
+    {
+        return this;
     }
 }

@@ -20,10 +20,9 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
-import org.neo4j.kernel.api.RelationshipPropertyDescriptor;
+import org.neo4j.kernel.api.schema.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.schema.RelationshipPropertyDescriptor;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyConstraint;
 import org.neo4j.kernel.api.constraints.RelationshipPropertyExistenceConstraint;
 

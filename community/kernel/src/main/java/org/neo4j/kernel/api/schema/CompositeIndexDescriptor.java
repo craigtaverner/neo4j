@@ -17,43 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.api;
+package org.neo4j.kernel.api.schema;
 
-import org.neo4j.storageengine.api.EntityType;
+import org.neo4j.storageengine.api.schema.SchemaRule;
+
+import static java.lang.String.format;
 
 /**
- * Description of a combination of a relationship type and one property.
+ * Description of a single index.
+ *
+ * @see SchemaRule
  */
-public class NodePropertyDescriptor extends EntityPropertyDescriptor
+public class CompositeIndexDescriptor extends NodeMultiPropertyDescriptor implements IndexDescriptor
 {
-    public NodePropertyDescriptor( int labelId, int propertyKeyId )
+    public CompositeIndexDescriptor( int labelId, int[] propertyKeyIds )
     {
-        super(labelId, propertyKeyId);
-    }
-
-    public int getLabelId()
-    {
-        return getEntityId();
-    }
-
-    public boolean isComposite()
-    {
-        return false;
-    }
-
-    @Override
-    public String entityNameText( TokenNameLookup tokenNameLookup )
-    {
-        return tokenNameLookup.labelGetName( getEntityId() );
-    }
-
-    public EntityType entityType()
-    {
-        return EntityType.NODE;
-    }
-
-    public NodePropertyDescriptor descriptor()
-    {
-        return this;
+        super( labelId, propertyKeyIds );
     }
 }

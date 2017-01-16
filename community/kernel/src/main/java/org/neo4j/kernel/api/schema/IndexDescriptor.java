@@ -17,36 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.kernel.api;
+package org.neo4j.kernel.api.schema;
 
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.storageengine.api.EntityType;
 import org.neo4j.storageengine.api.schema.SchemaRule;
 
+import static java.lang.String.format;
+
 /**
- * Description of a combination of a relationship type and one property.
+ * Description of a single index based on one label and one or more properties.
+ * @see SchemaRule
  */
-public class RelationshipPropertyDescriptor extends EntityPropertyDescriptor
+public interface IndexDescriptor
 {
-    public RelationshipPropertyDescriptor( int relationshipTypeId, int propertyKeyId )
-    {
-        super(relationshipTypeId, propertyKeyId);
-    }
-
-    public int getRelationshipTypeId()
-    {
-        return getEntityId();
-    }
-
-    @Override
-    public String entityNameText( TokenNameLookup tokenNameLookup )
-    {
-        return tokenNameLookup.relationshipTypeGetName( getEntityId() );
-    }
-
-    public EntityType entityType()
-    {
-        return EntityType.RELATIONSHIP;
-    }
+    int getLabelId();
+    int getPropertyKeyId();
+    int[] getPropertyKeyIds();
+    boolean isComposite();
+    String userDescription( TokenNameLookup tokenNameLookup );
+    NodePropertyDescriptor descriptor();
 }

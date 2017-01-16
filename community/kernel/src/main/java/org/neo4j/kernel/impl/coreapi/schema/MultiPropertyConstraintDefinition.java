@@ -50,7 +50,6 @@ abstract class MultiPropertyConstraintDefinition extends PropertyConstraintDefin
         this.propertyKeys = requireNonEmpty( propertyKeys );
     }
 
-
     private static String[] requireNonEmpty( String[] array )
     {
         requireNonNull( array );

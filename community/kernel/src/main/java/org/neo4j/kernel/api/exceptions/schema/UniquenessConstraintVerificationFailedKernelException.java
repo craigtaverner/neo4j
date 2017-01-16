@@ -26,7 +26,6 @@ import java.util.Set;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.constraints.UniquenessConstraint;
 import org.neo4j.kernel.api.exceptions.index.IndexEntryConflictException;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class UniquenessConstraintVerificationFailedKernelException extends ConstraintVerificationFailedKernelException
 {

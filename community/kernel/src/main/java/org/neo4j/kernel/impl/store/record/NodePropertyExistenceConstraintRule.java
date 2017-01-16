@@ -20,12 +20,10 @@
 package org.neo4j.kernel.impl.store.record;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public class NodePropertyExistenceConstraintRule extends NodePropertyConstraintRule
 {

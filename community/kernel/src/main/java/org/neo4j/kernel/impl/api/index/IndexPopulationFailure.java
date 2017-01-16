@@ -20,7 +20,7 @@
 package org.neo4j.kernel.impl.api.index;
 
 import org.neo4j.helpers.Exceptions;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.exceptions.index.IndexPopulationFailedKernelException;
 
 public abstract class IndexPopulationFailure

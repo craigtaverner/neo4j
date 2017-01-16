@@ -19,10 +19,8 @@
  */
 package org.neo4j.kernel.api.exceptions.schema;
 
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
+import org.neo4j.kernel.api.schema.EntityPropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
-import org.neo4j.kernel.api.index.IndexDescriptor;
-import org.neo4j.storageengine.api.EntityType;
 
 import static java.lang.String.format;
 

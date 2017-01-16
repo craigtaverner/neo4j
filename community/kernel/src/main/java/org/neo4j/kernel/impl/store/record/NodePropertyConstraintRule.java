@@ -19,14 +19,8 @@
  */
 package org.neo4j.kernel.impl.store.record;
 
-import java.util.Arrays;
-
-import org.neo4j.graphdb.index.Index;
-import org.neo4j.kernel.api.EntityPropertyDescriptor;
-import org.neo4j.kernel.api.NodePropertyDescriptor;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
-import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
-import org.neo4j.kernel.api.index.IndexDescriptor;
 
 public abstract class NodePropertyConstraintRule extends PropertyConstraintRule
 {

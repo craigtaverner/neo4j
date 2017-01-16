@@ -19,7 +19,7 @@
  */
 package org.neo4j.kernel.api.constraints;
 
-import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.schema.IndexDescriptor;
 
 public interface IndexBackedConstraint
 {

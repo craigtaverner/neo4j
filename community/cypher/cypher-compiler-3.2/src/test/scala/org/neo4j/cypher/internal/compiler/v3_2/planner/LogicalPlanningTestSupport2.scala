@@ -40,7 +40,7 @@ import org.neo4j.cypher.internal.frontend.v3_2.test_helpers.{CypherFunSuite, Cyp
 import org.neo4j.cypher.internal.frontend.v3_2.{Foldable, PropertyKeyId, SemanticTable}
 import org.neo4j.cypher.internal.ir.v3_2.{Cardinality, IdName, PeriodicCommit}
 import org.neo4j.helpers.collection.Visitable
-import org.neo4j.kernel.api.NodePropertyDescriptor
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor
 import org.neo4j.kernel.api.constraints.UniquenessConstraint
 import org.neo4j.kernel.impl.util.dbstructure.DbStructureVisitor
 import org.scalatest.matchers.{BeMatcher, MatchResult}
