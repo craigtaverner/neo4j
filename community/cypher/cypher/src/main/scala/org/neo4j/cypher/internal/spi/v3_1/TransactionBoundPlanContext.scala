@@ -23,18 +23,17 @@ import java.util.Optional
 
 import org.neo4j.cypher.MissingIndexException
 import org.neo4j.cypher.internal.LastCommittedTxIdProvider
-import org.neo4j.cypher.internal.compiler.v3_1.InternalNotificationLogger
+import org.neo4j.cypher.internal.compiler.v3_1.{IndexDescriptor, InternalNotificationLogger}
 import org.neo4j.cypher.internal.compiler.v3_1.pipes.EntityProducer
 import org.neo4j.cypher.internal.compiler.v3_1.pipes.matching.ExpanderStep
 import org.neo4j.cypher.internal.compiler.v3_1.spi._
 import org.neo4j.cypher.internal.frontend.v3_1.symbols.CypherType
 import org.neo4j.cypher.internal.frontend.v3_1.{CypherExecutionException, symbols}
-import org.neo4j.cypher.internal.spi.IndexDescriptorCompatibility
 import org.neo4j.graphdb.Node
 import org.neo4j.kernel.api.constraints.UniquenessConstraint
 import org.neo4j.kernel.api.exceptions.KernelException
 import org.neo4j.kernel.api.exceptions.schema.SchemaKernelException
-import org.neo4j.kernel.api.index.{IndexDescriptor, InternalIndexState}
+import org.neo4j.kernel.api.index.InternalIndexState
 import org.neo4j.kernel.api.proc
 import org.neo4j.kernel.api.proc.Neo4jTypes.AnyType
 import org.neo4j.kernel.api.proc.{Neo4jTypes, QualifiedName => KernelQualifiedName}
