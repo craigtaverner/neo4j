@@ -33,6 +33,7 @@ import org.neo4j.kernel.api.exceptions.InvalidArgumentsException;
 import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.AuthenticationResult;
+import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.enterprise.api.security.EnterpriseSecurityContext;
 
 class StandardEnterpriseSecurityContext implements EnterpriseSecurityContext
@@ -83,6 +84,12 @@ class StandardEnterpriseSecurityContext implements EnterpriseSecurityContext
     }
 
     @Override
+    public TokenRules tokenRules()
+    {
+        return TokenRules.Static.READ_WRITE;
+    }
+
+    @Override
     public String toString()
     {
         return defaultString( "enterprise-security-context" );
@@ -92,13 +99,13 @@ class StandardEnterpriseSecurityContext implements EnterpriseSecurityContext
     public EnterpriseSecurityContext freeze()
     {
         StandardAccessMode mode = mode();
-        return new Frozen( neoShiroSubject, mode, mode.roles, isAdmin() );
+        return new Frozen( neoShiroSubject, mode, tokenRules(), mode.roles, isAdmin() );
     }
 
     @Override
     public EnterpriseSecurityContext withMode( AccessMode mode )
     {
-        return new Frozen( neoShiroSubject, mode, queryForRoleNames(), isAdmin() );
+        return new Frozen( neoShiroSubject, mode, tokenRules(), queryForRoleNames(), isAdmin() );
     }
 
     @Override

@@ -25,6 +25,7 @@ import java.util.Set;
 import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.security.TokenRules;
 
 /**
  * A logged in user.
@@ -82,6 +83,12 @@ public interface EnterpriseSecurityContext extends SecurityContext
         }
 
         @Override
+        public TokenRules tokenRules()
+        {
+            return TokenRules.Static.READ_WRITE;
+        }
+
+        @Override
         public String description()
         {
             return "AUTH_DISABLED with " + mode().name();
@@ -104,13 +111,15 @@ public interface EnterpriseSecurityContext extends SecurityContext
     {
         private final AuthSubject subject;
         private final AccessMode mode;
+        private final TokenRules tokenRules;
         private final Set<String> roles;
         private final boolean isAdmin;
 
-        public Frozen( AuthSubject subject, AccessMode mode, Set<String> roles, boolean isAdmin )
+        public Frozen( AuthSubject subject, AccessMode mode, TokenRules tokenRules, Set<String> roles, boolean isAdmin )
         {
             this.subject = subject;
             this.mode = mode;
+            this.tokenRules = tokenRules;
             this.roles = roles;
             this.isAdmin = isAdmin;
         }
@@ -128,6 +137,12 @@ public interface EnterpriseSecurityContext extends SecurityContext
         }
 
         @Override
+        public TokenRules tokenRules()
+        {
+            return tokenRules;
+        }
+
+        @Override
         public AuthSubject subject()
         {
             return subject;
@@ -142,7 +157,7 @@ public interface EnterpriseSecurityContext extends SecurityContext
         @Override
         public EnterpriseSecurityContext withMode( AccessMode mode )
         {
-            return new EnterpriseSecurityContext.Frozen( subject, mode, roles, isAdmin );
+            return new EnterpriseSecurityContext.Frozen( subject, mode, tokenRules, roles, isAdmin );
         }
 
         @Override

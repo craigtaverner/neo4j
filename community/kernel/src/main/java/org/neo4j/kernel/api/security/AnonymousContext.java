@@ -23,6 +23,7 @@ package org.neo4j.kernel.api.security;
 public class AnonymousContext implements SecurityContext
 {
     private final AccessMode accessMode;
+    private final TokenRules tokenRules = TokenRules.Static.READ_WRITE;
 
     private AnonymousContext( AccessMode accessMode )
     {
@@ -70,13 +71,19 @@ public class AnonymousContext implements SecurityContext
     @Override
     public SecurityContext withMode( AccessMode mode )
     {
-        return new Frozen( subject(), mode );
+        return new Frozen( subject(), mode, tokenRules );
     }
 
     @Override
     public AccessMode mode()
     {
         return accessMode;
+    }
+
+    @Override
+    public TokenRules tokenRules()
+    {
+        return tokenRules;
     }
 
     @Override

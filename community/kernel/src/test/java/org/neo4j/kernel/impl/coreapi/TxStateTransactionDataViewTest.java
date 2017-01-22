@@ -38,6 +38,7 @@ import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.AnonymousContext;
 import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.api.txstate.TransactionState;
 import org.neo4j.kernel.impl.api.KernelTransactionImplementation;
 import org.neo4j.kernel.impl.api.state.StubCursors;
@@ -319,7 +320,8 @@ public class TxStateTransactionDataViewTest
         AuthSubject authSubject = mock( AuthSubject.class );
         when( authSubject.username() ).thenReturn( "Christof" );
         when( transaction.securityContext() )
-                .thenReturn( new SecurityContext.Frozen( authSubject, AccessMode.Static.FULL ) );
+                .thenReturn( new SecurityContext.Frozen( authSubject, AccessMode.Static.FULL,
+                        TokenRules.Static.READ_WRITE ) );
 
         TxStateTransactionDataSnapshot transactionDataSnapshot = snapshot();
         assertEquals( "Christof", transactionDataSnapshot.username() );

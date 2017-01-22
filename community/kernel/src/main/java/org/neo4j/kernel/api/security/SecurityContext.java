@@ -24,6 +24,7 @@ public interface SecurityContext
 {
     AccessMode mode();
     AuthSubject subject();
+    TokenRules tokenRules();
     boolean isAdmin();
 
     SecurityContext freeze();
@@ -55,6 +56,12 @@ public interface SecurityContext
         public AccessMode mode()
         {
             return mode;
+        }
+
+        @Override
+        public TokenRules tokenRules()
+        {
+            return TokenRules.Static.READ_WRITE;
         }
 
         @Override
@@ -98,17 +105,25 @@ public interface SecurityContext
     {
         private final AuthSubject subject;
         private final AccessMode mode;
+        private final TokenRules tokenRules;
 
-        public Frozen( AuthSubject subject, AccessMode mode )
+        public Frozen( AuthSubject subject, AccessMode mode, TokenRules tokenRules )
         {
             this.subject = subject;
             this.mode = mode;
+            this.tokenRules = tokenRules;
         }
 
         @Override
         public AccessMode mode()
         {
             return mode;
+        }
+
+        @Override
+        public TokenRules tokenRules()
+        {
+            return tokenRules;
         }
 
         @Override
@@ -132,7 +147,7 @@ public interface SecurityContext
         @Override
         public SecurityContext withMode( AccessMode mode )
         {
-            return new Frozen( subject, mode );
+            return new Frozen( subject, mode, tokenRules );
         }
     }
 }

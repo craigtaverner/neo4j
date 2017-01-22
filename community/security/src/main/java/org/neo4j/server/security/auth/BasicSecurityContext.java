@@ -26,6 +26,7 @@ import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.AuthenticationResult;
 import org.neo4j.kernel.api.exceptions.InvalidArgumentsException;
 import org.neo4j.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.security.TokenRules;
 
 import static org.neo4j.kernel.api.security.AuthenticationResult.FAILURE;
 import static org.neo4j.kernel.api.security.AuthenticationResult.PASSWORD_CHANGE_REQUIRED;
@@ -133,13 +134,19 @@ public class BasicSecurityContext implements SecurityContext
     @Override
     public SecurityContext withMode( AccessMode mode )
     {
-        return new Frozen( authSubject, mode );
+        return new Frozen( authSubject, mode, tokenRules() );
     }
 
     @Override
     public AccessMode mode()
     {
         return accessMode;
+    }
+
+    @Override
+    public TokenRules tokenRules()
+    {
+        return TokenRules.Static.READ_WRITE;
     }
 
     @Override

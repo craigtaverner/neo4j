@@ -41,7 +41,9 @@ import org.neo4j.kernel.api.LegacyIndexHits;
 import org.neo4j.kernel.api.QueryRegistryOperations;
 import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.SchemaWriteOperations;
+import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementConstants;
+import org.neo4j.kernel.api.TokenWriteOperations;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -81,6 +83,7 @@ import org.neo4j.kernel.api.properties.DefinedProperty;
 import org.neo4j.kernel.api.properties.Property;
 import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.impl.api.operations.CountsOperations;
 import org.neo4j.kernel.impl.api.operations.EntityReadOperations;
 import org.neo4j.kernel.impl.api.operations.EntityWriteOperations;
@@ -114,6 +117,8 @@ public class OperationsFacade
     private final KernelStatement statement;
     private final Procedures procedures;
     private StatementOperationParts operations;
+    private KeyReadOperations frozenTokenRead;
+    private KeyWriteOperations frozenTokenWrite;
 
     OperationsFacade( KernelTransaction tx, KernelStatement statement,
                       Procedures procedures )
@@ -123,19 +128,112 @@ public class OperationsFacade
         this.procedures = procedures;
     }
 
+    private class WrappedKeyReadOperations implements KeyReadOperations
+    {
+        KeyReadOperations inner;
+        TokenRules tokenRules;
+
+        public WrappedKeyReadOperations(KeyReadOperations inner, TokenRules tokenRules)
+        {
+            this.inner = inner;
+            this.tokenRules = tokenRules;
+        }
+
+        @Override
+        public int labelGetForName( Statement state, String labelName )
+        {
+            return inner.labelGetForName( state, labelName );
+        }
+
+        @Override
+        public String labelGetName( Statement state, int labelId ) throws LabelNotFoundKernelException
+        {
+            return inner.labelGetName( state, labelId );
+        }
+
+        @Override
+        public int propertyKeyGetForName( Statement state, String propertyKeyName )
+        {
+            return inner.propertyKeyGetForName( state, propertyKeyName );
+        }
+
+        @Override
+        public String propertyKeyGetName( Statement state, int propertyKeyId )
+                throws PropertyKeyIdNotFoundKernelException
+        {
+            return inner.propertyKeyGetName( state, propertyKeyId );
+        }
+
+        @Override
+        public Iterator<Token> propertyKeyGetAllTokens( Statement state )
+        {
+            return inner.propertyKeyGetAllTokens( state );
+        }
+
+        @Override
+        public Iterator<Token> labelsGetAllTokens( Statement state )
+        {
+            return inner.labelsGetAllTokens( state );
+        }
+
+        @Override
+        public Iterator<Token> relationshipTypesGetAllTokens( Statement state )
+        {
+            return inner.relationshipTypesGetAllTokens( state );
+        }
+
+        @Override
+        public int relationshipTypeGetForName( Statement state, String relationshipTypeName )
+        {
+            return inner.relationshipTypeGetForName( state, relationshipTypeName );
+        }
+
+        @Override
+        public String relationshipTypeGetName( Statement state, int relationshipTypeId )
+                throws RelationshipTypeIdNotFoundKernelException
+        {
+            return inner.relationshipTypeGetName( state, relationshipTypeId );
+        }
+
+        @Override
+        public int labelCount( KernelStatement statement )
+        {
+            return inner.labelCount( statement );
+        }
+
+        @Override
+        public int propertyKeyCount( KernelStatement statement )
+        {
+            return inner.propertyKeyCount( statement );
+        }
+
+        @Override
+        public int relationshipTypeCount( KernelStatement statement )
+        {
+            return inner.relationshipTypeCount( statement );
+        }
+    }
     public void initialize( StatementOperationParts operationParts )
     {
         this.operations = operationParts;
+        if (operations != null)
+        {
+            this.frozenTokenRead =
+                    tx.securityContext().tokenRules() != TokenRules.Static.READ_WRITE ? new WrappedKeyReadOperations(
+                            operations.keyReadOperations(), tx.securityContext().tokenRules() )
+                                                                                      : operations.keyReadOperations();
+            this.frozenTokenWrite = operations.keyWriteOperations();
+        }
     }
 
     final KeyReadOperations tokenRead()
     {
-        return operations.keyReadOperations();
+        return frozenTokenRead;
     }
 
     final KeyWriteOperations tokenWrite()
     {
-        return operations.keyWriteOperations();
+        return frozenTokenWrite;
     }
 
     final EntityReadOperations dataRead()

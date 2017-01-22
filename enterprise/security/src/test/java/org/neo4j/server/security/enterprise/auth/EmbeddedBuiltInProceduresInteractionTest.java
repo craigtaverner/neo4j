@@ -31,6 +31,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.AnonymousContext;
 import org.neo4j.kernel.api.security.AuthSubject;
+import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.enterprise.api.security.EnterpriseSecurityContext;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.GraphDatabaseFacade;
@@ -105,7 +106,7 @@ public class EmbeddedBuiltInProceduresInteractionTest extends BuiltInProceduresI
             @Override
             public EnterpriseSecurityContext withMode( AccessMode mode )
             {
-                return new EnterpriseSecurityContext.Frozen( subject(), mode, roles(), isAdmin() );
+                return new EnterpriseSecurityContext.Frozen( subject(), mode, TokenRules.Static.READ_WRITE, roles(), isAdmin() );
             }
 
             @Override
@@ -126,6 +127,12 @@ public class EmbeddedBuiltInProceduresInteractionTest extends BuiltInProceduresI
             public AccessMode mode()
             {
                 return inner.mode();
+            }
+
+            @Override
+            public TokenRules tokenRules()
+            {
+                return inner.tokenRules();
             }
 
             @Override

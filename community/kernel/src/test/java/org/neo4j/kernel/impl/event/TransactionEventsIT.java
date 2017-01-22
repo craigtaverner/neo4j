@@ -48,6 +48,7 @@ import org.neo4j.kernel.api.security.AccessMode;
 import org.neo4j.kernel.api.security.AnonymousContext;
 import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.test.rule.DatabaseRule;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -177,7 +178,8 @@ public class TransactionEventsIT
         } ) );
         AuthSubject subject = mock( AuthSubject.class );
         when( subject.username() ).thenReturn( "Christof" );
-        SecurityContext securityContext = new SecurityContext.Frozen( subject, AccessMode.Static.WRITE );
+        SecurityContext securityContext = new SecurityContext.Frozen( subject, AccessMode.Static.WRITE,
+                TokenRules.Static.READ_WRITE );
         Map<String,Object> metadata = genericMap( "username", "joe" );
         runTransaction( securityContext, metadata );
 

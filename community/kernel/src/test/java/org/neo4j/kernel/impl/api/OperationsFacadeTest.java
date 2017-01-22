@@ -30,11 +30,13 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.exceptions.schema.DuplicateIndexSchemaRuleException;
 import org.neo4j.kernel.api.exceptions.schema.IndexSchemaRuleNotFoundException;
 import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.index.IndexDescriptor;
+import org.neo4j.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.impl.api.operations.SchemaReadOperations;
 import org.neo4j.test.mockito.matcher.KernelExceptionUserMessageMatcher;
 
@@ -46,6 +48,8 @@ public class OperationsFacadeTest
     private final int LABEL1_ID = 1;
     private final int PROP1_ID = 2;
 
+    @Mock
+    private KernelTransaction tx;
     @Mock
     private KernelStatement kernelStatement;
     @Mock
@@ -61,6 +65,7 @@ public class OperationsFacadeTest
     @Before
     public void setUp() throws Exception
     {
+        Mockito.when( tx.securityContext() ).thenReturn( SecurityContext.AUTH_DISABLED );
         operationsFacade.initialize( statementOperationParts );
     }
 
