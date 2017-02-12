@@ -52,6 +52,7 @@ import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthPlugin;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthenticationPlugin;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthorizationPlugin;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.CustomCacheableAuthenticationInfo;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRulesProvider;
 import org.neo4j.server.security.enterprise.log.SecurityLog;
 
 import static org.neo4j.server.security.enterprise.configuration.SecuritySettings.PLUGIN_REALM_NAME_PREFIX;
@@ -149,9 +150,11 @@ public class PluginRealm extends AuthorizingRealm implements RealmLifecycle, Shi
         if ( authorizationPlugin != null )
         {
             org.neo4j.server.security.enterprise.auth.plugin.spi.AuthorizationInfo authorizationInfo;
+            PluginTokenRulesProvider tokenRulesProvider = role -> Optional.empty();
             try
             {
                  authorizationInfo = authorizationPlugin.authorize( getPrincipalAndProviderCollection( principals ) );
+                 tokenRulesProvider = authorizationPlugin.getTokenRulesProvider();
             }
             catch ( AuthorizationExpiredException e )
             {
@@ -160,7 +163,7 @@ public class PluginRealm extends AuthorizingRealm implements RealmLifecycle, Shi
             }
             if ( authorizationInfo != null )
             {
-                return PluginAuthorizationInfo.create( authorizationInfo );
+                return PluginAuthorizationInfo.create( authorizationInfo, tokenRulesProvider );
             }
         }
         else if ( authPlugin != null && !principals.fromRealm( getName() ).isEmpty() )

@@ -23,7 +23,7 @@ package org.neo4j.kernel.api.security;
 public class AnonymousContext implements SecurityContext
 {
     private final AccessMode accessMode;
-    private final TokenRules tokenRules = TokenRules.Static.READ_WRITE;
+    private final TokenRules tokenRules = TokenRules.Static.READ_ALL;
 
     private AnonymousContext( AccessMode accessMode )
     {

@@ -58,7 +58,7 @@ C: RUN "CALL dbms.cluster.routing.getServers" {}
 S: SUCCESS {"fields": ["ttl", "servers"]}
    RECORD [9223372036854775807, [
 {"role": "WRITE", "addresses": ["127.0.0.1:9001"]},
-{"role": "READ", "addresses": ["127.0.0.1:9002", "127.0.0.1:9003"]},
+{"role": "READ_ALL", "addresses": ["127.0.0.1:9002", "127.0.0.1:9003"]},
 {"role": "ROUTE", "addresses": ["127.0.0.1:9001", "127.0.0.1:9002", "127.0.0.1:9003"]}
 ]]
  */

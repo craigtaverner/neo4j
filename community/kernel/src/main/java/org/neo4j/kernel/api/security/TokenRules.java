@@ -33,14 +33,20 @@ public interface TokenRules
                     }
 
                     @Override
-                    public boolean allowsLabelWrites(String name)
+                    public boolean allowsRelationshipTypeReads(String name)
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean allowsPropertyReads(String name)
                     {
                         return false;
                     }
                 },
 
-        /** Allows reading tokens, but not writing them. */
-        READ_ONLY
+        /** Allows reading all tokens. */
+        READ_ALL
                 {
                     @Override
                     public boolean allowsLabelReads(String name)
@@ -49,39 +55,13 @@ public interface TokenRules
                     }
 
                     @Override
-                    public boolean allowsLabelWrites(String name)
-                    {
-                        return false;
-                    }
-                },
-
-        /** Allows writing tokens, but not reading them */
-        WRITE_ONLY
-                {
-                    @Override
-                    public boolean allowsLabelReads(String name)
-                    {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean allowsLabelWrites(String name)
-                    {
-                        return true;
-                    }
-                },
-
-        /** Allows reading and writing tokens */
-        READ_WRITE
-                {
-                    @Override
-                    public boolean allowsLabelReads(String name)
+                    public boolean allowsRelationshipTypeReads(String name)
                     {
                         return true;
                     }
 
                     @Override
-                    public boolean allowsLabelWrites(String name)
+                    public boolean allowsPropertyReads(String name)
                     {
                         return true;
                     }
@@ -90,5 +70,7 @@ public interface TokenRules
 
     boolean allowsLabelReads(String name);
 
-    boolean allowsLabelWrites(String name);
+    boolean allowsRelationshipTypeReads(String name);
+
+    boolean allowsPropertyReads(String name);
 }

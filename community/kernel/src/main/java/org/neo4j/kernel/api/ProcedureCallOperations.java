@@ -42,7 +42,7 @@ public interface ProcedureCallOperations
 
     /**
      * Invoke a read-only procedure by name, and set the transaction's access mode to
-     * {@link AccessMode.Static#READ READ} for the duration of the procedure execution.
+     * {@link AccessMode.Static#READ READ_ALL} for the duration of the procedure execution.
      * @param name the name of the procedure.
      * @param arguments the procedure arguments.
      * @return an iterator containing the procedure results.
@@ -101,7 +101,7 @@ public interface ProcedureCallOperations
     Object functionCall( QualifiedName name, Object[] arguments ) throws ProcedureException;
 
     /** Invoke a read-only function by name, and set the transaction's access mode to
-     * {@link AccessMode.Static#READ READ} for the duration of the function execution.
+     * {@link AccessMode.Static#READ READ_ALL} for the duration of the function execution.
      * @param name the name of the function.
      * @param arguments the function arguments.
      * @throws ProcedureException if there was an exception thrown during function execution.

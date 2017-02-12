@@ -146,7 +146,7 @@ public class BasicSecurityContext implements SecurityContext
     @Override
     public TokenRules tokenRules()
     {
-        return TokenRules.Static.READ_WRITE;
+        return TokenRules.Static.READ_ALL;
     }
 
     @Override

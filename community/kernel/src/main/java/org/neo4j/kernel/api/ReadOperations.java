@@ -191,7 +191,7 @@ public interface ReadOperations
      * {@link StatementConstants#NO_SUCH_NODE} if the index does not contain a
      * matching node.
      * <p/>
-     * If a node is found, a READ lock for the index entry will be held. If no node
+     * If a node is found, a READ_ALL lock for the index entry will be held. If no node
      * is found (if {@link StatementConstants#NO_SUCH_NODE} was returned), a WRITE
      * lock for the index entry will be held. This is to facilitate unique creation
      * of nodes, to build get-or-create semantics on top of this method.

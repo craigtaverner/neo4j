@@ -23,6 +23,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -35,6 +36,9 @@ import org.neo4j.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.security.AuthenticationResult;
 import org.neo4j.kernel.api.security.TokenRules;
 import org.neo4j.kernel.enterprise.api.security.EnterpriseSecurityContext;
+import org.neo4j.server.security.enterprise.auth.plugin.PluginAuthorizationInfo;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRules;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRulesProvider;
 
 class StandardEnterpriseSecurityContext implements EnterpriseSecurityContext
 {
@@ -86,7 +90,46 @@ class StandardEnterpriseSecurityContext implements EnterpriseSecurityContext
     @Override
     public TokenRules tokenRules()
     {
-        return TokenRules.Static.READ_WRITE;
+        Collection<AuthorizationInfo> authorizationInfo =
+                authManager.getAuthorizationInfo( shiroSubject.getPrincipals() );
+        Collection<PluginTokenRulesProvider> providers = authorizationInfo.stream()
+                .filter( a -> a instanceof PluginAuthorizationInfo )
+                .map( a -> ((PluginAuthorizationInfo) a) ).collect( Collectors.toList() );
+        return providers.size() == 0 ? TokenRules.Static.READ_ALL :
+               asKernelTokenRules( providers.iterator().next().getTokenRules( queryForRoleNames() ) );
+    }
+
+    public TokenRules asKernelTokenRules(Optional<PluginTokenRules> pluginTokenRulesOptional)
+    {
+        if ( pluginTokenRulesOptional.isPresent() )
+        {
+            PluginTokenRules rules = pluginTokenRulesOptional.get();
+            return new TokenRules()
+            {
+
+                @Override
+                public boolean allowsLabelReads( String name )
+                {
+                    return rules.allowsLabelReads( name );
+                }
+
+                @Override
+                public boolean allowsRelationshipTypeReads( String name )
+                {
+                    return rules.allowsRelationshipTypeReads( name );
+                }
+
+                @Override
+                public boolean allowsPropertyReads( String name )
+                {
+                    return rules.allowsPropertyReads( name );
+                }
+            };
+        }
+        else
+        {
+            return TokenRules.Static.READ_ALL;
+        }
     }
 
     @Override

@@ -20,6 +20,7 @@
 package org.neo4j.server.security.enterprise.auth.plugin.spi;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.neo4j.server.security.enterprise.auth.plugin.api.AuthorizationExpiredException;
 
@@ -84,6 +85,8 @@ public interface AuthorizationPlugin extends AuthProviderLifecycle
      */
     AuthorizationInfo authorize( Collection<PrincipalAndProvider> principals );
 
+    PluginTokenRulesProvider getTokenRulesProvider();
+
     class Adapter extends AuthProviderLifecycle.Adapter implements AuthorizationPlugin
     {
         @Override
@@ -96,6 +99,12 @@ public interface AuthorizationPlugin extends AuthProviderLifecycle
         public AuthorizationInfo authorize( Collection<PrincipalAndProvider> principals )
         {
             return null;
+        }
+
+        @Override
+        public PluginTokenRulesProvider getTokenRulesProvider()
+        {
+            return roles -> Optional.empty();
         }
     }
 }

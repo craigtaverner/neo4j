@@ -33,6 +33,7 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.cursor.Cursor;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.kernel.api.ProcedureCallOperations;
 import org.neo4j.kernel.api.DataWriteOperations;
 import org.neo4j.kernel.api.ExecutingQuery;
@@ -43,7 +44,6 @@ import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.SchemaWriteOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementConstants;
-import org.neo4j.kernel.api.TokenWriteOperations;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -119,6 +119,7 @@ public class OperationsFacade
     private StatementOperationParts operations;
     private KeyReadOperations frozenTokenRead;
     private KeyWriteOperations frozenTokenWrite;
+    private TokenValidityChecker tokenValidityChecker;
 
     OperationsFacade( KernelTransaction tx, KernelStatement statement,
                       Procedures procedures )
@@ -142,88 +143,183 @@ public class OperationsFacade
         @Override
         public int labelGetForName( Statement state, String labelName )
         {
-            return inner.labelGetForName( state, labelName );
+            return tokenRules.allowsLabelReads( labelName ) ? inner.labelGetForName( state, labelName ) : NO_SUCH_LABEL;
         }
 
         @Override
         public String labelGetName( Statement state, int labelId ) throws LabelNotFoundKernelException
         {
-            return inner.labelGetName( state, labelId );
+            String name = inner.labelGetName( state, labelId );
+            return tokenRules.allowsLabelReads( name ) ? name : inner.labelGetName( state, NO_SUCH_LABEL );
         }
 
         @Override
         public int propertyKeyGetForName( Statement state, String propertyKeyName )
         {
-            return inner.propertyKeyGetForName( state, propertyKeyName );
+            return tokenRules.allowsPropertyReads( propertyKeyName ) ? inner
+                    .propertyKeyGetForName( state, propertyKeyName ) : NO_SUCH_PROPERTY_KEY;
         }
 
         @Override
         public String propertyKeyGetName( Statement state, int propertyKeyId )
                 throws PropertyKeyIdNotFoundKernelException
         {
-            return inner.propertyKeyGetName( state, propertyKeyId );
+            String name = inner.propertyKeyGetName( state, propertyKeyId );
+            return tokenRules.allowsPropertyReads( name ) ? name
+                                                          : inner.propertyKeyGetName( state, NO_SUCH_PROPERTY_KEY );
         }
 
         @Override
         public Iterator<Token> propertyKeyGetAllTokens( Statement state )
         {
-            return inner.propertyKeyGetAllTokens( state );
+            return Iterators.stream( inner.propertyKeyGetAllTokens( state ) )
+                    .filter( token -> tokenRules.allowsPropertyReads( token.name() ) ).iterator();
         }
 
         @Override
         public Iterator<Token> labelsGetAllTokens( Statement state )
         {
-            return inner.labelsGetAllTokens( state );
+            return Iterators.stream( inner.labelsGetAllTokens( state ) )
+                    .filter( token -> tokenRules.allowsLabelReads( token.name() ) ).iterator();
         }
 
         @Override
         public Iterator<Token> relationshipTypesGetAllTokens( Statement state )
         {
-            return inner.relationshipTypesGetAllTokens( state );
+            return Iterators.stream( inner.relationshipTypesGetAllTokens( state ) )
+                    .filter( token -> tokenRules.allowsRelationshipTypeReads( token.name() ) ).iterator();
         }
 
         @Override
         public int relationshipTypeGetForName( Statement state, String relationshipTypeName )
         {
-            return inner.relationshipTypeGetForName( state, relationshipTypeName );
+            return tokenRules.allowsRelationshipTypeReads( relationshipTypeName ) ? inner
+                    .relationshipTypeGetForName( state, relationshipTypeName ) : NO_SUCH_RELATIONSHIP_TYPE;
         }
 
         @Override
         public String relationshipTypeGetName( Statement state, int relationshipTypeId )
                 throws RelationshipTypeIdNotFoundKernelException
         {
-            return inner.relationshipTypeGetName( state, relationshipTypeId );
+            String name = inner.relationshipTypeGetName( state, relationshipTypeId );
+            return tokenRules.allowsRelationshipTypeReads( name ) ? name : inner
+                    .relationshipTypeGetName( state, NO_SUCH_RELATIONSHIP_TYPE );
         }
 
         @Override
         public int labelCount( KernelStatement statement )
         {
-            return inner.labelCount( statement );
+            return (int) Iterators.count( inner.labelsGetAllTokens( statement ),
+                    token -> tokenRules.allowsLabelReads( token.name() ) );
         }
 
         @Override
         public int propertyKeyCount( KernelStatement statement )
         {
-            return inner.propertyKeyCount( statement );
+            return (int) Iterators.count( inner.propertyKeyGetAllTokens( statement ),
+                    token -> tokenRules.allowsPropertyReads( token.name() ) );
         }
 
         @Override
         public int relationshipTypeCount( KernelStatement statement )
         {
-            return inner.relationshipTypeCount( statement );
+            return (int) Iterators.count( inner.relationshipTypesGetAllTokens( statement ),
+                    token -> tokenRules.allowsRelationshipTypeReads( token.name() ) );
         }
     }
+
+    private class TokenValidityChecker
+    {
+        boolean isLabelValid( int labelId )
+        {
+            return labelId != StatementConstants.NO_SUCH_LABEL;
+        }
+
+        boolean isLabelWildcardOrValid( int labelId )
+        {
+            return true;
+        }
+
+        boolean isRelationshipTypeValid( int typeId )
+        {
+            return typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
+        }
+
+        boolean isPropertyValid( int propertyKeyId )
+        {
+            return propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY;
+        }
+    }
+
+    private class RestrictedTokenValidityChecker extends TokenValidityChecker
+    {
+        boolean isLabelValid( int labelId )
+        {
+            try
+            {
+                return labelId != StatementConstants.NO_SUCH_LABEL &&
+                       tokenRead().labelGetName( statement, labelId ) != null;
+            }
+            catch ( LabelNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+
+        boolean isLabelWildcardOrValid( int labelId )
+        {
+            try
+            {
+                return labelId == StatementConstants.NO_SUCH_LABEL ||
+                       tokenRead().labelGetName( statement, labelId ) != null;
+            }
+            catch ( LabelNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+
+        boolean isRelationshipTypeValid( int typeId )
+        {
+            try
+            {
+                return typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE &&
+                       tokenRead().relationshipTypeGetName( statement, typeId ) != null;
+            }
+            catch ( RelationshipTypeIdNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+
+        boolean isPropertyValid( int propertyKeyId )
+        {
+            try
+            {
+                return propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY &&
+                       tokenRead().propertyKeyGetName( statement, propertyKeyId ) != null;
+            }
+            catch ( PropertyKeyIdNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+    }
+
     public void initialize( StatementOperationParts operationParts )
     {
         this.operations = operationParts;
         if (operations != null)
         {
             this.frozenTokenRead =
-                    tx.securityContext().tokenRules() != TokenRules.Static.READ_WRITE ? new WrappedKeyReadOperations(
+                    tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new WrappedKeyReadOperations(
                             operations.keyReadOperations(), tx.securityContext().tokenRules() )
-                                                                                      : operations.keyReadOperations();
+                                                                                    : operations.keyReadOperations();
             this.frozenTokenWrite = operations.keyWriteOperations();
         }
+        this.tokenValidityChecker =
+                tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new RestrictedTokenValidityChecker()
+                                                                                : new TokenValidityChecker();
     }
 
     final KeyReadOperations tokenRead()
@@ -306,7 +402,7 @@ public class OperationsFacade
     public PrimitiveLongIterator nodesGetForLabel( int labelId )
     {
         statement.assertOpen();
-        if ( labelId == StatementConstants.NO_SUCH_LABEL )
+        if ( !tokenValidityChecker.isLabelValid( labelId ) )
         {
             return PrimitiveLongCollections.emptyIterator();
         }
@@ -409,7 +505,7 @@ public class OperationsFacade
     {
         statement.assertOpen();
 
-        if ( labelId == StatementConstants.NO_SUCH_LABEL )
+        if ( !tokenValidityChecker.isLabelValid( labelId ) )
         {
             return false;
         }
@@ -434,7 +530,7 @@ public class OperationsFacade
     public boolean nodeHasProperty( long nodeId, int propertyKeyId ) throws EntityNotFoundException
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return false;
         }
@@ -448,7 +544,7 @@ public class OperationsFacade
     public Object nodeGetProperty( long nodeId, int propertyKeyId ) throws EntityNotFoundException
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return null;
         }
@@ -540,7 +636,7 @@ public class OperationsFacade
     public boolean relationshipHasProperty( long relationshipId, int propertyKeyId ) throws EntityNotFoundException
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return false;
         }
@@ -554,7 +650,7 @@ public class OperationsFacade
     public Object relationshipGetProperty( long relationshipId, int propertyKeyId ) throws EntityNotFoundException
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return null;
         }
@@ -572,7 +668,7 @@ public class OperationsFacade
     public boolean graphHasProperty( int propertyKeyId )
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return false;
         }
@@ -583,7 +679,7 @@ public class OperationsFacade
     public Object graphGetProperty( int propertyKeyId )
     {
         statement.assertOpen();
-        if ( propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY )
+        if ( !tokenValidityChecker.isPropertyValid( propertyKeyId ) )
         {
             return null;
         }
@@ -1505,7 +1601,14 @@ public class OperationsFacade
     public long countsForNode( int labelId )
     {
         statement.assertOpen();
-        return counting().countsForNode( statement, labelId );
+        if ( tokenValidityChecker.isLabelWildcardOrValid( labelId ) )
+        {
+            return counting().countsForNode( statement, labelId );
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     @Override

@@ -321,7 +321,7 @@ public class TxStateTransactionDataViewTest
         when( authSubject.username() ).thenReturn( "Christof" );
         when( transaction.securityContext() )
                 .thenReturn( new SecurityContext.Frozen( authSubject, AccessMode.Static.FULL,
-                        TokenRules.Static.READ_WRITE ) );
+                        TokenRules.Static.READ_ALL ) );
 
         TxStateTransactionDataSnapshot transactionDataSnapshot = snapshot();
         assertEquals( "Christof", transactionDataSnapshot.username() );

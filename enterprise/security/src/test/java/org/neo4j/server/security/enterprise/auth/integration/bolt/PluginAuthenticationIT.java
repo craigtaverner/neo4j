@@ -22,6 +22,7 @@ package org.neo4j.server.security.enterprise.auth.integration.bolt;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.neo4j.bolt.v1.messaging.message.PullAllMessage.pullAll;
 import static org.neo4j.bolt.v1.messaging.message.RunMessage.run;
 import static org.neo4j.bolt.v1.messaging.util.MessageMatchers.msgFailure;
+import static org.neo4j.bolt.v1.messaging.util.MessageMatchers.msgRecord;
 import static org.neo4j.bolt.v1.messaging.util.MessageMatchers.msgSuccess;
+import static org.neo4j.bolt.v1.runtime.spi.StreamMatchers.eqRecord;
+import static org.neo4j.bolt.v1.transport.integration.TransportTestUtil.chunk;
 import static org.neo4j.bolt.v1.transport.integration.TransportTestUtil.eventuallyReceives;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -207,6 +211,65 @@ public class PluginAuthenticationIT extends EnterpriseAuthenticationTestBase
         assertConnectionSucceeds( authToken( "neo4j", "neo4j", null ) );
         assertReadSucceeds();
         assertWriteFails( "neo4j", "reader" );
+    }
+
+    @Test
+    public void shouldAuthorizeWithTokenRulesRestrictions() throws Throwable
+    {
+        // Given a database with two users, one unrestricted publisher user and one restricted reader
+        restartNeo4jServerWithOverriddenSettings( settings -> {
+            settings.put( SecuritySettings.auth_providers, "plugin-TestCombinedAuthWithTokenRulesPlugin" );
+        });
+
+        // And give the publisher has created two nodes with different labels and properties
+        assertConnectionSucceeds( authToken( "neo4j", "neo4j", null ) );
+        assertQuerySucceeds( "CREATE (:User {name:'Joe',ssn:'123abc'}) CREATE (:NonUser)" );
+
+        // Then the publisher can access all
+        assertLabelPropertyResults( 1L, 1L, "123abc" );
+
+        // But when switching to the restricted user
+        reconnect();
+        assertConnectionSucceeds( authToken( "restricted", "neo4j", null ) );
+
+        // Then we find that the restricted user has access to fewer nodes and cannot see inaccesible properties
+        assertLabelPropertyResults( 0L, 1L, null );
+    }
+
+    private void assertLabelPropertyResults(long nonUserNodeCount, long userNodeCount, String ssn) throws IOException
+    {
+        // Test unrestricted access
+        // When
+        client.send( chunk(
+                run( "MATCH (:NonUser) RETURN count(*)" ),
+                pullAll() ) );
+
+        // Then
+        assertThat( client, eventuallyReceives(
+                msgSuccess(),
+                msgRecord( eqRecord( equalTo( nonUserNodeCount ) ) ),
+                msgSuccess() ) );
+
+        client.send( chunk(
+                run( "MATCH (:User {name:'Joe'}) RETURN count(*)" ),
+                pullAll() ) );
+
+        // Then
+        assertThat( client, eventuallyReceives(
+                msgSuccess(),
+                msgRecord( eqRecord( equalTo( userNodeCount ) ) ),
+                msgSuccess() ) );
+
+        // When
+        client.send( chunk(
+                run( "MATCH (n:User {name:'Joe'}) RETURN n.ssn" ),
+                pullAll() ) );
+
+        // Then
+        assertThat( client, eventuallyReceives(
+                msgSuccess(),
+                msgRecord( eqRecord( equalTo( ssn ) ) ),
+                msgSuccess() ) );
     }
 
     @Test

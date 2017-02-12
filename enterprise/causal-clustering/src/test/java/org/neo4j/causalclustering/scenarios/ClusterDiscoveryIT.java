@@ -92,7 +92,7 @@ public class ClusterDiscoveryIT
             assertEquals( 1, members.stream().filter( x -> x.get( "role" ).equals( "WRITE" ) )
                     .flatMap( x -> Arrays.stream( (Object[]) x.get( "addresses" ) ) ).count() );
 
-            assertEquals( readEndPoints, members.stream().filter( x -> x.get( "role" ).equals( "READ" ) )
+            assertEquals( readEndPoints, members.stream().filter( x -> x.get( "role" ).equals( "READ_ALL" ) )
                     .flatMap( x -> Arrays.stream( (Object[]) x.get( "addresses" ) ) ).count() );
 
             assertEquals( cores, members.stream().filter( x -> x.get( "role" ).equals( "ROUTE" ) )

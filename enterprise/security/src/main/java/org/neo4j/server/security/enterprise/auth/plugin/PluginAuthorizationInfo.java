@@ -21,20 +21,33 @@ package org.neo4j.server.security.enterprise.auth.plugin;
 
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthorizationInfo;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRules;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRulesProvider;
 
-public class PluginAuthorizationInfo extends SimpleAuthorizationInfo
+public class PluginAuthorizationInfo extends SimpleAuthorizationInfo implements PluginTokenRulesProvider
 {
-    private PluginAuthorizationInfo( Set<String> roles )
+    private final PluginTokenRulesProvider tokenRulesProvider;
+
+    private PluginAuthorizationInfo( Set<String> roles, PluginTokenRulesProvider tokenRulesProvider )
     {
         super( roles );
+        this.tokenRulesProvider = tokenRulesProvider;
     }
 
-    public static PluginAuthorizationInfo create( AuthorizationInfo authorizationInfo )
+    public static PluginAuthorizationInfo create( AuthorizationInfo authorizationInfo, PluginTokenRulesProvider tokenRulesProvider )
     {
-        return new PluginAuthorizationInfo( new LinkedHashSet<>( authorizationInfo.roles() ) );
+        return new PluginAuthorizationInfo( new LinkedHashSet<>( authorizationInfo.roles() ), tokenRulesProvider );
+    }
+
+    @Override
+    public Optional<PluginTokenRules> getTokenRules( Collection<String> roles)
+    {
+        return tokenRulesProvider.getTokenRules( roles );
     }
 }

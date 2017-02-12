@@ -157,7 +157,7 @@ public class BoltCausalClusteringIT
             }
             catch ( ClientException ex )
             {
-                assertEquals( "Write queries cannot be performed in READ access mode.", ex.getMessage() );
+                assertEquals( "Write queries cannot be performed in READ_ALL access mode.", ex.getMessage() );
                 return true;
             }
             finally

@@ -25,16 +25,27 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.neo4j.server.security.enterprise.auth.plugin.api.AuthToken;
-import org.neo4j.server.security.enterprise.auth.plugin.api.AuthorizationExpiredException;
 import org.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthenticationInfo;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthenticationPlugin;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthorizationInfo;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.AuthorizationPlugin;
+import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRules;
 import org.neo4j.server.security.enterprise.auth.plugin.spi.PluginTokenRulesProvider;
 
-public class TestCombinedAuthPlugin extends AuthenticationPlugin.Adapter implements AuthorizationPlugin
+public class TestCombinedAuthWithTokenRulesPlugin extends AuthenticationPlugin.Adapter implements AuthorizationPlugin
 {
+    public static final String allowedLabel = "User";
+    public static final String deniedRelationshipType = "KNOWS";
+    public static final String deniedProperty = "ssn";
+    private final PluginTokenRules tokenRules;
+
+    public TestCombinedAuthWithTokenRulesPlugin()
+    {
+        this.tokenRules = new PluginTokenRulesBuilder().allowLabels( allowedLabel )
+                .denyRelationshipTypes( deniedRelationshipType ).denyProperties( deniedProperty ).build();
+    }
+
     @Override
     public String name()
     {
@@ -51,9 +62,9 @@ public class TestCombinedAuthPlugin extends AuthenticationPlugin.Adapter impleme
         {
             return AuthenticationInfo.of( "neo4j" );
         }
-        else if ( principal.equals( "authorization_expired_user" ) && Arrays.equals( credentials, "neo4j".toCharArray() ) )
+        else if ( principal.equals( "restricted" ) && Arrays.equals( credentials, "neo4j".toCharArray() ) )
         {
-            return (AuthenticationInfo) () -> "authorization_expired_user";
+            return (AuthenticationInfo) () -> "restricted";
         }
         return null;
     }
@@ -63,11 +74,11 @@ public class TestCombinedAuthPlugin extends AuthenticationPlugin.Adapter impleme
     {
         if ( principals.stream().anyMatch( p -> "neo4j".equals( p.principal() ) ) )
         {
-            return (AuthorizationInfo) () -> Collections.singleton( PredefinedRoles.READER );
+            return (AuthorizationInfo) () -> Collections.singleton( PredefinedRoles.PUBLISHER );
         }
-        else if ( principals.stream().anyMatch( p -> "authorization_expired_user".equals( p.principal() ) ) )
+        else if ( principals.stream().anyMatch( p -> "restricted".equals( p.principal() ) ) )
         {
-            throw new AuthorizationExpiredException( "authorization_expired_user needs to re-authenticate." );
+            return (AuthorizationInfo) () -> Collections.singleton( PredefinedRoles.READER );
         }
         return null;
     }
@@ -75,6 +86,6 @@ public class TestCombinedAuthPlugin extends AuthenticationPlugin.Adapter impleme
     @Override
     public PluginTokenRulesProvider getTokenRulesProvider()
     {
-        return roles -> Optional.empty();
+        return roles -> roles.contains( PredefinedRoles.READER ) ? Optional.of( tokenRules ) : Optional.empty();
     }
 }

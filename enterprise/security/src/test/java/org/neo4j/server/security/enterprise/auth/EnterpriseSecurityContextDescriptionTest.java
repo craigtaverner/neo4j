@@ -98,7 +98,7 @@ public class EnterpriseSecurityContextDescriptionTest
 
         EnterpriseSecurityContext restricted =
                 context.withMode( new RestrictedAccessMode( context.mode(), AccessMode.Static.READ ) );
-        assertThat( restricted.description(), equalTo( "user 'mats' with roles [publisher,role1] restricted to READ" ) );
+        assertThat( restricted.description(), equalTo( "user 'mats' with roles [publisher,role1] restricted to READ_ALL" ) );
     }
 
     @Test
@@ -109,7 +109,7 @@ public class EnterpriseSecurityContextDescriptionTest
 
         EnterpriseSecurityContext overridden =
                 context.withMode( new OverriddenAccessMode( context.mode(), AccessMode.Static.READ ) );
-        assertThat( overridden.description(), equalTo( "user 'mats' with roles [publisher,role1] overridden by READ" ) );
+        assertThat( overridden.description(), equalTo( "user 'mats' with roles [publisher,role1] overridden by READ_ALL" ) );
     }
 
     @Test
@@ -125,6 +125,6 @@ public class EnterpriseSecurityContextDescriptionTest
         EnterpriseSecurityContext disabled = EnterpriseSecurityContext.AUTH_DISABLED;
         EnterpriseSecurityContext restricted =
                 disabled.withMode( new RestrictedAccessMode( disabled.mode(), AccessMode.Static.READ ) );
-        assertThat( restricted.description(), equalTo( "AUTH_DISABLED with FULL restricted to READ" ) );
+        assertThat( restricted.description(), equalTo( "AUTH_DISABLED with FULL restricted to READ_ALL" ) );
     }
 }

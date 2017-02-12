@@ -179,7 +179,7 @@ public class TransactionEventsIT
         AuthSubject subject = mock( AuthSubject.class );
         when( subject.username() ).thenReturn( "Christof" );
         SecurityContext securityContext = new SecurityContext.Frozen( subject, AccessMode.Static.WRITE,
-                TokenRules.Static.READ_WRITE );
+                TokenRules.Static.READ_ALL );
         Map<String,Object> metadata = genericMap( "username", "joe" );
         runTransaction( securityContext, metadata );
 

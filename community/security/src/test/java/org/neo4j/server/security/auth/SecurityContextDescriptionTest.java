@@ -85,7 +85,7 @@ public class SecurityContextDescriptionTest
     {
         SecurityContext restricted =
                 context.withMode( new RestrictedAccessMode( context.mode(), AccessMode.Static.READ ) );
-        assertThat( restricted.description(), equalTo( "user 'johan' with FULL restricted to READ" ) );
+        assertThat( restricted.description(), equalTo( "user 'johan' with FULL restricted to READ_ALL" ) );
     }
 
     @Test
@@ -93,7 +93,7 @@ public class SecurityContextDescriptionTest
     {
         SecurityContext overridden =
                 context.withMode( new OverriddenAccessMode( context.mode(), AccessMode.Static.READ ) );
-        assertThat( overridden.description(), equalTo( "user 'johan' with FULL overridden by READ" ) );
+        assertThat( overridden.description(), equalTo( "user 'johan' with FULL overridden by READ_ALL" ) );
     }
 
     @Test
@@ -109,7 +109,7 @@ public class SecurityContextDescriptionTest
         SecurityContext disabled = SecurityContext.AUTH_DISABLED;
         SecurityContext restricted =
                 disabled.withMode( new RestrictedAccessMode( disabled.mode(), AccessMode.Static.READ ) );
-        assertThat( restricted.description(), equalTo( "AUTH_DISABLED with FULL restricted to READ" ) );
+        assertThat( restricted.description(), equalTo( "AUTH_DISABLED with FULL restricted to READ_ALL" ) );
     }
 
 }

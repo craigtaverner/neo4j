@@ -106,7 +106,7 @@ public class EmbeddedBuiltInProceduresInteractionTest extends BuiltInProceduresI
             @Override
             public EnterpriseSecurityContext withMode( AccessMode mode )
             {
-                return new EnterpriseSecurityContext.Frozen( subject(), mode, TokenRules.Static.READ_WRITE, roles(), isAdmin() );
+                return new EnterpriseSecurityContext.Frozen( subject(), mode, TokenRules.Static.READ_ALL, roles(), isAdmin() );
             }
 
             @Override
