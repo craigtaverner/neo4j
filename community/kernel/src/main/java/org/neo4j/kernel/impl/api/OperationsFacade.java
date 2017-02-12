@@ -127,6 +127,7 @@ public class OperationsFacade
         this.tx = tx;
         this.statement = statement;
         this.procedures = procedures;
+        this.tokenValidityChecker = new TokenValidityChecker();
     }
 
     private class WrappedKeyReadOperations implements KeyReadOperations
@@ -316,10 +317,10 @@ public class OperationsFacade
                             operations.keyReadOperations(), tx.securityContext().tokenRules() )
                                                                                     : operations.keyReadOperations();
             this.frozenTokenWrite = operations.keyWriteOperations();
+            this.tokenValidityChecker =
+                    tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new RestrictedTokenValidityChecker()
+                                                                                    : new TokenValidityChecker();
         }
-        this.tokenValidityChecker =
-                tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new RestrictedTokenValidityChecker()
-                                                                                : new TokenValidityChecker();
     }
 
     final KeyReadOperations tokenRead()
