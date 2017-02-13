@@ -91,7 +91,7 @@ public class PropertyAndNodeIndexedCheck implements RecordCheck<NodeRecord, Cons
             {
                 properties = propertyReader.propertyBlocks( propertyRecs );
             }
-            int propertyId = indexRule.getSchemaDescriptor().getPropertyIds()[0]; // assuming 1 property always
+            int propertyId = indexRule.getSchemaDescriptor().getPropertyId(); // assuming 1 property always
             PropertyBlock property = propertyWithKey( properties, propertyId );
 
             if ( property == null )

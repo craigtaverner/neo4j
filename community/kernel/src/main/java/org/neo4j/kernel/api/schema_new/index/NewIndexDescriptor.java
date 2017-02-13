@@ -21,6 +21,7 @@ package org.neo4j.kernel.api.schema_new.index;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.schema_new.LabelSchemaDescriptor;
+import org.neo4j.kernel.api.schema_new.SchemaUtil;
 
 import static java.lang.String.format;
 
@@ -99,5 +100,11 @@ public class NewIndexDescriptor
     public int hashCode()
     {
         return type.hashCode() & schema.hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return userDescription( SchemaUtil.noopTokenNameLookup );
     }
 }

@@ -66,11 +66,11 @@ public class ConstraintBoundary
             switch ( descriptor.type() ) {
             case UNIQUE:
                 return new UniquenessConstraint( IndexDescriptorFactory.getNodePropertyDescriptor(
-                        schema.getLabelId(), schema.getPropertyIds()[0] ) );
+                        schema.getLabelId(), schema.getPropertyId() ) );
 
             case EXISTS:
                 return new NodePropertyExistenceConstraint( IndexDescriptorFactory.getNodePropertyDescriptor(
-                        schema.getLabelId(), schema.getPropertyIds()[0] ) );
+                        schema.getLabelId(), schema.getPropertyId() ) );
 
             default:
                 throw new UnsupportedOperationException( "Although we cannot get here, this has not been implemented." );
@@ -81,7 +81,7 @@ public class ConstraintBoundary
         public PropertyConstraint computeSpecific( RelationTypeSchemaDescriptor schema )
         {
             return new RelationshipPropertyExistenceConstraint( new RelationshipPropertyDescriptor(
-                    schema.getRelTypeId(), schema.getPropertyIds()[0] ) );
+                    schema.getRelTypeId(), schema.getPropertyId() ) );
         }
     }
 }

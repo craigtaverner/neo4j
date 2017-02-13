@@ -245,7 +245,7 @@ public class IndexRule extends AbstractSchemaRule
             UTF8.putEncodedStringInto( providerDescriptor.getKey(), buffer );
             UTF8.putEncodedStringInto( providerDescriptor.getVersion(), buffer );
             buffer.putShort( (short) 1 /*propertyKeys.length*/ );
-            buffer.putLong( schema.getPropertyIds()[0] );
+            buffer.putLong( schema.getPropertyId() );
             if ( canSupportUniqueConstraint() )
             {
                 buffer.putLong( owningConstraint );

@@ -217,7 +217,7 @@ public class ConstraintRule extends AbstractSchemaRule implements ConstraintDesc
             case EXISTS:
                 buffer.putInt( schema.getLabelId() );
                 buffer.put( NODE_PROPERTY_EXISTENCE_CONSTRAINT.id() );
-                buffer.putInt( schema.getPropertyIds()[0] ); // only one property supported by store format atm
+                buffer.putInt( schema.getPropertyId() ); // only one property supported by store format atm
                 break;
 
             default:
@@ -230,7 +230,7 @@ public class ConstraintRule extends AbstractSchemaRule implements ConstraintDesc
         {
             buffer.putInt( schema.getRelTypeId() );
             buffer.put( RELATIONSHIP_PROPERTY_EXISTENCE_CONSTRAINT.id() );
-            buffer.putInt( schema.getPropertyIds()[0] ); // only one property supported by store format atm
+            buffer.putInt( schema.getPropertyId() ); // only one property supported by store format atm
         }
     }
 }

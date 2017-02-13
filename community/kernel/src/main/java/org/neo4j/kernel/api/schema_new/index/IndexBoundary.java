@@ -29,13 +29,17 @@ public class IndexBoundary
 {
     public static IndexDescriptor map( NewIndexDescriptor descriptor )
     {
-        LabelSchemaDescriptor labelSchema = (LabelSchemaDescriptor) descriptor.schema();
+        LabelSchemaDescriptor labelSchema = descriptor.schema();
         return org.neo4j.kernel.api.schema.IndexDescriptorFactory.of(
-                labelSchema.getLabelId(), labelSchema.getPropertyIds()[0] );
+                labelSchema.getLabelId(), labelSchema.getPropertyId() );
     }
 
     public static NewIndexDescriptor map( IndexDescriptor descriptor )
     {
+        if ( descriptor == null )
+        {
+            return null;
+        }
         return NewIndexDescriptorFactory.forLabel( descriptor.getLabelId(), descriptor.getPropertyKeyId() );
     }
 }
