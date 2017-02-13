@@ -33,6 +33,8 @@ import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.api.properties.DefinedProperty;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptorFactory;
+import org.neo4j.kernel.api.schema_new.index.IndexBoundary;
+import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 import org.neo4j.kernel.impl.api.index.SchemaIndexProviderMap;
 import org.neo4j.kernel.impl.constraints.ConstraintSemantics;
@@ -194,10 +196,8 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         }
         else
         {
-            rule = IndexRule.indexRule(
-                        schemaStorage.newRuleId(),
-                        NewIndexDescriptorFactory.forLabel( element.getLabelId(), element.getPropertyKeyId() ),
-                        providerDescriptor );
+            NewIndexDescriptor index = IndexBoundary.map( element );
+            rule = IndexRule.indexRule( schemaStorage.newRuleId(), index, providerDescriptor );
         }
         recordState.createSchemaRule( rule );
     }

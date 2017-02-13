@@ -20,6 +20,7 @@
 package org.neo4j.kernel.api.schema_new.index;
 
 import org.neo4j.kernel.api.schema.IndexDescriptor;
+import org.neo4j.kernel.api.schema.IndexDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.LabelSchemaDescriptor;
 
 /**
@@ -30,8 +31,8 @@ public class IndexBoundary
     public static IndexDescriptor map( NewIndexDescriptor descriptor )
     {
         LabelSchemaDescriptor labelSchema = descriptor.schema();
-        return org.neo4j.kernel.api.schema.IndexDescriptorFactory.of(
-                labelSchema.getLabelId(), labelSchema.getPropertyId() );
+        return IndexDescriptorFactory.of(
+                labelSchema.getLabelId(), labelSchema.getPropertyIds() );
     }
 
     public static NewIndexDescriptor map( IndexDescriptor descriptor )
@@ -40,6 +41,13 @@ public class IndexBoundary
         {
             return null;
         }
-        return NewIndexDescriptorFactory.forLabel( descriptor.getLabelId(), descriptor.getPropertyKeyId() );
+        if ( descriptor.isComposite() )
+        {
+            return NewIndexDescriptorFactory.forLabel( descriptor.getLabelId(), descriptor.getPropertyKeyIds() );
+        }
+        else
+        {
+            return NewIndexDescriptorFactory.forLabel( descriptor.getLabelId(), descriptor.getPropertyKeyId() );
+        }
     }
 }

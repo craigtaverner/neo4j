@@ -26,8 +26,8 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import scala.collection.JavaConverters._
 
 class CompositeIndexAcceptanceTest extends ExecutionEngineFunSuite with NewPlannerTestSupport {
-/*
-TODO: add once composite indexes are actually implemented
+
+  //TODO: add once composite indexes are actually implemented
   test("should succeed in creating composite index") {
     // When
     executeWithCostPlannerOnly("CREATE INDEX ON :Person(firstname)")
@@ -55,7 +55,6 @@ TODO: add once composite indexes are actually implemented
     result should use("NodeIndexSeek")
     result.columnAs("n").toList should be(List(n))
   }
-*/
 
   case class haveIndexes(expectedIndexes: String*) extends Matcher[GraphDatabaseQueryService] {
     def apply(graph: GraphDatabaseQueryService): MatchResult = {

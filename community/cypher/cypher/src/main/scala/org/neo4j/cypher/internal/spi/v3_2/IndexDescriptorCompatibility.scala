@@ -24,8 +24,15 @@ import org.neo4j.kernel.api.schema.{IndexDescriptor => KernelIndexDescriptor, No
 
 trait IndexDescriptorCompatibility {
   implicit def cypherToKernel(index: CypherIndexDescriptor) =
-    IndexDescriptorFactory.of(index.label, index.property)
+    if (index.isComposite)
+      IndexDescriptorFactory.of(
+        new NodeMultiPropertyDescriptor(index.label, CypherIndexDescriptor.toKernelEncode(index.properties)))
+    else
+      IndexDescriptorFactory.of(index.label, index.property)
 
   implicit def kernelToCypher(index: KernelIndexDescriptor) =
-    CypherIndexDescriptor(index.getLabelId, index.getPropertyKeyId)
+    if (index.isComposite)
+      CypherIndexDescriptor(index.getLabelId, index.getPropertyKeyIds)
+    else
+      CypherIndexDescriptor(index.getLabelId, index.getPropertyKeyId)
 }
