@@ -39,13 +39,15 @@ import java.util.Set;
 import org.neo4j.kernel.api.exceptions.index.IndexEntryConflictException;
 import org.neo4j.kernel.api.impl.index.storage.DirectoryFactory;
 import org.neo4j.kernel.api.index.IndexConfiguration;
+import org.neo4j.kernel.api.index.IndexEntryUpdate;
 import org.neo4j.kernel.api.schema.IndexDescriptor;
 import org.neo4j.kernel.api.schema.IndexDescriptorFactory;
 import org.neo4j.kernel.api.index.IndexPopulator;
 import org.neo4j.kernel.api.index.IndexUpdater;
 import org.neo4j.kernel.api.index.InternalIndexState;
-import org.neo4j.kernel.api.index.NodePropertyUpdate;
 import org.neo4j.kernel.api.index.PropertyAccessor;
+import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
+import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.api.index.IndexStoreView;
 import org.neo4j.kernel.impl.api.index.sampling.IndexSamplingConfig;
@@ -76,6 +78,7 @@ public class LuceneSchemaIndexPopulatorTest
     private IndexSearcher searcher;
     private final long indexId = 0;
     private final int propertyKeyId = 666;
+    private static final NewIndexDescriptor index = NewIndexDescriptorFactory.forLabel( 0, 0 );
 
     @Before
     public void before() throws Exception
@@ -256,19 +259,19 @@ public class LuceneSchemaIndexPopulatorTest
         }
     }
 
-    private NodePropertyUpdate add( long nodeId, Object value )
+    private static IndexEntryUpdate add( long nodeId, Object value )
     {
-        return NodePropertyUpdate.add( nodeId, 0, value, new long[0] );
+        return IndexEntryUpdate.add( nodeId, index, value );
     }
 
-    private NodePropertyUpdate change( long nodeId, Object valueBefore, Object valueAfter )
+    private static IndexEntryUpdate change( long nodeId, Object valueBefore, Object valueAfter )
     {
-        return NodePropertyUpdate.change( nodeId, 0, valueBefore, new long[0], valueAfter, new long[0] );
+        return IndexEntryUpdate.change( nodeId, index, valueBefore, valueAfter );
     }
 
-    private NodePropertyUpdate remove( long nodeId, Object removedValue )
+    private static IndexEntryUpdate remove( long nodeId, Object removedValue )
     {
-        return NodePropertyUpdate.remove( nodeId, 0, removedValue, new long[0] );
+        return IndexEntryUpdate.remove( nodeId, index, removedValue );
     }
 
     private void assertIndexedValues( Hit... expectedHits ) throws IOException
@@ -300,18 +303,18 @@ public class LuceneSchemaIndexPopulatorTest
     private static void addUpdate( IndexPopulator populator, long nodeId, Object value )
             throws IOException, IndexEntryConflictException
     {
-        populator.add( Collections.singletonList( NodePropertyUpdate.add( nodeId, 0, value, new long[]{0} ) ) );
+        populator.add( Collections.singletonList( add( nodeId, value ) ) );
     }
 
     private static void updatePopulator(
             IndexPopulator populator,
-            Iterable<NodePropertyUpdate> updates,
+            Iterable<IndexEntryUpdate> updates,
             PropertyAccessor accessor )
             throws IOException, IndexEntryConflictException
     {
         try ( IndexUpdater updater = populator.newPopulatingUpdater( accessor ) )
         {
-            for ( NodePropertyUpdate update :  updates )
+            for ( IndexEntryUpdate update :  updates )
             {
                 updater.process( update );
             }
