@@ -20,6 +20,7 @@
 package org.neo4j.server.security.enterprise.auth.integration.bolt;
 
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -319,6 +320,18 @@ public abstract class EnterpriseAuthenticationTestBase extends AbstractLdapTestU
 
         // Then
         assertThat( client, eventuallyReceives( msgSuccess(), msgSuccess() ) );
+    }
+
+    protected <T> void assertQueryResult(String query, Matcher<T> matcher) throws IOException
+    {
+        // When
+        client.send( chunk( run( query ), pullAll() ) );
+
+        // Then
+        assertThat( client, eventuallyReceives(
+                msgSuccess(),
+                msgRecord( eqRecord( matcher ) ),
+                msgSuccess() ) );
     }
 
     protected Map<String,Object> authToken( String username, String password, String realm )

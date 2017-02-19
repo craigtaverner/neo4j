@@ -223,53 +223,27 @@ public class PluginAuthenticationIT extends EnterpriseAuthenticationTestBase
 
         // And give the publisher has created two nodes with different labels and properties
         assertConnectionSucceeds( authToken( "neo4j", "neo4j", null ) );
-        assertQuerySucceeds( "CREATE (:User {name:'Joe',ssn:'123abc'}) CREATE (:NonUser)" );
+        assertQuerySucceeds( "CREATE (a:User {name:'Joe',ssn:'123abc'}) CREATE (b:NonUser) CREATE (c:User) CREATE (a)-[:KNOWS]->(b) CREATE (a)-[:KNOWS]->(c)" );
 
         // Then the publisher can access all
-        assertLabelPropertyResults( 1L, 1L, "123abc" );
+        assertLabelPropertyResults( 1L, 2L, 2L, "123abc" );
 
         // But when switching to the restricted user
         reconnect();
         assertConnectionSucceeds( authToken( "restricted", "neo4j", null ) );
 
         // Then we find that the restricted user has access to fewer nodes and cannot see inaccesible properties
-        assertLabelPropertyResults( 0L, 1L, null );
+        assertLabelPropertyResults( 0L, 2L, 0L, null );
     }
 
-    private void assertLabelPropertyResults(long nonUserNodeCount, long userNodeCount, String ssn) throws IOException
+    private void assertLabelPropertyResults(long nonUserNodeCount, long userNodeCount, long knowsCount, String ssn) throws IOException
     {
-        // Test unrestricted access
-        // When
-        client.send( chunk(
-                run( "MATCH (:NonUser) RETURN count(*)" ),
-                pullAll() ) );
-
-        // Then
-        assertThat( client, eventuallyReceives(
-                msgSuccess(),
-                msgRecord( eqRecord( equalTo( nonUserNodeCount ) ) ),
-                msgSuccess() ) );
-
-        client.send( chunk(
-                run( "MATCH (:User {name:'Joe'}) RETURN count(*)" ),
-                pullAll() ) );
-
-        // Then
-        assertThat( client, eventuallyReceives(
-                msgSuccess(),
-                msgRecord( eqRecord( equalTo( userNodeCount ) ) ),
-                msgSuccess() ) );
-
-        // When
-        client.send( chunk(
-                run( "MATCH (n:User {name:'Joe'}) RETURN n.ssn" ),
-                pullAll() ) );
-
-        // Then
-        assertThat( client, eventuallyReceives(
-                msgSuccess(),
-                msgRecord( eqRecord( equalTo( ssn ) ) ),
-                msgSuccess() ) );
+        assertQueryResult( "MATCH (:NonUser) RETURN count(*)", equalTo( nonUserNodeCount ) );
+        assertQueryResult( "MATCH (:User {name:'Joe'}) RETURN count(*)", equalTo( 1L ) );
+        assertQueryResult( "MATCH (n:User {name:'Joe'}) RETURN n.ssn", equalTo( ssn ) );
+        assertQueryResult( "MATCH (n) RETURN count(n)", equalTo( nonUserNodeCount + userNodeCount ) );
+        assertQueryResult( "MATCH (n:User {name:'Joe'})-[r:KNOWS]->() RETURN count(r)", equalTo( knowsCount ) );
+        assertQueryResult( "MATCH ()-[r:KNOWS]->() RETURN count(r)", equalTo( knowsCount ) );
     }
 
     @Test

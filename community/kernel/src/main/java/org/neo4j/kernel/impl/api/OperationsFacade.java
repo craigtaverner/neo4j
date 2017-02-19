@@ -19,6 +19,7 @@
  */
 package org.neo4j.kernel.impl.api;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -120,6 +121,7 @@ public class OperationsFacade
     private KeyReadOperations frozenTokenRead;
     private KeyWriteOperations frozenTokenWrite;
     private TokenValidityChecker tokenValidityChecker;
+    private EntityValidityChecker entityValidityChecker;
 
     OperationsFacade( KernelTransaction tx, KernelStatement statement,
                       Procedures procedures )
@@ -127,7 +129,6 @@ public class OperationsFacade
         this.tx = tx;
         this.statement = statement;
         this.procedures = procedures;
-        this.tokenValidityChecker = new TokenValidityChecker();
     }
 
     private class WrappedKeyReadOperations implements KeyReadOperations
@@ -241,6 +242,11 @@ public class OperationsFacade
             return true;
         }
 
+        boolean isRelationshipTypeWildcardOrValid( int typeId )
+        {
+            return true;
+        }
+
         boolean isRelationshipTypeValid( int typeId )
         {
             return typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
@@ -254,12 +260,18 @@ public class OperationsFacade
 
     private class RestrictedTokenValidityChecker extends TokenValidityChecker
     {
+        private TokenRules tokenRules;
+
+        private RestrictedTokenValidityChecker( TokenRules tokenRules )
+        {
+            this.tokenRules = tokenRules;
+        }
+
         boolean isLabelValid( int labelId )
         {
             try
             {
-                return labelId != StatementConstants.NO_SUCH_LABEL &&
-                       tokenRead().labelGetName( statement, labelId ) != null;
+                return tokenRules.allowsLabelReads( labelGetName( labelId ) );
             }
             catch ( LabelNotFoundKernelException e )
             {
@@ -271,10 +283,21 @@ public class OperationsFacade
         {
             try
             {
-                return labelId == StatementConstants.NO_SUCH_LABEL ||
-                       tokenRead().labelGetName( statement, labelId ) != null;
+                return labelId == ANY_LABEL || tokenRules.allowsLabelReads( labelGetName( labelId ) );
             }
             catch ( LabelNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+
+        boolean isRelationshipTypeWildcardOrValid( int typeId )
+        {
+            try
+            {
+                return typeId == ANY_LABEL || tokenRules.allowsRelationshipTypeReads( relationshipTypeGetName( typeId ) );
+            }
+            catch ( RelationshipTypeIdNotFoundKernelException e )
             {
                 return false;
             }
@@ -307,19 +330,205 @@ public class OperationsFacade
         }
     }
 
+    private interface EntityValidityChecker
+    {
+        PrimitiveLongIterator filterValidNodes( PrimitiveLongIterator iterator );
+
+        RelationshipIterator filterValidRelationships( PrimitiveLongIterator relationships );
+
+        boolean isRestrictedByLabels();
+
+        boolean isRestrictedByRelationshipTypes();
+
+        int[] filterValidRelationshipTypes( int[] types );
+
+        boolean isRelationshipTypeValid( int relType );
+    }
+
+    private class UnrestrictedEntityValidityChecker implements EntityValidityChecker
+    {
+        public PrimitiveLongIterator filterValidNodes( PrimitiveLongIterator iterator )
+        {
+            return iterator;
+        }
+
+        public RelationshipIterator filterValidRelationships( PrimitiveLongIterator relationships )
+        {
+            return (RelationshipIterator) relationships;
+        }
+
+        public boolean isRestrictedByLabels()
+        {
+            return false;
+        }
+
+        public boolean isRestrictedByRelationshipTypes()
+        {
+            return false;
+        }
+
+        public int[] filterValidRelationshipTypes( int[] types )
+        {
+            return types;
+        }
+
+        public boolean isRelationshipTypeValid( int relType )
+        {
+            return true;
+        }
+    }
+
+    private class RestrictedEntityValidityChecker implements EntityValidityChecker
+    {
+        private TokenRules tokenRules;
+
+        private RestrictedEntityValidityChecker( TokenRules tokenRules )
+        {
+            this.tokenRules = tokenRules;
+        }
+
+        public PrimitiveLongIterator filterValidNodes( PrimitiveLongIterator iterator )
+        {
+            return PrimitiveLongCollections.filter( iterator, nodeId ->
+            {
+                try
+                {
+                    PrimitiveIntIterator labels = nodeGetLabels( nodeId );
+                    while ( labels.hasNext() )
+                    {
+                        if ( !tokenRules.allowsLabelReads( labelGetName( labels.next() ) ) )
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                catch ( EntityNotFoundException e )
+                {
+                    return false;
+                }
+                catch ( LabelNotFoundKernelException e )
+                {
+                    return false;
+                }
+            } );
+        }
+
+        public RelationshipIterator filterValidRelationships( PrimitiveLongIterator iterator )
+        {
+            return new RelationshipIterator.BaseIterator()
+            {
+                @Override
+                protected boolean fetchNext()
+                {
+                    if ( iterator.hasNext() )
+                    {
+                        while ( iterator.hasNext() )
+                        {
+                            long relationshipId = iterator.next();
+                            if ( hasValidType( relationshipId ) )
+                            {
+                                return (next( relationshipId ));
+                            }
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                private boolean hasValidType( long relationshipId )
+                {
+                    try ( Cursor<RelationshipItem> rel = dataRead()
+                            .relationshipCursorById( statement, relationshipId ) )
+                    {
+                        return tokenRules.allowsRelationshipTypeReads( relationshipTypeGetName( rel.get().type() ) );
+                    }
+                    catch ( EntityNotFoundException e )
+                    {
+                        return false;
+                    }
+                    catch ( RelationshipTypeIdNotFoundKernelException e )
+                    {
+                        return false;
+                    }
+                }
+
+                @Override
+                public <EXCEPTION extends Exception> boolean relationshipVisit( long relationshipId,
+                        RelationshipVisitor<EXCEPTION> visitor )
+                {
+                    return false;
+                }
+            };
+        }
+
+        public boolean isRestrictedByLabels()
+        {
+            //TODO: Optimize for specific restrictions in TokenRules
+            return true;
+        }
+
+        public boolean isRestrictedByRelationshipTypes()
+        {
+            //TODO: Optimize for specific restrictions in TokenRules
+            return true;
+        }
+
+        public int[] filterValidRelationshipTypes( int[] types )
+        {
+            int valid = 0;
+            for ( int i = 0; i < types.length; i++ )
+            {
+                int type = types[i];
+                if ( isRelationshipTypeValid( type ) )
+                {
+                    types[valid] = types[i];
+                    valid++;
+                }
+            }
+            if ( valid < types.length )
+            {
+                types = Arrays.copyOf( types, valid );
+            }
+            return types;
+        }
+
+        public boolean isRelationshipTypeValid( int relType )
+        {
+            try
+            {
+                return tokenRules.allowsRelationshipTypeReads( relationshipTypeGetName( relType ) );
+            }
+            catch ( RelationshipTypeIdNotFoundKernelException e )
+            {
+                return false;
+            }
+        }
+    }
+
     public void initialize( StatementOperationParts operationParts )
     {
         this.operations = operationParts;
         if (operations != null)
         {
-            this.frozenTokenRead =
-                    tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new WrappedKeyReadOperations(
-                            operations.keyReadOperations(), tx.securityContext().tokenRules() )
-                                                                                    : operations.keyReadOperations();
-            this.frozenTokenWrite = operations.keyWriteOperations();
-            this.tokenValidityChecker =
-                    tx.securityContext().tokenRules() != TokenRules.Static.READ_ALL ? new RestrictedTokenValidityChecker()
-                                                                                    : new TokenValidityChecker();
+            TokenRules tokenRules = tx.securityContext().tokenRules();
+            if ( tokenRules == TokenRules.Static.READ_ALL )
+            {
+                this.frozenTokenRead = operations.keyReadOperations();
+                this.frozenTokenWrite = operations.keyWriteOperations();
+                this.tokenValidityChecker = new TokenValidityChecker();
+                this.entityValidityChecker = new UnrestrictedEntityValidityChecker();
+            }
+            else
+            {
+                this.frozenTokenRead = new WrappedKeyReadOperations(operations.keyReadOperations(), tokenRules );
+                this.frozenTokenWrite = operations.keyWriteOperations();
+                this.tokenValidityChecker = new RestrictedTokenValidityChecker( tokenRules );
+                this.entityValidityChecker = new RestrictedEntityValidityChecker( tokenRules );
+            }
         }
     }
 
@@ -389,7 +598,7 @@ public class OperationsFacade
     public PrimitiveLongIterator nodesGetAll()
     {
         statement.assertOpen();
-        return dataRead().nodesGetAll( statement );
+        return entityValidityChecker.filterValidNodes( dataRead().nodesGetAll( statement ) );
     }
 
     @Override
@@ -566,7 +775,8 @@ public class OperationsFacade
         statement.assertOpen();
         try ( Cursor<NodeItem> node = dataRead().nodeCursorById( statement, nodeId ) )
         {
-            return node.get().getRelationships( direction( direction ), relTypes );
+            int[] validRelTypes = entityValidityChecker.filterValidRelationshipTypes( relTypes );
+            return node.get().getRelationships( direction( direction ), validRelTypes );
         }
     }
 
@@ -589,7 +799,8 @@ public class OperationsFacade
 
         try ( Cursor<NodeItem> node = dataRead().nodeCursorById( statement, nodeId ) )
         {
-            return node.get().getRelationships( direction( direction ) );
+            return entityValidityChecker
+                    .filterValidRelationships( node.get().getRelationships( direction( direction ) ) );
         }
     }
 
@@ -599,7 +810,14 @@ public class OperationsFacade
         statement.assertOpen();
         try ( Cursor<NodeItem> node = dataRead().nodeCursorById( statement, nodeId ) )
         {
-            return node.get().degree( direction( direction ), relType );
+            if ( entityValidityChecker.isRelationshipTypeValid( relType ) )
+            {
+                return node.get().degree( direction( direction ), relType );
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 
@@ -609,7 +827,20 @@ public class OperationsFacade
         statement.assertOpen();
         try ( Cursor<NodeItem> node = dataRead().nodeCursorById( statement, nodeId ) )
         {
-            return node.get().degree( direction( direction ) );
+            if ( entityValidityChecker.isRestrictedByRelationshipTypes() )
+            {
+                int degree = 0;
+                PrimitiveIntIterator validLabels = nodeGetLabels( nodeId );
+                while ( validLabels.hasNext() )
+                {
+                    degree += node.get().degree( direction( direction ), validLabels.next() );
+                }
+                return degree;
+            }
+            else
+            {
+                return node.get().degree( direction( direction ) );
+            }
         }
     }
 
@@ -1604,7 +1835,15 @@ public class OperationsFacade
         statement.assertOpen();
         if ( tokenValidityChecker.isLabelWildcardOrValid( labelId ) )
         {
-            return counting().countsForNode( statement, labelId );
+            if ( labelId == ANY_LABEL && entityValidityChecker.isRestrictedByLabels() )
+            {
+                // Cannot use count store, need filtering
+                return PrimitiveLongCollections.count( entityValidityChecker.filterValidNodes( nodesGetAll() ) );
+            }
+            else
+            {
+                return counting().countsForNode( statement, labelId );
+            }
         }
         else
         {
@@ -1623,7 +1862,26 @@ public class OperationsFacade
     public long countsForRelationship( int startLabelId, int typeId, int endLabelId )
     {
         statement.assertOpen();
-        return counting().countsForRelationship( statement, startLabelId, typeId, endLabelId );
+        boolean labelWildcardRestrictions = (startLabelId== ANY_LABEL || endLabelId == ANY_LABEL) && entityValidityChecker.isRestrictedByLabels();
+        boolean relWildcardRestrictions = typeId == ANY_RELATIONSHIP_TYPE && entityValidityChecker.isRestrictedByRelationshipTypes();
+        if ( labelWildcardRestrictions || relWildcardRestrictions )
+        {
+            // Cannot use count store, need filtering
+            return PrimitiveLongCollections.count( entityValidityChecker.filterValidRelationships( relationshipsGetAll() ) );
+        }
+        else
+        {
+            if ( tokenValidityChecker.isLabelWildcardOrValid( startLabelId )
+                 && tokenValidityChecker.isLabelWildcardOrValid( endLabelId )
+                 && tokenValidityChecker.isRelationshipTypeWildcardOrValid( typeId ) )
+            {
+                return counting().countsForRelationship( statement, startLabelId, typeId, endLabelId );
+            }
+            else
+            {
+                return 0L;
+            }
+        }
     }
 
     @Override
