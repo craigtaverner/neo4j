@@ -83,7 +83,7 @@ public class UniqueDatabaseIndexPopulatingUpdaterTest
         verifyZeroInteractions( index );
 
         updater.close();
-        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyId() ), eq( Arrays.asList( "foo", "bar", "baz" ) ) );
+        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyIds() ), eq( Arrays.asList( "foo", "bar", "baz" ) ) );
     }
 
     @Test
@@ -99,7 +99,7 @@ public class UniqueDatabaseIndexPopulatingUpdaterTest
         verifyZeroInteractions( index );
 
         updater.close();
-        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyId() ), eq( Arrays.asList( "foo2", "bar2", "baz2" ) ) );
+        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyIds() ), eq( Arrays.asList( "foo2", "bar2", "baz2" ) ) );
     }
 
     @Test
@@ -119,7 +119,7 @@ public class UniqueDatabaseIndexPopulatingUpdaterTest
         updater.close();
 
         List<Object> toBeVerified = Arrays.asList( "added1", "added2", "after1", "after2" );
-        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyId() ), eq( toBeVerified ) );
+        verify( index ).verifyUniqueness( any(), eq( descriptor.getPropertyIds() ), eq( toBeVerified ) );
     }
 
     @Test
@@ -258,7 +258,7 @@ public class UniqueDatabaseIndexPopulatingUpdaterTest
     private static UniqueLuceneIndexPopulatingUpdater newUpdater( SchemaIndex index, LuceneIndexWriter writer,
             UniqueIndexSampler sampler )
     {
-        return new UniqueLuceneIndexPopulatingUpdater( writer, descriptor.getPropertyId(), index,
+        return new UniqueLuceneIndexPopulatingUpdater( writer, descriptor.getPropertyIds(), index,
                 mock( PropertyAccessor.class ), sampler );
     }
 }
