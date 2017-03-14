@@ -42,6 +42,7 @@ import org.neo4j.kernel.api.ReadOperations;
 import org.neo4j.kernel.api.Statement;
 import org.neo4j.kernel.api.StatementTokenNameLookup;
 import org.neo4j.kernel.api.TokenWriteOperations;
+import org.neo4j.kernel.api.constraints.NodeKeyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -390,6 +391,13 @@ public class SchemaImpl implements Schema
             {
                 StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
                 return new UniquenessConstraintDefinition( actions, new IndexDefinitionImpl( actions,
+                        Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
+                        getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ), true ) );
+            }
+            else if ( constraint instanceof NodeKeyConstraint )
+            {
+                StatementTokenNameLookup lookup = new StatementTokenNameLookup( readOperations );
+                return new NodeKeyConstraintDefinition( actions, new IndexDefinitionImpl( actions,
                         Label.label( lookup.labelGetName( nodePropertyConstraint.label() ) ),
                         getPropertyKeys( lookup, nodePropertyConstraint.descriptor() ), true ) );
             }

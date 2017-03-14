@@ -97,6 +97,27 @@ public class LabelSchemaDescriptor implements SchemaDescriptor
         return "LabelSchemaDescriptor( " + userDescription( SchemaUtil.idTokenNameLookup ) + " )";
     }
 
+    @Override
+    public int compareTo( SchemaDescriptor o )
+    {
+        if ( o instanceof LabelSchemaDescriptor )
+        {
+            LabelSchemaDescriptor other = (LabelSchemaDescriptor) o;
+            if ( labelId == other.getLabelId() )
+            {
+                return SchemaUtil.comparePropertyKeyIds( propertyIds, other.getPropertyIds() );
+            }
+            else
+            {
+                return labelId - other.labelId;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
     public interface Supplier extends SchemaDescriptor.Supplier
     {
         LabelSchemaDescriptor schema();

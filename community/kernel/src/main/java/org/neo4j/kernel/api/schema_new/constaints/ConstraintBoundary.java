@@ -22,6 +22,7 @@ package org.neo4j.kernel.api.schema_new.constaints;
 import java.util.Iterator;
 
 import org.neo4j.helpers.collection.Iterators;
+import org.neo4j.kernel.api.constraints.NodeKeyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyConstraint;
 import org.neo4j.kernel.api.constraints.NodePropertyExistenceConstraint;
 import org.neo4j.kernel.api.constraints.PropertyConstraint;
@@ -116,6 +117,11 @@ public class ConstraintBoundary
             case EXISTS:
                 return new NodePropertyExistenceConstraint( new NodePropertyDescriptor(
                         schema.getLabelId(), schema.getPropertyId() ) );
+
+            case UNIQUE_EXISTS:
+                return new NodeKeyConstraint( SchemaBoundary
+                        .map( NewIndexDescriptorFactory.forLabel( schema.getLabelId(), schema.getPropertyIds() )
+                                .schema() ) );
 
             default:
                 throw new UnsupportedOperationException( "Although we cannot get here, this has not been implemented." );

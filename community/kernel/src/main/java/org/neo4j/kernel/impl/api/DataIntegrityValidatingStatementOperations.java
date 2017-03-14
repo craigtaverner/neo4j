@@ -154,14 +154,30 @@ public class DataIntegrityValidatingStatementOperations implements
             KernelStatement state, LabelSchemaDescriptor descriptor )
             throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException
     {
-        ConstraintDescriptor constraint = ConstraintDescriptorFactory.nodeKeyForSchema( descriptor );
-        assertConstraintDoesNotExist( state, constraint );
-
-        //TODO: Clarify if it could be allowed to have nodeKey and uniqueProperty constraints on the same label/property
-        // It is not allowed to create uniqueness constraints on indexed label/property pairs
-        checkUniqueIndexExistence( state, OperationContext.CONSTRAINT_CREATION, SchemaBoundary.map( descriptor ) );
-
-        return schemaWriteDelegate.nodeKeyConstraintCreate( state, descriptor );
+        NodeKeyConstraintDescriptor constraint = ConstraintDescriptorFactory.nodeKeyForSchema( descriptor );
+        UniquenessConstraintDescriptor uniquenessConstraintDescriptor =
+                ConstraintDescriptorFactory.uniqueForSchema( descriptor );
+        boolean somethingWasMade = false;
+        if ( !schemaReadDelegate.constraintExists( state, uniquenessConstraintDescriptor ) )
+        {
+            checkUniqueIndexExistence( state, OperationContext.CONSTRAINT_CREATION, SchemaBoundary.map( descriptor ) );
+            schemaWriteDelegate.uniquePropertyConstraintCreate( state, descriptor );
+            somethingWasMade = true;
+        }
+        for ( NodeExistenceConstraintDescriptor pem : constraint.ownedExistenceConstraints() )
+        {
+            if ( !schemaReadDelegate.constraintExists( state, pem ) )
+            {
+                schemaWriteDelegate.nodePropertyExistenceConstraintCreate( state, pem.schema() );
+                somethingWasMade = true;
+            }
+        }
+        if ( !somethingWasMade )
+        {
+            throw new AlreadyConstrainedException( ConstraintBoundary.map( constraint ),
+                    OperationContext.CONSTRAINT_CREATION, new StatementTokenNameLookup( state.readOperations() ) );
+        }
+        return constraint;
     }
 
     @Override

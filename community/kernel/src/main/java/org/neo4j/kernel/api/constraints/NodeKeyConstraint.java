@@ -19,19 +19,19 @@
  */
 package org.neo4j.kernel.api.constraints;
 
-import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.TokenNameLookup;
+import org.neo4j.kernel.api.schema.NodePropertyDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaBoundary;
 import org.neo4j.kernel.api.schema_new.SchemaUtil;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 
 /**
- * Description of uniqueness constraint over nodes given a label and a property key id.
+ * Description of uniqueness and existence constraint over nodes given a label and a property key id.
  */
-public class UniquenessConstraint extends NodePropertyConstraint
+public class NodeKeyConstraint extends NodePropertyConstraint
 {
-    public UniquenessConstraint( NodePropertyDescriptor descriptor )
+    public NodeKeyConstraint( NodePropertyDescriptor descriptor )
     {
         super( descriptor );
     }
@@ -44,13 +44,13 @@ public class UniquenessConstraint extends NodePropertyConstraint
     @Override
     public void added( ChangeVisitor visitor )
     {
-        visitor.visitAddedUniquePropertyConstraint( this );
+        visitor.visitAddedNodeKeyConstraint( this );
     }
 
     @Override
     public void removed( ChangeVisitor visitor )
     {
-        visitor.visitRemovedUniquePropertyConstraint( this );
+        visitor.visitRemovedNodeKeyConstraint( this );
     }
 
     @Override
@@ -60,13 +60,13 @@ public class UniquenessConstraint extends NodePropertyConstraint
         String boundIdentifier = labelName.toLowerCase();
         String properties = SchemaUtil
                 .niceProperties( tokenNameLookup, SchemaBoundary.map( descriptor ).getPropertyIds(), boundIdentifier );
-        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS UNIQUE", boundIdentifier, labelName, properties );
+        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS NODE KEY", boundIdentifier, labelName, properties );
     }
 
     @Override
     public String toString()
     {
-        return String.format( "CONSTRAINT ON ( n:label[%s] ) ASSERT n.property[%s] IS UNIQUE",
+        return String.format( "CONSTRAINT ON ( n:label[%s] ) ASSERT n.property[%s] IS NODE KEY",
                 descriptor.getLabelId(), descriptor.propertyIdText() );
     }
 }

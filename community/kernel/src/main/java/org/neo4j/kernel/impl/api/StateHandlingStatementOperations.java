@@ -19,9 +19,11 @@
  */
 package org.neo4j.kernel.impl.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.neo4j.collection.primitive.Primitive;
 import org.neo4j.collection.primitive.PrimitiveIntCollection;
@@ -140,6 +142,7 @@ public class StateHandlingStatementOperations implements
     private final ConstraintIndexCreator constraintIndexCreator;
     private final LegacyIndexStore legacyIndexStore;
     private final IndexTxStateUpdater indexTxStateUpdater;
+    private final NodeKeyConstraintView nodeKeyConstraintView;
 
     public StateHandlingStatementOperations(
             StoreReadLayer storeLayer, AutoIndexing propertyTrackers,
@@ -151,6 +154,83 @@ public class StateHandlingStatementOperations implements
         this.constraintIndexCreator = constraintIndexCreator;
         this.legacyIndexStore = legacyIndexStore;
         this.indexTxStateUpdater = new IndexTxStateUpdater( this, this );
+        this.nodeKeyConstraintView = new NodeKeyConstraintView();
+    }
+
+    private static class NodeKeyConstraintView
+    {
+        public Iterator<ConstraintDescriptor> convertToNodeKeyView(Iterator<ConstraintDescriptor> constraints)
+        {
+            ArrayList<UniquenessConstraintDescriptor> allUniqueConstraints = new ArrayList<>();
+            TreeMap<SchemaDescriptor,ConstraintDescriptor> allExistenceConstraints = new TreeMap<>();
+            while ( constraints.hasNext() )
+            {
+                ConstraintDescriptor constraint = constraints.next();
+                if ( constraint.type() == ConstraintDescriptor.Type.UNIQUE )
+                {
+                    allUniqueConstraints.add( (UniquenessConstraintDescriptor) constraint );
+                }
+                else if ( constraint.type() == ConstraintDescriptor.Type.EXISTS )
+                {
+                    allExistenceConstraints.put( constraint.schema(), constraint );
+                }
+                else
+                {
+                    throw new IllegalStateException(
+                            "NODE KEY constraints are syntactic sugar and should not exist in the SchemaStore" );
+                }
+            }
+
+            return new Iterator<ConstraintDescriptor>()
+            {
+                private Iterator<UniquenessConstraintDescriptor> _inner = allUniqueConstraints.iterator();
+
+                @Override
+                public boolean hasNext()
+                {
+                    return _inner.hasNext() || !allExistenceConstraints.isEmpty();
+                }
+
+                @Override
+                public ConstraintDescriptor next()
+                {
+                    if ( _inner.hasNext() )
+                    {
+                        UniquenessConstraintDescriptor constraint = _inner.next();
+                        NodeKeyConstraintDescriptor nodeKeyConstraintDescriptor =
+                                ConstraintDescriptorFactory.nodeKeyForSchema( constraint.schema() );
+                        boolean allExistenceConstraintsExists = true;
+                        for ( NodeExistenceConstraintDescriptor existenceConstraintDescriptor :
+                                nodeKeyConstraintDescriptor
+                                        .ownedExistenceConstraints() )
+                        {
+                            if ( !allExistenceConstraints.containsKey( existenceConstraintDescriptor.schema() ) )
+                            {
+                                allExistenceConstraintsExists = false;
+                            }
+                        }
+                        if ( allExistenceConstraintsExists )
+                        {
+                            for ( NodeExistenceConstraintDescriptor existenceConstraintDescriptor :
+                                    nodeKeyConstraintDescriptor
+                                            .ownedExistenceConstraints() )
+                            {
+                                allExistenceConstraints.remove( existenceConstraintDescriptor.schema() );
+                            }
+                            return nodeKeyConstraintDescriptor;
+                        }
+                        else
+                        {
+                            return constraint;
+                        }
+                    }
+                    else
+                    {
+                        return allExistenceConstraints.remove( allExistenceConstraints.firstKey() );
+                    }
+                }
+            };
+        }
     }
 
     // <Cursors>
@@ -589,25 +669,12 @@ public class StateHandlingStatementOperations implements
     }
 
     @Override
-    public NodeKeyConstraintDescriptor nodeKeyConstraintCreate( KernelStatement state, LabelSchemaDescriptor descriptor )
+    public NodeKeyConstraintDescriptor nodeKeyConstraintCreate( KernelStatement state,
+            LabelSchemaDescriptor descriptor )
             throws CreateConstraintFailureException
     {
-        NodeKeyConstraintDescriptor constraint = ConstraintDescriptorFactory.nodeKeyForSchema( descriptor );
-        Iterator<ConstraintDescriptor> it = storeLayer.constraintsGetForSchema( descriptor );
-        while ( it.hasNext() )
-        {
-            if ( it.next().equals( constraint ) )
-            {
-                return constraint;
-            }
-        }
-        uniquePropertyConstraintCreate( state, descriptor );
-        for ( NodeExistenceConstraintDescriptor pec : constraint.ownedExistenceConstraints() )
-        {
-            state.txState().constraintDoAdd( pec );
-        }
-        state.txState().constraintDoAdd( constraint, constraint.ownedUniquenessConstraint() );
-        return constraint;
+        throw new IllegalStateException(
+                "NODE KEY Constraints are syntactic sugar and cannot be stored in the SchemaStore" );
     }
 
     @Override
@@ -701,7 +768,7 @@ public class StateHandlingStatementOperations implements
         {
             return state.txState().constraintsChangesForLabel( labelId ).apply( constraints );
         }
-        return constraints;
+        return nodeKeyConstraintView.convertToNodeKeyView( constraints );
     }
 
     @Override
@@ -724,7 +791,7 @@ public class StateHandlingStatementOperations implements
         {
             return state.txState().constraintsChanges().apply( constraints );
         }
-        return constraints;
+        return nodeKeyConstraintView.convertToNodeKeyView( constraints );
     }
 
     @Override
