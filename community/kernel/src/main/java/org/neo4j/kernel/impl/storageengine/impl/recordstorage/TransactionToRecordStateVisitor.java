@@ -29,6 +29,8 @@ import org.neo4j.kernel.api.exceptions.schema.SchemaRuleNotFoundException;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.api.properties.DefinedProperty;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.NodeExistenceConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.impl.api.index.SchemaIndexProviderMap;
@@ -202,21 +204,40 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         switch ( constraint.type() )
         {
         case UNIQUE:
-            UniquenessConstraintDescriptor uniqueConstraint = (UniquenessConstraintDescriptor) constraint;
-            IndexRule indexRule = schemaStorage.indexGetForSchema( uniqueConstraint.ownedIndexDescriptor() );
-            recordState.createSchemaRule( constraintSemantics.createUniquenessConstraintRule(
-                    constraintId, uniqueConstraint, indexRule.getId() ) );
-            recordState.setConstraintIndexOwner( indexRule, constraintId );
+            visitAddedUniqueConstraint( (UniquenessConstraintDescriptor) constraint, constraintId );
             break;
 
         case EXISTS:
-            recordState.createSchemaRule( constraintSemantics.createExistenceConstraint(
-                    schemaStorage.newRuleId(), constraint ) );
+            visitAddedPropertyExistenceConstraint( (NodeExistenceConstraintDescriptor) constraint );
+            break;
+
+        case UNIQUE_EXISTS:
+            NodeKeyConstraintDescriptor nodeKeyConstraint = (NodeKeyConstraintDescriptor) constraint;
+            visitAddedUniqueConstraint( nodeKeyConstraint.ownedUniquenessConstraint(), constraintId );
+            for ( NodeExistenceConstraintDescriptor pem : nodeKeyConstraint.ownedExistenceConstraints() )
+            {
+                visitAddedPropertyExistenceConstraint( pem );
+            }
             break;
 
         default:
             throw new IllegalStateException( constraint.type().toString() );
         }
+    }
+
+    private void visitAddedUniqueConstraint(UniquenessConstraintDescriptor uniqueConstraint, long constraintId)
+    {
+        IndexRule indexRule = schemaStorage.indexGetForSchema( uniqueConstraint.ownedIndexDescriptor() );
+        recordState.createSchemaRule( constraintSemantics.createUniquenessConstraintRule(
+                constraintId, uniqueConstraint, indexRule.getId() ) );
+        recordState.setConstraintIndexOwner( indexRule, constraintId );
+    }
+
+    private void visitAddedPropertyExistenceConstraint( NodeExistenceConstraintDescriptor constraint )
+            throws CreateConstraintFailureException
+    {
+        recordState.createSchemaRule(
+                constraintSemantics.createExistenceConstraint( schemaStorage.newRuleId(), constraint ) );
     }
 
     @Override

@@ -21,18 +21,26 @@ package org.neo4j.kernel.api.schema_new.constaints;
 
 import org.neo4j.kernel.api.TokenNameLookup;
 import org.neo4j.kernel.api.schema_new.LabelSchemaDescriptor;
+import org.neo4j.kernel.api.schema_new.SchemaDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.SchemaUtil;
-import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
-import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 
-public class UniquenessConstraintDescriptor extends ConstraintDescriptor implements LabelSchemaDescriptor.Supplier
+public class NodeKeyConstraintDescriptor extends ConstraintDescriptor implements LabelSchemaDescriptor.Supplier
 {
     private final LabelSchemaDescriptor schema;
+    private final UniquenessConstraintDescriptor uniquenessConstraint;
+    private final NodeExistenceConstraintDescriptor[] existenceConstraints;
 
-    UniquenessConstraintDescriptor( LabelSchemaDescriptor schema )
+    NodeKeyConstraintDescriptor( LabelSchemaDescriptor schema )
     {
-        super( Type.UNIQUE );
+        super( Type.UNIQUE_EXISTS );
         this.schema = schema;
+        this.uniquenessConstraint = new UniquenessConstraintDescriptor( schema );
+        this.existenceConstraints = new NodeExistenceConstraintDescriptor[schema.getPropertyIds().length];
+        for ( int i = 0; i < schema.getPropertyIds().length; i++ )
+        {
+            this.existenceConstraints[i] = ConstraintDescriptorFactory.existsForSchema(
+                    SchemaDescriptorFactory.forLabel( schema.getLabelId(), schema.getPropertyIds()[i] ) );
+        }
     }
 
     @Override
@@ -41,9 +49,14 @@ public class UniquenessConstraintDescriptor extends ConstraintDescriptor impleme
         return schema;
     }
 
-    public NewIndexDescriptor ownedIndexDescriptor()
+    public UniquenessConstraintDescriptor ownedUniquenessConstraint()
     {
-        return NewIndexDescriptorFactory.uniqueForSchema( schema );
+        return uniquenessConstraint;
+    }
+
+    public NodeExistenceConstraintDescriptor[] ownedExistenceConstraints()
+    {
+        return existenceConstraints;
     }
 
     @Override
@@ -52,6 +65,6 @@ public class UniquenessConstraintDescriptor extends ConstraintDescriptor impleme
         String labelName = escapeLabelOrRelTyp( tokenNameLookup.labelGetName( schema.getLabelId() ) );
         String nodeName = labelName.toLowerCase();
         String properties = SchemaUtil.niceProperties( tokenNameLookup, schema.getPropertyIds(), nodeName );
-        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS UNIQUE", nodeName, labelName, properties );
+        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS NODE KEY", nodeName, labelName, properties );
     }
 }

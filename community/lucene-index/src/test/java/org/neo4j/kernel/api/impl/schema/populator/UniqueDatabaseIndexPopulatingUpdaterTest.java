@@ -31,8 +31,6 @@ import org.neo4j.kernel.api.impl.schema.writer.LuceneIndexWriter;
 import org.neo4j.kernel.api.index.PropertyAccessor;
 import org.neo4j.kernel.api.schema_new.LabelSchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptorFactory;
-import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
-import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 import org.neo4j.kernel.impl.api.index.sampling.UniqueIndexSampler;
 import org.neo4j.storageengine.api.schema.IndexSample;
 

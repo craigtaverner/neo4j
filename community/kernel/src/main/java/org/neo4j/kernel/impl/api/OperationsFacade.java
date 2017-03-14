@@ -82,6 +82,7 @@ import org.neo4j.kernel.api.schema_new.SchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.NodeExistenceConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.RelExistenceConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
@@ -1000,6 +1001,14 @@ public class OperationsFacade
     {
         statement.assertOpen();
         schemaWrite().indexDrop( statement, descriptor );
+    }
+
+    @Override
+    public NodeKeyConstraintDescriptor nodeKeyConstraintCreate( LabelSchemaDescriptor descriptor )
+            throws CreateConstraintFailureException, AlreadyConstrainedException, AlreadyIndexedException
+    {
+        statement.assertOpen();
+        return schemaWrite().nodeKeyConstraintCreate( statement, descriptor );
     }
 
     @Override

@@ -71,6 +71,7 @@ import org.neo4j.kernel.api.schema_new.SchemaUtil;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.constaints.NodeExistenceConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.RelExistenceConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
@@ -585,6 +586,28 @@ public class StateHandlingStatementOperations implements
     public void uniqueIndexDrop( KernelStatement state, NewIndexDescriptor descriptor ) throws DropIndexFailureException
     {
         state.txState().indexDoDrop( descriptor );
+    }
+
+    @Override
+    public NodeKeyConstraintDescriptor nodeKeyConstraintCreate( KernelStatement state, LabelSchemaDescriptor descriptor )
+            throws CreateConstraintFailureException
+    {
+        NodeKeyConstraintDescriptor constraint = ConstraintDescriptorFactory.nodeKeyForSchema( descriptor );
+        Iterator<ConstraintDescriptor> it = storeLayer.constraintsGetForSchema( descriptor );
+        while ( it.hasNext() )
+        {
+            if ( it.next().equals( constraint ) )
+            {
+                return constraint;
+            }
+        }
+        uniquePropertyConstraintCreate( state, descriptor );
+        for ( NodeExistenceConstraintDescriptor pec : constraint.ownedExistenceConstraints() )
+        {
+            state.txState().constraintDoAdd( pec );
+        }
+        state.txState().constraintDoAdd( constraint, constraint.ownedUniquenessConstraint() );
+        return constraint;
     }
 
     @Override

@@ -56,6 +56,7 @@ import org.neo4j.kernel.api.schema_new.RelationTypeSchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.NodeExistenceConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.RelExistenceConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
@@ -554,6 +555,13 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
     public void uniqueIndexDrop( KernelStatement state, NewIndexDescriptor descriptor ) throws DropIndexFailureException
     {
         schemaWriteOperations.uniqueIndexDrop( state, descriptor );
+    }
+
+    @Override
+    public NodeKeyConstraintDescriptor nodeKeyConstraintCreate( KernelStatement state, LabelSchemaDescriptor descriptor )
+            throws AlreadyConstrainedException, CreateConstraintFailureException, AlreadyIndexedException
+    {
+        return schemaWriteOperations.nodeKeyConstraintCreate( state, descriptor );
     }
 
     @Override
