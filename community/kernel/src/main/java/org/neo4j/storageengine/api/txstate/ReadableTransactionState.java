@@ -29,7 +29,6 @@ import org.neo4j.kernel.api.exceptions.schema.CreateConstraintFailureException;
 import org.neo4j.kernel.api.schema_new.OrderedPropertyValues;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
-import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.impl.api.RelationshipVisitor;
 import org.neo4j.kernel.impl.api.store.RelationshipIterator;
@@ -124,10 +123,6 @@ public interface ReadableTransactionState
     ReadableDiffSets<ConstraintDescriptor> constraintsChangesForRelationshipType( int relTypeId );
 
     Long indexCreatedForConstraint( ConstraintDescriptor constraint );
-
-    Iterable<ConstraintDescriptor> constraintConstraintsCreatedInTx();
-
-    UniquenessConstraintDescriptor constraintCreatedForConstraint( ConstraintDescriptor constraint );
 
     ReadableDiffSets<Long> indexUpdatesForScan( NewIndexDescriptor index );
 

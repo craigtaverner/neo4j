@@ -42,7 +42,6 @@ import org.neo4j.kernel.api.schema_new.OrderedPropertyValues;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptorPredicates;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
-import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.api.txstate.RelationshipChangeVisitorAdapter;
@@ -160,7 +159,6 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     private PrimitiveLongSet relationshipsDeletedInTx;
 
     private Map<UniquenessConstraintDescriptor, Long> createdConstraintIndexesByConstraint;
-    private Map<NodeKeyConstraintDescriptor, UniquenessConstraintDescriptor> createdUniquenessConstraintsByConstraint;
 
     private Map<LabelSchemaDescriptor, Map<OrderedPropertyValues, DiffSets<Long>>> indexUpdates;
 
@@ -921,14 +919,6 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     }
 
     @Override
-    public void constraintDoAdd( NodeKeyConstraintDescriptor constraint, UniquenessConstraintDescriptor uniquenessConstraint )
-    {
-        constraintsChangesDiffSets().add( constraint );
-        createdUniquenessConstraintsByConstraint().put( constraint, uniquenessConstraint );
-        changed();
-    }
-
-    @Override
     public void constraintDoAdd( ConstraintDescriptor constraint )
     {
         constraintsChangesDiffSets().add( constraint );
@@ -1000,23 +990,6 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
     {
         return createdConstraintIndexesByConstraint == null ? null :
                 createdConstraintIndexesByConstraint.get( constraint );
-    }
-
-    @Override
-    public Iterable<ConstraintDescriptor> constraintConstraintsCreatedInTx()
-    {
-        if ( createdUniquenessConstraintsByConstraint != null && !createdUniquenessConstraintsByConstraint.isEmpty() )
-        {
-            return map( this::getUniquenessConstraintForNodeKeyConstraint, createdUniquenessConstraintsByConstraint.keySet() );
-        }
-        return Iterables.empty();
-    }
-
-    @Override
-    public UniquenessConstraintDescriptor constraintCreatedForConstraint( ConstraintDescriptor constraint )
-    {
-        return createdUniquenessConstraintsByConstraint == null ? null :
-               createdUniquenessConstraintsByConstraint.get( constraint );
     }
 
     @Override
@@ -1308,23 +1281,9 @@ public final class TxState implements TransactionState, RelationshipVisitor.Home
         return createdConstraintIndexesByConstraint;
     }
 
-    private Map<NodeKeyConstraintDescriptor, UniquenessConstraintDescriptor> createdUniquenessConstraintsByConstraint()
-    {
-        if ( createdUniquenessConstraintsByConstraint == null )
-        {
-            createdUniquenessConstraintsByConstraint = new HashMap<>();
-        }
-        return createdUniquenessConstraintsByConstraint;
-    }
-
     private NewIndexDescriptor getIndexForUniqueConstraint( UniquenessConstraintDescriptor constraint )
     {
         return constraint.ownedIndexDescriptor();
-    }
-
-    private UniquenessConstraintDescriptor getUniquenessConstraintForNodeKeyConstraint( NodeKeyConstraintDescriptor constraint )
-    {
-        return constraint.ownedUniquenessConstraint();
     }
 
     private boolean hasNodeState( long nodeId )
