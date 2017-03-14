@@ -47,6 +47,13 @@ public class SchemaBoundary
 
     public static NodePropertyDescriptor map( LabelSchemaDescriptor schema )
     {
-        return new NodeMultiPropertyDescriptor( schema.getLabelId(), schema.getPropertyIds() );
+        if ( schema.getPropertyIds().length > 1 )
+        {
+            return new NodeMultiPropertyDescriptor( schema.getLabelId(), schema.getPropertyIds() );
+        }
+        else
+        {
+            return new NodePropertyDescriptor( schema.getLabelId(), schema.getPropertyIds()[0] );
+        }
     }
 }

@@ -59,8 +59,12 @@ public class NodeKeyConstraint extends NodePropertyConstraint
         String labelName = labelName( tokenNameLookup );
         String boundIdentifier = labelName.toLowerCase();
         String properties = SchemaUtil
-                .niceProperties( tokenNameLookup, SchemaBoundary.map( descriptor ).getPropertyIds(), boundIdentifier );
-        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS NODE KEY", boundIdentifier, labelName, properties );
+                .niceProperties( tokenNameLookup, SchemaBoundary.map( descriptor ).getPropertyIds(), boundIdentifier + "." );
+        if ( descriptor.isComposite() )
+        {
+            properties = "(" + properties + ")";
+        }
+        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s IS NODE KEY", boundIdentifier, labelName, properties );
     }
 
     @Override

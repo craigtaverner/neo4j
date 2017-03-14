@@ -64,7 +64,11 @@ public class NodeKeyConstraintDescriptor extends ConstraintDescriptor implements
     {
         String labelName = escapeLabelOrRelTyp( tokenNameLookup.labelGetName( schema.getLabelId() ) );
         String nodeName = labelName.toLowerCase();
-        String properties = SchemaUtil.niceProperties( tokenNameLookup, schema.getPropertyIds(), nodeName );
-        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT (%s) IS NODE KEY", nodeName, labelName, properties );
+        String properties = SchemaUtil.niceProperties( tokenNameLookup, schema.getPropertyIds(), nodeName + "." );
+        if ( schema.getPropertyIds().length > 1 )
+        {
+            properties = "(" + properties + ")";
+        }
+        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s IS NODE KEY", nodeName, labelName, properties );
     }
 }
