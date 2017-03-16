@@ -45,6 +45,11 @@ public class ConstraintDescriptorFactory
         return new UniquenessConstraintDescriptor( SchemaDescriptorFactory.forLabel( labelId, propertyIds ) );
     }
 
+    public static NodeKeyConstraintDescriptor nodeKeyForLabel( int labelId, int... propertyIds )
+    {
+        return new NodeKeyConstraintDescriptor( SchemaDescriptorFactory.forLabel( labelId, propertyIds ) );
+    }
+
     public static ConstraintDescriptor existsForSchema( SchemaDescriptor schema )
     {
         return schema.computeWith( convertToExistenceConstraint );

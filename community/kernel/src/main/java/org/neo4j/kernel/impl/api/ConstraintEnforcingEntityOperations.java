@@ -80,7 +80,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_NODE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.kernel.api.exceptions.schema.ConstraintValidationException.Phase.VALIDATION;
 import static org.neo4j.kernel.api.schema_new.SchemaDescriptorPredicates.hasProperty;
-import static org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor.Type.UNIQUE;
 import static org.neo4j.kernel.impl.locking.ResourceTypes.INDEX_ENTRY;
 import static org.neo4j.kernel.impl.locking.ResourceTypes.indexEntryResourceId;
 
@@ -118,7 +117,7 @@ public class ConstraintEnforcingEntityOperations implements EntityOperations, Sc
             while ( constraints.hasNext() )
             {
                 ConstraintDescriptor constraint = constraints.next();
-                if ( constraint.type() == UNIQUE )
+                if ( constraint.type().enforcesUniqueness() )
                 {
                     UniquenessConstraintDescriptor uniqueConstraint = (UniquenessConstraintDescriptor) constraint;
                     ExactPredicate[] propertyValues = getAllPropertyValues( state, uniqueConstraint.schema(), node );

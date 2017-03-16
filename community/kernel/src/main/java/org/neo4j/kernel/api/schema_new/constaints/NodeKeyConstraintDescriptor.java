@@ -24,51 +24,16 @@ import org.neo4j.kernel.api.schema_new.LabelSchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaDescriptorFactory;
 import org.neo4j.kernel.api.schema_new.SchemaUtil;
 
-public class NodeKeyConstraintDescriptor extends ConstraintDescriptor implements LabelSchemaDescriptor.Supplier
+public class NodeKeyConstraintDescriptor extends IndexBackedConstraintDescriptor
 {
-    private final LabelSchemaDescriptor schema;
-    private final UniquenessConstraintDescriptor uniquenessConstraint;
-    private final NodeExistenceConstraintDescriptor[] existenceConstraints;
-
     NodeKeyConstraintDescriptor( LabelSchemaDescriptor schema )
     {
-        super( Type.UNIQUE_EXISTS );
-        this.schema = schema;
-        this.uniquenessConstraint = new UniquenessConstraintDescriptor( schema );
-        this.existenceConstraints = new NodeExistenceConstraintDescriptor[schema.getPropertyIds().length];
-        for ( int i = 0; i < schema.getPropertyIds().length; i++ )
-        {
-            this.existenceConstraints[i] = ConstraintDescriptorFactory.existsForSchema(
-                    SchemaDescriptorFactory.forLabel( schema.getLabelId(), schema.getPropertyIds()[i] ) );
-        }
+        super( Type.UNIQUE_EXISTS, schema );
     }
 
     @Override
-    public LabelSchemaDescriptor schema()
+    protected String constraintTypeText()
     {
-        return schema;
-    }
-
-    public UniquenessConstraintDescriptor ownedUniquenessConstraint()
-    {
-        return uniquenessConstraint;
-    }
-
-    public NodeExistenceConstraintDescriptor[] ownedExistenceConstraints()
-    {
-        return existenceConstraints;
-    }
-
-    @Override
-    public String prettyPrint( TokenNameLookup tokenNameLookup )
-    {
-        String labelName = escapeLabelOrRelTyp( tokenNameLookup.labelGetName( schema.getLabelId() ) );
-        String nodeName = labelName.toLowerCase();
-        String properties = SchemaUtil.niceProperties( tokenNameLookup, schema.getPropertyIds(), nodeName + "." );
-        if ( schema.getPropertyIds().length > 1 )
-        {
-            properties = "(" + properties + ")";
-        }
-        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s IS NODE KEY", nodeName, labelName, properties );
+        return "NODE KEY";
     }
 }

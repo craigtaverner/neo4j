@@ -204,20 +204,16 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         switch ( constraint.type() )
         {
         case UNIQUE:
-            visitAddedUniqueConstraint( (UniquenessConstraintDescriptor) constraint, constraintId );
-            break;
-
-        case EXISTS:
-            visitAddedPropertyExistenceConstraint( (NodeExistenceConstraintDescriptor) constraint );
+            visitAddedUniquenessConstraint( (UniquenessConstraintDescriptor) constraint, constraintId );
             break;
 
         case UNIQUE_EXISTS:
-            NodeKeyConstraintDescriptor nodeKeyConstraint = (NodeKeyConstraintDescriptor) constraint;
-            visitAddedUniqueConstraint( nodeKeyConstraint.ownedUniquenessConstraint(), constraintId );
-            for ( NodeExistenceConstraintDescriptor pem : nodeKeyConstraint.ownedExistenceConstraints() )
-            {
-                visitAddedPropertyExistenceConstraint( pem );
-            }
+            visitAddedNodeKeyConstraint( (NodeKeyConstraintDescriptor) constraint, constraintId );
+            break;
+
+        case EXISTS:
+            recordState.createSchemaRule(
+                    constraintSemantics.createExistenceConstraint( schemaStorage.newRuleId(), constraint ) );
             break;
 
         default:
@@ -225,7 +221,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         }
     }
 
-    private void visitAddedUniqueConstraint(UniquenessConstraintDescriptor uniqueConstraint, long constraintId)
+    private void visitAddedUniquenessConstraint(UniquenessConstraintDescriptor uniqueConstraint, long constraintId)
     {
         IndexRule indexRule = schemaStorage.indexGetForSchema( uniqueConstraint.ownedIndexDescriptor() );
         recordState.createSchemaRule( constraintSemantics.createUniquenessConstraintRule(
@@ -233,11 +229,13 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         recordState.setConstraintIndexOwner( indexRule, constraintId );
     }
 
-    private void visitAddedPropertyExistenceConstraint( NodeExistenceConstraintDescriptor constraint )
+    private void visitAddedNodeKeyConstraint(NodeKeyConstraintDescriptor uniqueConstraint, long constraintId)
             throws CreateConstraintFailureException
     {
-        recordState.createSchemaRule(
-                constraintSemantics.createExistenceConstraint( schemaStorage.newRuleId(), constraint ) );
+        IndexRule indexRule = schemaStorage.indexGetForSchema( uniqueConstraint.ownedIndexDescriptor() );
+        recordState.createSchemaRule( constraintSemantics.createNodeKeyConstraintRule(
+                constraintId, uniqueConstraint, indexRule.getId() ) );
+        recordState.setConstraintIndexOwner( indexRule, constraintId );
     }
 
     @Override
@@ -258,7 +256,7 @@ public class TransactionToRecordStateVisitor extends TxStateVisitor.Adapter
         {
             throw new IllegalStateException( "Multiple constraints found for specified label and property." );
         }
-        if ( constraint.type() == ConstraintDescriptor.Type.UNIQUE )
+        if ( constraint.type().enforcesUniqueness() )
         {
             // Remove the index for the constraint as well
             visitRemovedIndex( ((UniquenessConstraintDescriptor)constraint).ownedIndexDescriptor() );

@@ -25,16 +25,40 @@ import org.neo4j.kernel.api.schema_new.SchemaUtil;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptor;
 import org.neo4j.kernel.api.schema_new.index.NewIndexDescriptorFactory;
 
-public class UniquenessConstraintDescriptor extends IndexBackedConstraintDescriptor
+public abstract class IndexBackedConstraintDescriptor extends ConstraintDescriptor implements LabelSchemaDescriptor.Supplier
 {
-    UniquenessConstraintDescriptor( LabelSchemaDescriptor schema )
+    private final LabelSchemaDescriptor schema;
+
+    IndexBackedConstraintDescriptor( Type type, LabelSchemaDescriptor schema )
     {
-        super( Type.UNIQUE, schema );
+        super( type );
+        this.schema = schema;
     }
 
     @Override
-    protected String constraintTypeText()
+    public LabelSchemaDescriptor schema()
     {
-        return "UNIQUE";
+        return schema;
     }
+
+    public NewIndexDescriptor ownedIndexDescriptor()
+    {
+        return NewIndexDescriptorFactory.uniqueForSchema( schema );
+    }
+
+    @Override
+    public String prettyPrint( TokenNameLookup tokenNameLookup )
+    {
+        String labelName = escapeLabelOrRelTyp( tokenNameLookup.labelGetName( schema.getLabelId() ) );
+        String nodeName = labelName.toLowerCase();
+        String properties = SchemaUtil.niceProperties( tokenNameLookup, schema.getPropertyIds(), nodeName + "." );
+        if ( schema().getPropertyIds().length > 1 )
+        {
+            properties = "(" + properties + ")";
+        }
+        return String.format( "CONSTRAINT ON ( %s:%s ) ASSERT %s IS %s", nodeName, labelName, properties,
+                constraintTypeText() );
+    }
+
+    protected abstract String constraintTypeText();
 }

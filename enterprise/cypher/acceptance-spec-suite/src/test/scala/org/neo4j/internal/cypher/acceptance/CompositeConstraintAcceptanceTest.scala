@@ -34,7 +34,7 @@ class CompositeConstraintAcceptanceTest extends ExecutionEngineFunSuite with New
     new GraphDatabaseCypherService(new TestEnterpriseGraphDatabaseFactory().newImpermanentDatabase(databaseConfig().asJava))
   }
 
-  test("should be able to create and remove composite uniquness constraints") {
+  test("should be able to create and remove composite uniqueness constraints") {
     // When
     executeWithCostPlannerAndInterpretedRuntimeOnly("CREATE CONSTRAINT ON (n:Person) ASSERT n.email IS UNIQUE")
     executeWithCostPlannerAndInterpretedRuntimeOnly("CREATE CONSTRAINT ON (n:Person) ASSERT (n.firstname,n.lastname) IS UNIQUE")

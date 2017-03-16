@@ -1327,7 +1327,7 @@ public class BatchInsertTest
         {
             // Then
             assertEquals(
-                    "It is not allowed to create uniqueness constraints and indexes on the same {label;property}",
+                    "It is not allowed to create node keys, uniqueness constraints or indexes on the same {label;property}",
                     e.getMessage() );
         }
     }
