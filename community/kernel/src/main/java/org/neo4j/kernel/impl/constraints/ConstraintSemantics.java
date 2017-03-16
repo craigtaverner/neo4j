@@ -50,7 +50,8 @@ public interface ConstraintSemantics
 
     ConstraintDescriptor readConstraint( ConstraintRule rule );
 
-    ConstraintRule createUniquenessConstraintRule( long ruleId, UniquenessConstraintDescriptor descriptor, long indexId );
+    ConstraintRule createUniquenessConstraintRule( long ruleId, UniquenessConstraintDescriptor descriptor, long indexId )
+            throws CreateConstraintFailureException;
 
     ConstraintRule createNodeKeyConstraintRule( long ruleId, NodeKeyConstraintDescriptor descriptor, long indexId )
             throws CreateConstraintFailureException;

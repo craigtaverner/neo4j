@@ -34,6 +34,7 @@ import org.neo4j.kernel.api.schema_new.RelationTypeSchemaDescriptor;
 import org.neo4j.kernel.api.schema_new.SchemaProcessor;
 import org.neo4j.kernel.api.schema_new.constaints.ConstraintDescriptor;
 import org.neo4j.kernel.api.schema_new.constaints.NodeKeyConstraintDescriptor;
+import org.neo4j.kernel.api.schema_new.constaints.UniquenessConstraintDescriptor;
 import org.neo4j.kernel.impl.constraints.StandardConstraintSemantics;
 import org.neo4j.kernel.impl.store.record.ConstraintRule;
 import org.neo4j.storageengine.api.NodeItem;
@@ -47,6 +48,12 @@ import static org.neo4j.kernel.api.exceptions.schema.ConstraintValidationExcepti
 public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
 {
     @Override
+    public ConstraintDescriptor readConstraint( ConstraintRule rule )
+    {
+        return rule.getConstraintDescriptor();
+    }
+
+    @Override
     protected ConstraintDescriptor readNonStandardConstraint( ConstraintRule rule, String errorMessage )
     {
         if ( !rule.getConstraintDescriptor().type().enforcesPropertyExistence() )
@@ -54,6 +61,13 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
             throw new IllegalStateException( "Unsupported constraint type: " + rule );
         }
         return rule.getConstraintDescriptor();
+    }
+
+    @Override
+    public ConstraintRule createUniquenessConstraintRule(
+            long ruleId, UniquenessConstraintDescriptor descriptor, long indexId )
+    {
+        return ConstraintRule.constraintRule( ruleId, descriptor, indexId );
     }
 
     @Override
@@ -88,13 +102,13 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
     }
 
     private void validateNodePropertyExistenceConstraint( NodeItem node, int propertyKey,
-        LabelSchemaDescriptor descriptor, BiPredicate<NodeItem, Integer> hasPropertyCheck ) throws
+            LabelSchemaDescriptor descriptor, BiPredicate<NodeItem,Integer> hasPropertyCheck ) throws
             CreateConstraintFailureException
     {
         if ( !hasPropertyCheck.test( node, propertyKey ) )
         {
             throw createConstraintFailure(
-                new NodePropertyExistenceException( descriptor, VERIFICATION, node.id() ) );
+                    new NodePropertyExistenceException( descriptor, VERIFICATION, node.id() ) );
         }
     }
 
@@ -109,7 +123,7 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
             for ( int propertyId : descriptor.getPropertyIds() )
             {
                 if ( relationship.type() == descriptor.getRelTypeId() &&
-                        !hasPropertyCheck.test( relationship, propertyId ) )
+                     !hasPropertyCheck.test( relationship, propertyId ) )
                 {
                     throw createConstraintFailure(
                             new RelationshipPropertyExistenceException( descriptor, VERIFICATION, relationship.id() ) );
@@ -136,7 +150,8 @@ public class EnterpriseConstraintSemantics extends StandardConstraintSemantics
 
         if ( collector.hasExistenceConstraints() )
         {
-            return new PropertyExistenceEnforcer( visitor, txState, storeLayer, collector.labelExists, collector.relTypeExists );
+            return new PropertyExistenceEnforcer( visitor, txState, storeLayer, collector.labelExists,
+                    collector.relTypeExists );
         }
         return visitor;
     }

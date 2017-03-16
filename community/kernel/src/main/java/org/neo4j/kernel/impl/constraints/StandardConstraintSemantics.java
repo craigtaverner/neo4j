@@ -42,6 +42,7 @@ public class StandardConstraintSemantics implements ConstraintSemantics
 {
     public static final String ERROR_MESSAGE_EXISTS = "Property existence constraint requires Neo4j Enterprise Edition";
     public static final String ERROR_MESSAGE_NODE_KEY = "Node Key constraint requires Neo4j Enterprise Edition";
+    public static final String ERROR_MESSAGE_COMPOSITE_UNIQUE = "Multi-property uniqueness constraint requires Neo4j Enterprise Edition";
 
     @Override
     public void validateNodePropertyExistenceConstraint( Iterator<Cursor<NodeItem>> allNodes,
@@ -69,6 +70,11 @@ public class StandardConstraintSemantics implements ConstraintSemantics
             return readNonStandardConstraint( rule, ERROR_MESSAGE_EXISTS );
         case UNIQUE_EXISTS:
             return readNonStandardConstraint( rule, ERROR_MESSAGE_NODE_KEY );
+        case UNIQUE:
+            if ( desc.schema().getPropertyIds().length > 1 )
+            {
+                throw new IllegalStateException( ERROR_MESSAGE_COMPOSITE_UNIQUE );
+            }
         }
         return desc;
     }
@@ -90,7 +96,12 @@ public class StandardConstraintSemantics implements ConstraintSemantics
     @Override
     public ConstraintRule createUniquenessConstraintRule(
             long ruleId, UniquenessConstraintDescriptor descriptor, long indexId )
+            throws CreateConstraintFailureException
     {
+        if ( descriptor.schema().getPropertyIds().length > 1 )
+        {
+            throw propertyExistenceConstraintsNotAllowed( descriptor.schema(), ERROR_MESSAGE_COMPOSITE_UNIQUE );
+        }
         return ConstraintRule.constraintRule( ruleId, descriptor, indexId );
     }
 
