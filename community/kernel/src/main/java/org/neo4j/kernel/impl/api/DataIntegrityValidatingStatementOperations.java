@@ -383,8 +383,7 @@ public class DataIntegrityValidatingStatementOperations implements
                 int[] nodeKeyPropertyIds = nodeKeysForLabel.next().schema().getPropertyIds();
                 if ( ArrayUtils.indexOf( nodeKeyPropertyIds, pec.schema().getPropertyId() ) != -1 )
                 {
-                    throw new DropConstraintFailureException( ConstraintBoundary.map( descriptor ), new
-                            NoSuchConstraintException( ConstraintBoundary.map( pec ) ) );
+                    throw new DropConstraintFailureException( descriptor, new NoSuchConstraintException( pec ) );
                 }
             }
         }
