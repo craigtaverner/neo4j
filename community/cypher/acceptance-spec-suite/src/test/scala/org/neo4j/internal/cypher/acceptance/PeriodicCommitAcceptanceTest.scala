@@ -28,11 +28,18 @@ import org.neo4j.cypher.internal.helpers.TxCounts
 import org.neo4j.cypher.internal.frontend.v3_1.helpers.StringHelper.RichString
 import org.neo4j.graphdb.Node
 import org.neo4j.kernel.api.KernelTransaction
+import org.neo4j.kernel.impl.proc.Procedures
 import org.neo4j.kernel.impl.transaction.log.TransactionIdStore
 
 class PeriodicCommitAcceptanceTest extends ExecutionEngineFunSuite
   with TxCountsTrackingTestSupport with QueryStatisticsTestSupport
   with CreateTempFileTestSupport {
+
+  override protected def createGraphDatabase() = {
+    val graph = super.createGraphDatabase()
+    graph.getDependencyResolver.resolveDependency(classOf[Procedures]).registerProcedure(classOf[WriteProceduresForTests])
+    graph
+  }
 
   def unwrapLoadCSVStatus[T](f: => T) = {
     try {
@@ -64,6 +71,19 @@ class PeriodicCommitAcceptanceTest extends ExecutionEngineFunSuite
 
     result.toList should equal(List(Map("n.id" -> "42")))
     result.columns should equal(List("n.id"))
+  }
+
+  test("should allow LOAD CSV when only write component comes from procedure") {
+    val url = createTempFileURL("foo", ".csv") { writer: PrintWriter =>
+      Range(0, 1000).foreach { i =>
+        writer.println(s"$i")
+      }
+    }
+    val result = graph.execute(s"USING PERIODIC COMMIT 200 LOAD CSV FROM '$url' AS line CALL test.createNodeWithId(line[0]) YIELD node as n WHERE n.id = '42' RETURN n.id")
+    println(result.resultAsString())
+
+//    result.toList should equal(List(Map("n.id" -> "42")))
+//    result.columns should equal(List("n.id"))
   }
 
   test("should use cost planner for periodic commit and load csv") {
