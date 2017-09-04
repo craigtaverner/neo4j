@@ -59,6 +59,7 @@ public class NativeSchemaNumberIndexProviderTest
     private static final int indexId = 1;
     private static final int labelId = 1;
     private static final int propId = 1;
+    private static final IndexDescriptor descriptor = IndexDescriptorFactory.forLabel( labelId, propId );
     private NativeSchemaNumberIndexProvider provider;
     private final AssertableLogProvider logging = new AssertableLogProvider();
 
@@ -81,7 +82,7 @@ public class NativeSchemaNumberIndexProviderTest
         try
         {
             // when
-            provider.getPopulator( indexId, descriptor(), samplingConfig() );
+            provider.getPopulator( indexId, descriptor, samplingConfig() );
             fail( "Should have failed" );
         }
         catch ( UnsupportedOperationException e )
@@ -111,7 +112,7 @@ public class NativeSchemaNumberIndexProviderTest
         provider = newProvider();
 
         // when
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
 
         // then
         assertTrue( "Expected populator to be non-unique populator", populator instanceof NativeNonUniqueSchemaNumberIndexPopulator );
@@ -153,7 +154,6 @@ public class NativeSchemaNumberIndexProviderTest
         provider = newProvider();
 
         // when
-        IndexDescriptor descriptor = descriptor();
         try ( IndexAccessor accessor = provider.getOnlineAccessor( indexId, descriptor, samplingConfig() );
               IndexUpdater indexUpdater = accessor.newUpdater( IndexUpdateMode.ONLINE ) )
         {
@@ -173,7 +173,7 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
         populator.close( true );
 
@@ -183,7 +183,7 @@ public class NativeSchemaNumberIndexProviderTest
         // then
         try
         {
-            provider.getPopulationFailure( indexId );
+            provider.getPopulationFailure( indexId, descriptor );
             fail( "Should have failed" );
         }
         catch ( IllegalStateException e )
@@ -200,12 +200,12 @@ public class NativeSchemaNumberIndexProviderTest
         provider = newProvider();
 
         int nonFailedIndexId = NativeSchemaNumberIndexProviderTest.indexId;
-        IndexPopulator nonFailedPopulator = provider.getPopulator( nonFailedIndexId, descriptor(), samplingConfig() );
+        IndexPopulator nonFailedPopulator = provider.getPopulator( nonFailedIndexId, descriptor, samplingConfig() );
         nonFailedPopulator.create();
         nonFailedPopulator.close( true );
 
         int failedIndexId = 2;
-        IndexPopulator failedPopulator = provider.getPopulator( failedIndexId, descriptor(), samplingConfig() );
+        IndexPopulator failedPopulator = provider.getPopulator( failedIndexId, descriptor, samplingConfig() );
         failedPopulator.create();
 
         // when
@@ -215,7 +215,7 @@ public class NativeSchemaNumberIndexProviderTest
         // then
         try
         {
-            provider.getPopulationFailure( nonFailedIndexId );
+            provider.getPopulationFailure( nonFailedIndexId, descriptor );
             fail( "Should have failed" );
         }
         catch ( IllegalStateException e )
@@ -230,7 +230,7 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
 
         // when
@@ -239,7 +239,7 @@ public class NativeSchemaNumberIndexProviderTest
         populator.close( false );
 
         // then
-        String populationFailure = provider.getPopulationFailure( indexId );
+        String populationFailure = provider.getPopulationFailure( indexId, descriptor );
         assertThat( populationFailure, is( failureMessage ) );
     }
 
@@ -251,11 +251,11 @@ public class NativeSchemaNumberIndexProviderTest
         int first = 1;
         int second = 2;
         int third = 3;
-        IndexPopulator firstPopulator = provider.getPopulator( first, descriptor(), samplingConfig() );
+        IndexPopulator firstPopulator = provider.getPopulator( first, descriptor, samplingConfig() );
         firstPopulator.create();
-        IndexPopulator secondPopulator = provider.getPopulator( second, descriptor(), samplingConfig() );
+        IndexPopulator secondPopulator = provider.getPopulator( second, descriptor, samplingConfig() );
         secondPopulator.create();
-        IndexPopulator thirdPopulator = provider.getPopulator( third, descriptor(), samplingConfig() );
+        IndexPopulator thirdPopulator = provider.getPopulator( third, descriptor, samplingConfig() );
         thirdPopulator.create();
 
         // when
@@ -268,11 +268,11 @@ public class NativeSchemaNumberIndexProviderTest
         thirdPopulator.close( false );
 
         // then
-        assertThat( provider.getPopulationFailure( first ), is( firstFailure ) );
-        assertThat( provider.getPopulationFailure( third ), is( thirdFailure ) );
+        assertThat( provider.getPopulationFailure( first, descriptor ), is( firstFailure ) );
+        assertThat( provider.getPopulationFailure( third, descriptor ), is( thirdFailure ) );
         try
         {
-            provider.getPopulationFailure( second );
+            provider.getPopulationFailure( second, descriptor );
             fail( "Should have failed" );
         }
         catch ( IllegalStateException e )
@@ -286,7 +286,7 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
 
         // when
@@ -296,7 +296,7 @@ public class NativeSchemaNumberIndexProviderTest
 
         // then
         provider = newProvider();
-        String populationFailure = provider.getPopulationFailure( indexId );
+        String populationFailure = provider.getPopulationFailure( indexId, descriptor );
         assertThat( populationFailure, is( failureMessage ) );
     }
 
@@ -310,7 +310,7 @@ public class NativeSchemaNumberIndexProviderTest
         provider = newProvider();
 
         // when
-        InternalIndexState state = provider.getInitialState( indexId, descriptor() );
+        InternalIndexState state = provider.getInitialState( indexId, descriptor );
 
         // then
         assertEquals( InternalIndexState.POPULATING, state );
@@ -322,11 +322,11 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
 
         // when
-        InternalIndexState state = provider.getInitialState( indexId, descriptor() );
+        InternalIndexState state = provider.getInitialState( indexId, descriptor );
 
         // then
         assertEquals( InternalIndexState.POPULATING, state );
@@ -338,13 +338,13 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
         populator.markAsFailed( "Just some failure" );
         populator.close( false );
 
         // when
-        InternalIndexState state = provider.getInitialState( indexId, descriptor() );
+        InternalIndexState state = provider.getInitialState( indexId, descriptor );
 
         // then
         assertEquals( InternalIndexState.FAILED, state );
@@ -355,12 +355,12 @@ public class NativeSchemaNumberIndexProviderTest
     {
         // given
         provider = newProvider();
-        IndexPopulator populator = provider.getPopulator( indexId, descriptor(), samplingConfig() );
+        IndexPopulator populator = provider.getPopulator( indexId, descriptor, samplingConfig() );
         populator.create();
         populator.close( true );
 
         // when
-        InternalIndexState state = provider.getInitialState( indexId, descriptor() );
+        InternalIndexState state = provider.getInitialState( indexId, descriptor );
 
         // then
         assertEquals( InternalIndexState.ONLINE, state );
@@ -371,11 +371,6 @@ public class NativeSchemaNumberIndexProviderTest
     private IndexSamplingConfig samplingConfig()
     {
         return new IndexSamplingConfig( Config.defaults() );
-    }
-
-    private IndexDescriptor descriptor()
-    {
-        return IndexDescriptorFactory.forLabel( labelId, propId );
     }
 
     private IndexDescriptor descriptorUnique()
