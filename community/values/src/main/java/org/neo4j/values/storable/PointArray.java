@@ -19,39 +19,35 @@
  */
 package org.neo4j.values.storable;
 
+import java.util.Arrays;
+
 import org.neo4j.graphdb.spatial.Geometry;
+import org.neo4j.graphdb.spatial.Point;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.SequenceValue;
 
-/**
- * Not a value.
- *
- * The NULL object of the Value world. Is implemented as a singleton, to allow direct reference equality checks (==),
- * and avoid unnecessary object creation.
- */
-final class NoValue extends Value
+import static java.lang.String.format;
+
+public abstract class PointArray extends ArrayValue
 {
-    @SuppressWarnings( "WeakerAccess" )
-    static final NoValue NO_VALUE = new NoValue();
+    abstract Point[] value();
 
-    private NoValue()
+    @Override
+    public int length()
     {
+        return value().length;
     }
 
     @Override
-    public boolean eq( Object other )
+    public boolean equals( Geometry[] x )
     {
-        return this == other;
-    }
-
-    @Override
-    public int computeHash()
-    {
-        return System.identityHashCode( this );
+        return Arrays.equals( value(), x );
     }
 
     @Override
     public boolean equals( Value other )
     {
-        return this == other;
+        return false;
     }
 
     @Override
@@ -91,25 +87,7 @@ final class NoValue extends Value
     }
 
     @Override
-    public boolean equals( boolean x )
-    {
-        return false;
-    }
-
-    @Override
     public boolean equals( boolean[] x )
-    {
-        return false;
-    }
-
-    @Override
-    public boolean equals( char x )
-    {
-        return false;
-    }
-
-    @Override
-    public boolean equals( String x )
     {
         return false;
     }
@@ -127,44 +105,89 @@ final class NoValue extends Value
     }
 
     @Override
-    public boolean equals( Geometry[] x )
-    {
-        return false;
-    }
-
-    @Override
-    public <E extends Exception> void writeTo( ValueWriter<E> writer ) throws E
-    {
-        writer.writeNull();
-    }
-
-    @Override
-    public Object asObjectCopy()
-    {
-        return null;
-    }
-
-    @Override
-    public String toString()
-    {
-        return prettyPrint();
-    }
-
-    @Override
-    public String prettyPrint()
-    {
-        return "NO_VALUE";
-    }
-
-    @Override
     public ValueGroup valueGroup()
     {
-        return ValueGroup.NO_VALUE;
+        return ValueGroup.GEOMETRY_ARRAY;
     }
 
     @Override
     public NumberType numberType()
     {
         return NumberType.NO_NUMBER;
+    }
+
+    @Override
+    public final boolean eq( Object other )
+    {
+        if ( other == null )
+        {
+            return false;
+        }
+
+        if ( other instanceof SequenceValue )
+        {
+            return this.equals( (SequenceValue) other );
+        }
+        return other instanceof Value && equals( (Value) other );
+    }
+
+    @Override
+    public int computeHash()
+    {
+        return Arrays.hashCode( value() );
+    }
+
+    @Override
+    public <E extends Exception> void writeTo( ValueWriter<E> writer ) throws E
+    {
+        PrimitiveArrayWriting.writeTo( writer, value() );
+    }
+
+    @Override
+    public Object asObjectCopy()
+    {
+        return value().clone();
+    }
+
+    @Override
+    @Deprecated
+    public Object asObject()
+    {
+        return value();
+    }
+
+    @Override
+    public String prettyPrint()
+    {
+        return Arrays.toString( value() );
+    }
+
+    static final class Direct extends PointArray
+    {
+        final Point[] value;
+
+        Direct( Point[] value )
+        {
+            assert value != null;
+            this.value = value;
+        }
+
+        @Override
+        Point[] value()
+        {
+            return value;
+        }
+
+        @Override
+        public String toString()
+        {
+            return format( "PointArray%s", Arrays.toString( value() ) );
+        }
+
+        @Override
+        public AnyValue value( int offset )
+        {
+            return Values.point( value[offset] );
+        }
     }
 }

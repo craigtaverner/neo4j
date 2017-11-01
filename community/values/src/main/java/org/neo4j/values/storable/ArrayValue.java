@@ -54,7 +54,7 @@ public abstract class ArrayValue extends Value implements SequenceValue
             @Override
             public AnyValue next()
             {
-                return value( offset );
+                return value( offset++ );
             }
         };
     }
