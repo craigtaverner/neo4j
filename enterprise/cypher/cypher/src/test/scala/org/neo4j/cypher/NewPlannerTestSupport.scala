@@ -27,12 +27,13 @@ import org.neo4j.cypher.internal.compiler.v3_4.planner.CantCompileQueryException
 import org.neo4j.cypher.internal.v3_4.logical.plans.LogicalPlan
 import org.neo4j.cypher.internal.util.v3_4.test_helpers.CypherTestSupport
 import org.neo4j.cypher.internal.RewindableExecutionResult
-import org.neo4j.cypher.internal.runtime.{CRS, CartesianPoint, GeographicPoint, InternalExecutionResult}
+import org.neo4j.cypher.internal.runtime.InternalExecutionResult
 import org.neo4j.cypher.internal.util.v3_4.Eagerly
 import org.neo4j.graphdb.Result
 import org.neo4j.graphdb.config.Setting
 import org.neo4j.graphdb.factory.GraphDatabaseSettings
 import org.neo4j.helpers.Exceptions
+import org.neo4j.values.storable.{CoordinateReferenceSystem, Values}
 
 import scala.util.{Failure, Success, Try}
 
@@ -272,8 +273,8 @@ trait NewPlannerTestSupport extends CypherTestSupport {
 
     def toCompararableSeq(replaceNaNs: Boolean): Seq[Map[String, Any]] = {
       def convert(v: Any): Any = v match {
-        case p: GeographicPointv3_1 => GeographicPoint(p.longitude, p.latitude, CRS(p.crs.name, p.crs.code, p.crs.url))
-        case p: CartesianPointv3_1  => CartesianPoint(p.x, p.y, CRS(p.crs.name, p.crs.code, p.crs.url))
+        case p: GeographicPointv3_1 => Values.pointValue(CoordinateReferenceSystem.get(p.crs.url), p.longitude, p.latitude)
+        case p: CartesianPointv3_1 => Values.pointValue(CoordinateReferenceSystem.get(p.crs.url), p.x, p.y)
         case a: Array[_] => a.toList.map(convert)
         case m: Map[_, _] =>
           Eagerly.immutableMapValues(m, convert)
