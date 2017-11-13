@@ -27,6 +27,7 @@ import org.junit.rules.RuleChain;
 import java.io.File;
 import java.io.IOException;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.configuration.Config;
@@ -41,6 +42,7 @@ import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.kernel.impl.transaction.log.TransactionIdStore;
 import org.neo4j.kernel.impl.util.monitoring.ProgressReporter;
 import org.neo4j.logging.NullLogProvider;
+import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.test.rule.PageCacheRule;
 import org.neo4j.test.rule.RandomRule;
 import org.neo4j.test.rule.TestDirectory;
@@ -206,6 +208,13 @@ public class StoreMigratorTest
 
         // Should not have started any migration
         assertFalse( progressReporter.started );
+    }
+
+    @Test
+    public void shouldOpenStore()
+    {
+        GraphDatabaseService db = new TestGraphDatabaseFactory().newImpermanentDatabase();
+        db.shutdown();
     }
 
     private StoreMigrator newStoreMigrator()
