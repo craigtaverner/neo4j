@@ -37,6 +37,7 @@ import org.neo4j.values.storable.ByteArray;
 import org.neo4j.values.storable.ByteValue;
 import org.neo4j.values.storable.CharArray;
 import org.neo4j.values.storable.CharValue;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.DateArray;
 import org.neo4j.values.storable.DateTimeArray;
 import org.neo4j.values.storable.DateTimeValue;
@@ -229,6 +230,8 @@ public interface ValueMapper<Base>
 
     Base mapPoint( PointValue value );
 
+    Base mapCustomValue( CustomValue value );
+
     default Base mapPointArray( PointArray value )
     {
         return mapSequence( value );
@@ -404,6 +407,12 @@ public interface ValueMapper<Base>
 
         @Override
         public Point mapPoint( PointValue value )
+        {
+            return value.asObjectCopy();
+        }
+
+        @Override
+        public Object mapCustomValue( CustomValue value )
         {
             return value.asObjectCopy();
         }

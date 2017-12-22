@@ -35,6 +35,7 @@ import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.AnyValueWriter;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.Values;
@@ -360,6 +361,14 @@ public class Neo4jPackV1 implements Neo4jPack
         {
             error = new Error( Status.Request.Invalid,
                     "DateTime is not yet supported as a return type in Bolt" );
+            packNull();
+        }
+
+        @Override
+        public void writeCustomValue( CustomValue value ) throws IOException
+        {
+            error = new Error( Status.Request.Invalid,
+                    "Custom types are not yet supported as return types in Bolt" );
             packNull();
         }
 

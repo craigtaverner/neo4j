@@ -97,6 +97,8 @@ public interface ValueWriter<E extends Exception>
 
     void writeDateTime( long epochSecondUTC, int nano, String zoneId ) throws E;
 
+    void writeCustomValue( CustomValue value ) throws E;
+
     class Adapter<E extends Exception> implements ValueWriter<E>
     {
         @Override
@@ -201,6 +203,11 @@ public interface ValueWriter<E extends Exception>
 
         @Override
         public void writeDateTime( long epochSecondUTC, int nano, String zoneId ) throws E
+        {   // no-op
+        }
+
+        @Override
+        public void writeCustomValue( CustomValue value ) throws E
         {   // no-op
         }
     }

@@ -20,6 +20,7 @@
 package org.neo4j.internal.cypher.acceptance
 
 import org.neo4j.cypher.ExecutionEngineFunSuite
+import org.neo4j.cypher.internal.runtime.InternalExecutionResult
 import org.neo4j.graphdb.spatial.Point
 import org.neo4j.internal.cypher.acceptance.CypherComparisonSupport._
 import org.neo4j.values.storable.{CoordinateReferenceSystem, Values}
@@ -103,6 +104,14 @@ class SpatialFunctionsAcceptanceTest extends ExecutionEngineFunSuite with Cypher
     result.toList should equal(List(Map("point" -> Values.pointValue(CoordinateReferenceSystem.Cartesian, 2, 4))))
   }
 
+  test("point function should work with parameters") {
+    val result = executeWith(pointConfig, "RETURN point({params}) as point",
+      planComparisonStrategy = ComparePlansWithAssertion(_ should useOperatorWithText("Projection", "point"),
+        expectPlansToFail = Configs.AllRulePlanners), params = Map("params" -> Map("x" -> 2.0, "y" -> 4.0, "crs" -> "cartesian")))
+
+    result.toList should equal(List(Map("point" -> Values.pointValue(CoordinateReferenceSystem.Cartesian, 2, 4))))
+  }
+
   test("should fail properly if missing cartesian coordinates") {
     failWithError(pointConfig, "RETURN point({params}) as point",
       List("A cartesian point must contain 'x' and 'y'",
@@ -166,6 +175,19 @@ class SpatialFunctionsAcceptanceTest extends ExecutionEngineFunSuite with Cypher
         expectPlansToFail = Configs.AllRulePlanners))
 
     result.toList should equal(List(Map("point" -> Values.pointValue(CoordinateReferenceSystem.WGS84, 56.7, 12.78))))
+  }
+
+  test("polygon function should work with collection of points") {
+    val result: InternalExecutionResult = innerExecuteDeprecated("RETURN polygon({points}) as polygon",
+      Map("points" -> Seq(
+        Values.pointValue(CoordinateReferenceSystem.Cartesian, 1.0, 1.0),
+        Values.pointValue(CoordinateReferenceSystem.Cartesian, 1.0, 2.0),
+        Values.pointValue(CoordinateReferenceSystem.Cartesian, 2.0, 2.0),
+        Values.pointValue(CoordinateReferenceSystem.Cartesian, 2.0, 1.0),
+        Values.pointValue(CoordinateReferenceSystem.Cartesian, 1.0, 1.0)
+      )))
+
+    result.toList should equal(List(Map("polygon" -> Values.pointValue(CoordinateReferenceSystem.Cartesian, 2, 4))))
   }
 
   test("point function should work with node properties") {

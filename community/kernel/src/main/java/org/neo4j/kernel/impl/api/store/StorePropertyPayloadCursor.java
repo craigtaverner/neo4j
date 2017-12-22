@@ -49,6 +49,7 @@ import static org.neo4j.kernel.impl.store.PropertyType.ARRAY;
 import static org.neo4j.kernel.impl.store.PropertyType.BOOL;
 import static org.neo4j.kernel.impl.store.PropertyType.BYTE;
 import static org.neo4j.kernel.impl.store.PropertyType.CHAR;
+import static org.neo4j.kernel.impl.store.PropertyType.CUSTOM;
 import static org.neo4j.kernel.impl.store.PropertyType.DOUBLE;
 import static org.neo4j.kernel.impl.store.PropertyType.FLOAT;
 import static org.neo4j.kernel.impl.store.PropertyType.GEOMETRY;
@@ -146,6 +147,15 @@ class StorePropertyPayloadCursor
     int propertyKeyId()
     {
         return PropertyBlock.keyIndexId( currentHeader() );
+    }
+
+    private Value customValue()
+    {
+        assertOfType( CUSTOM );
+        readFromStore( arrayRecordCursor );
+        buffer.flip();
+        // TODO load custom reader from registered types
+        return PropertyUtil.readArrayFromBuffer( buffer );
     }
 
     private BooleanValue booleanValue()
@@ -274,6 +284,8 @@ class StorePropertyPayloadCursor
             return geometryValue();
         case TEMPORAL:
             return temporalValue();
+        case CUSTOM:
+            return customValue();
         default:
             throw new IllegalStateException( "No such type:" + type() );
         }

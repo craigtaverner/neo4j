@@ -48,6 +48,7 @@ import org.neo4j.helpers.collection.ReverseArrayIterator;
 import org.neo4j.values.AnyValueWriter;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
 import org.neo4j.values.storable.DurationValue;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
@@ -329,6 +330,12 @@ public abstract class BaseToObjectValueWriter<E extends Exception> implements An
     public final void writePoint( CoordinateReferenceSystem crs, double[] coordinate )
     {
         writeValue( newPoint( crs, coordinate ) );
+    }
+
+    @Override
+    public void writeCustomValue( CustomValue value ) throws E
+    {
+        writeValue( value );
     }
 
     @Override

@@ -251,6 +251,8 @@ object CastSupport {
 
     override def writeDateTime(epochSecondUTC: Long, nano: Int, zoneId: String): Unit =
       write(DateTimeValue.datetime(epochSecondUTC, nano, ZoneId.of(zoneId)).asObject())
+
+    override def writeCustomValue(value: CustomValue): Unit = write(value)
   }
 
 }

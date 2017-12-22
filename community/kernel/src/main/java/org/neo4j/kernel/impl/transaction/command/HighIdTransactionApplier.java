@@ -88,6 +88,7 @@ public class HighIdTransactionApplier extends TransactionApplier.Adapter
                 track( propertyStore.getStringStore(), block.getValueRecords() );
                 break;
             case ARRAY:
+            case CUSTOM:
                 track( propertyStore.getArrayStore(), block.getValueRecords() );
                 break;
             default:

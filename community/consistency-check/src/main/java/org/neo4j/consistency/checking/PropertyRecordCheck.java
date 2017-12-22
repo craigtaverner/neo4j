@@ -77,6 +77,7 @@ public class PropertyRecordCheck
                                          DynamicReference.string( block ) );
                 break;
             case ARRAY:
+            case CUSTOM:
                 engine.comparativeCheck( records.array( block.getSingleValueLong() ), DynamicReference.array( block ) );
                 break;
             default:

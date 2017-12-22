@@ -226,6 +226,30 @@ public enum PropertyType
         {
             return TemporalType.calculateNumberOfBlocksUsed( firstBlock );
         }
+    },
+    CUSTOM( 15 )
+    {
+        @Override
+        public Value value( PropertyBlock block, PropertyStore store )
+        {
+            return store.getArrayFor( block, PropertyType.CUSTOM );
+        }
+
+        @Override
+        public byte[] readDynamicRecordHeader( byte[] recordBytes )
+        {
+            byte itemType = recordBytes[0];
+            if ( itemType == BYTE.byteValue() )
+            {
+                return headOf( recordBytes, DynamicArrayStore.NUMBER_HEADER_SIZE );
+            }
+            throw new IllegalArgumentException( "Unknown array type for custom value " + itemType + ", should be byte=" + BYTE.byteValue() );
+        }
+
+        private byte[] headOf( byte[] bytes, int length )
+        {
+            return Arrays.copyOf( bytes, length );
+        }
     };
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -299,6 +323,8 @@ public enum PropertyType
             return GEOMETRY;
         case 14:
             return TEMPORAL;
+        case 15:
+            return CUSTOM;
         default:
             return null;
         }

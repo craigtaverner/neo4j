@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Deque;
 
 import org.neo4j.values.AnyValueWriter;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
@@ -236,6 +237,12 @@ public class PrettyPrinter implements AnyValueWriter<RuntimeException>
         append( ", timezone: \"" );
         append( zoneId );
         append( "\"}}" );
+    }
+
+    @Override
+    public void writeCustomValue( CustomValue value ) throws RuntimeException
+    {
+        append( value.asString() );
     }
 
     @Override

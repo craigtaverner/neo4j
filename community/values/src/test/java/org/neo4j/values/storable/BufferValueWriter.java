@@ -172,6 +172,12 @@ public class BufferValueWriter implements ValueWriter<RuntimeException>
     }
 
     @Override
+    public void writeCustomValue( CustomValue value ) throws RuntimeException
+    {
+        buffer.add( value );
+    }
+
+    @Override
     public void writeByteArray( byte[] value ) throws RuntimeException
     {
         buffer.add( Specials.byteArray( value ) );

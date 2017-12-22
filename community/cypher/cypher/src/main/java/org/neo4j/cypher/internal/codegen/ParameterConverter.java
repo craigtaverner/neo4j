@@ -44,6 +44,7 @@ import org.neo4j.helpers.collection.ReverseArrayIterator;
 import org.neo4j.kernel.impl.core.EmbeddedProxySPI;
 import org.neo4j.values.AnyValueWriter;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
@@ -397,6 +398,12 @@ class ParameterConverter implements AnyValueWriter<RuntimeException>
     public void writeDateTime( long epochSecondUTC, int nano, String zoneId )
     {
         writeValue( ZonedDateTime.ofInstant( Instant.ofEpochSecond(epochSecondUTC, nano), ZoneId.of( zoneId ) ) );
+    }
+
+    @Override
+    public void writeCustomValue( CustomValue value ) throws RuntimeException
+    {
+        writeValue( value );
     }
 
     private interface Writer

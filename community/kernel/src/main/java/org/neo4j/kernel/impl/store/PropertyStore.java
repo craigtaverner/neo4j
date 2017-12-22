@@ -52,6 +52,7 @@ import org.neo4j.storageengine.api.StorageStatement;
 import org.neo4j.string.UTF8;
 import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueWriter;
 
@@ -82,6 +83,7 @@ import static org.neo4j.kernel.impl.store.record.RecordLoad.NORMAL;
  * </pre>
  * <h2>property types</h2>
  * <pre>
+ *  0: CUSTOM
  *  1: BOOL
  *  2: BYTE
  *  3: SHORT
@@ -94,7 +96,8 @@ import static org.neo4j.kernel.impl.store.record.RecordLoad.NORMAL;
  * 10: ARRAY  REFERENCE
  * 11: SHORT STRING
  * 12: SHORT ARRAY
- * 13: GEOMETRY
+ * 13: SPATIAL
+ * 14: TEMPORAL
  * </pre>
  * <h2>value formats</h2>
  * <pre>
@@ -243,10 +246,13 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
             {
                 arrayStore.updateRecord( valueRecord );
             }
+            else if ( recordType == PropertyType.CUSTOM )
+            {
+                arrayStore.updateRecord( valueRecord );
+            }
             else
             {
-                throw new InvalidRecordException( "Unknown dynamic record"
-                        + valueRecord );
+                throw new InvalidRecordException( "Unknown dynamic record" + valueRecord );
             }
         }
     }
@@ -290,6 +296,7 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
         switch ( type )
         {
         case ARRAY: return arrayStore;
+        case CUSTOM: return arrayStore;
         case STRING: return stringStore;
         default: return null;
         }
@@ -342,7 +349,7 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
         }
         else
         {
-            value.writeTo( new PropertyBlockValueWriter( block, keyId, stringAllocator, allowStorePointsAndTemporal ) );
+            value.writeTo( new PropertyBlockValueWriter( block, keyId, stringAllocator, arrayAllocator, allowStorePointsAndTemporal ) );
         }
     }
 
@@ -416,13 +423,16 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
         private final PropertyBlock block;
         private final int keyId;
         private final DynamicRecordAllocator stringAllocator;
+        private final DynamicRecordAllocator arrayAllocator;
         private final boolean allowStorePointsAndTemporal;
 
-        PropertyBlockValueWriter( PropertyBlock block, int keyId, DynamicRecordAllocator stringAllocator, boolean allowStorePointsAndTemporal )
+        PropertyBlockValueWriter( PropertyBlock block, int keyId, DynamicRecordAllocator stringAllocator, DynamicRecordAllocator arrayAllocator,
+                boolean allowStorePointsAndTemporal )
         {
             this.block = block;
             this.keyId = keyId;
             this.stringAllocator = stringAllocator;
+            this.arrayAllocator = arrayAllocator;
             this.allowStorePointsAndTemporal = allowStorePointsAndTemporal;
         }
 
@@ -635,6 +645,26 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
                 throw new UnsupportedFormatCapabilityException( Capability.TEMPORAL_PROPERTIES );
             }
         }
+
+        @Override
+        public void writeCustomValue( CustomValue value ) throws IllegalArgumentException
+        {
+            // TODO: Try encode using ShortArray for short custom types
+            byte[] bytes = value.asPropertyByteArray();
+            if ( bytes[0] != value.type() )
+            {
+                throw new IllegalStateException(
+                        String.format( "Cannot store custom type when first byte '%d' does not match custom type '%d'", bytes[0], value.type() ) );
+            }
+            List<DynamicRecord> arrayRecords = new ArrayList<>();
+            DynamicArrayStore.allocateRecordsFromBytes( arrayRecords, bytes, arrayAllocator );
+            setSingleBlockValue( block, keyId, PropertyType.CUSTOM, Iterables.first( arrayRecords ).getId() );
+            for ( DynamicRecord valueRecord : arrayRecords )
+            {
+                valueRecord.setType( PropertyType.CUSTOM.intValue() );
+            }
+            block.setValueRecords( arrayRecords );
+        }
     }
 
     public static void setSingleBlockValue( PropertyBlock block, int keyId, PropertyType type, long longValue )
@@ -677,9 +707,20 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
         return getArrayFor( propertyBlock.getValueRecords() );
     }
 
+    public Value getArrayFor( PropertyBlock propertyBlock, PropertyType propertyType )
+    {
+        ensureHeavy( propertyBlock );
+        return getArrayFor( propertyBlock.getValueRecords(), propertyType );
+    }
+
     public Value getArrayFor( Iterable<DynamicRecord> records )
     {
-        return getRightArray( arrayStore.readFullByteArray( records, PropertyType.ARRAY ) );
+        return getArrayFor( records, PropertyType.ARRAY );
+    }
+
+    public Value getArrayFor( Iterable<DynamicRecord> records, PropertyType propertyType )
+    {
+        return getRightArray( arrayStore.readFullByteArray( records, propertyType ) );
     }
 
     @Override

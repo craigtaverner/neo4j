@@ -171,4 +171,10 @@ public abstract class ThrowingValueWriter<E extends Exception> implements ValueW
     {
         throw exception( "writeDateTime" );
     }
+
+    @Override
+    public void writeCustomValue( CustomValue value ) throws E
+    {
+        throw exception( "writeCustomValue" );
+    }
 }

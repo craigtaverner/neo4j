@@ -255,6 +255,7 @@ class OwnerCheck implements CheckDecorator
         case STRING:
             return STRING_PROPERTY;
         case ARRAY:
+        case CUSTOM:
             return ARRAY_PROPERTY;
         default:
             return null;

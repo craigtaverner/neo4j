@@ -343,6 +343,8 @@ public class DefaultPropertyCursor extends PropertyRecord implements PropertyCur
             return geometryValue();
         case TEMPORAL:
             return temporalValue();
+        case CUSTOM:
+            return readLongArray();
         default:
             throw new IllegalStateException( "Unsupported PropertyType: " + type.name() );
         }

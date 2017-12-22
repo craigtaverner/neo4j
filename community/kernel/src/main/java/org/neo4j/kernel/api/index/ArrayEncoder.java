@@ -25,6 +25,7 @@ import java.util.Base64;
 
 import org.neo4j.string.UTF8;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.DateTimeValue;
 import org.neo4j.values.storable.DateValue;
 import org.neo4j.values.storable.DurationValue;
@@ -204,6 +205,13 @@ public final class ArrayEncoder
         public void writeDateTime( long epochSecondUTC, int nano, String zoneId ) throws RuntimeException
         {
             builder.append( DateTimeValue.datetime( epochSecondUTC, nano, ZoneId.of( zoneId ) ).prettyPrint() );
+            builder.append( '|' );
+        }
+
+        @Override
+        public void writeCustomValue( CustomValue value ) throws RuntimeException
+        {
+            builder.append( value.asString() );
             builder.append( '|' );
         }
 

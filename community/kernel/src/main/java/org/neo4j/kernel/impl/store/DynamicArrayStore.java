@@ -43,6 +43,7 @@ import org.neo4j.kernel.impl.util.Bits;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.values.storable.CRSTable;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
+import org.neo4j.values.storable.CustomValue;
 import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.PointValue;
 import org.neo4j.values.storable.Value;
@@ -273,7 +274,7 @@ public class DynamicArrayStore extends AbstractDynamicStore
         }
         else if ( type.equals( PointValue.class ) )
         {
-            allocateFromCompositeType( target,GeometryType.encodePointArray( (PointValue[]) array ),
+            allocateFromCompositeType( target, GeometryType.encodePointArray( (PointValue[]) array ),
                     recordAllocator, allowStorePointsAndTemporal, Capability.POINT_PROPERTIES );
         }
         else if ( type.equals( LocalDate.class ) )
@@ -305,6 +306,11 @@ public class DynamicArrayStore extends AbstractDynamicStore
         {
             allocateFromCompositeType( target, TemporalType.encodeDurationArray( (DurationValue[]) array ),
                     recordAllocator, allowStorePointsAndTemporal, Capability.TEMPORAL_PROPERTIES );
+        }
+        else if ( type.equals( CustomValue.class ) )
+        {
+            allocateFromCompositeType( target, CustomType.encode( (CustomValue[]) array ),
+                    recordAllocator, allowStorePointsAndTemporal, Capability.POINT_PROPERTIES );
         }
         else
         {
@@ -342,6 +348,11 @@ public class DynamicArrayStore extends AbstractDynamicStore
         {
             TemporalType.TemporalHeader temporalHeader = TemporalType.TemporalHeader.fromArrayHeaderBytes(header);
             return TemporalType.decodeTemporalArray( temporalHeader, bArray );
+        }
+        else if ( typeId == PropertyType.CUSTOM.intValue() )
+        {
+            CustomType.CustomHeader customHeader = CustomType.CustomHeader.fromArrayHeaderBytes( header );
+            return CustomType.decodeCustomArray( customHeader, bArray );
         }
         else
         {
