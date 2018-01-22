@@ -334,7 +334,7 @@ public final class Values
         {
             values[i] = Values.point( points[i] );
         }
-        return new PointArray.Direct( values );
+        return pointArray( values );
     }
 
     public static PointArray pointArray( Value[] maybePoints )
@@ -349,7 +349,7 @@ public final class Values
             }
             values[i] = Values.point( (PointValue) maybePoint );
         }
-        return new PointArray.Direct( values );
+        return pointArray( values );
     }
 
     public static PointArray pointArray( PointValue[] points )
