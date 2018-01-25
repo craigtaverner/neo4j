@@ -272,6 +272,11 @@ public abstract class SpaceFillingCurve
         SearchEnvelope wholeExtent = new SearchEnvelope( 0, this.getWidth(), nbrDim );
         ArrayList<LongRange> results = new ArrayList<>(1000);
 
+        if ( monitor != null )
+        {
+            monitor.registerSearchArea( search.getArea() );
+        }
+
         addTilesIntersectingEnvelopeAt( config, monitor, 0, config.maxDepth( referenceEnvelope, this.range, nbrDim, maxLevel ), search,
                 wholeExtent, rootCurve(), 0, this.getValueWidth(), results );
         return results;
@@ -298,10 +303,11 @@ public abstract class SpaceFillingCurve
                     current = new LongRange( left );
                     results.add( current );
                 }
-            }
-            if(monitor != null)
-            {
-                monitor.addRangeAtDepth( depth );
+                if ( monitor != null )
+                {
+                    monitor.addRangeAtDepth( depth );
+                    monitor.addToCoveredArea( currentExtent.getArea() );
+                }
             }
         }
         else if ( search.intersects( currentExtent ) )
@@ -326,6 +332,7 @@ public abstract class SpaceFillingCurve
                 if(monitor != null)
                 {
                     monitor.addRangeAtDepth( depth );
+                    monitor.addToCoveredArea( currentExtent.getArea() );
                 }
             }
             else
@@ -370,7 +377,7 @@ public abstract class SpaceFillingCurve
             double value = clamp( coord[dim], range.getMin( dim ), range.getMax( dim ) );
             if ( value == range.getMax( dim ) )
             {
-                normalizedCoord[dim] = valueWidth - 1;
+                normalizedCoord[dim] = width - 1;
             }
             else
             {
