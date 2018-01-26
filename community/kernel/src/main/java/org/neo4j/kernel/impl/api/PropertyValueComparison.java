@@ -62,9 +62,10 @@ public class PropertyValueComparison
         OTHER( 0, Limit.inclusive( LOWEST_OBJECT ), Limit.exclusive( "" ) ),
         STRING( 1, Limit.inclusive( "" ), Limit.exclusive( false ) ),
         BOOLEAN( 2, Limit.inclusive( false ), Limit.inclusive( true ) ),
+        GEOMETRY( 3, Limit.exclusive( true ), Limit.exclusive( Double.NEGATIVE_INFINITY ) ),
 
         // Keep this last so that Double.NaN is the largest value
-        NUMBER( 3, Limit.inclusive( Double.NEGATIVE_INFINITY ), Limit.inclusive( Double.NaN ) );
+        NUMBER( 4, Limit.inclusive( Double.NEGATIVE_INFINITY ), Limit.inclusive( Double.NaN ) );
 
         public final int typeId;
         public final Limit<Object> lowLimit;
@@ -105,6 +106,10 @@ public class PropertyValueComparison
             else if ( value instanceof Character )
             {
                 return STRING;
+            }
+            else if ( value instanceof PointValue )
+            {
+                return GEOMETRY;
             }
 
             return OTHER;
@@ -161,6 +166,9 @@ public class PropertyValueComparison
 
                     case BOOLEAN:
                         return Boolean.compare( (Boolean) left, (Boolean) right );
+
+                    case GEOMETRY:
+                        return COMPARE_POINTS.compare( (PointValue) left, (PointValue) right );
 
                     // case OTHER:
                     default:
