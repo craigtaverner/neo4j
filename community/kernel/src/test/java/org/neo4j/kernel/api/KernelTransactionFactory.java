@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.neo4j.collection.pool.Pool;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.kernel.api.Token;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracerSupplier;
 import org.neo4j.kernel.api.explicitindex.AutoIndexing;
 import org.neo4j.kernel.impl.api.KernelTransactionImplementation;
@@ -39,7 +40,7 @@ import org.neo4j.kernel.impl.locking.LockTracer;
 import org.neo4j.kernel.impl.locking.NoOpClient;
 import org.neo4j.kernel.impl.locking.SimpleStatementLocks;
 import org.neo4j.kernel.impl.locking.StatementLocks;
-import org.neo4j.kernel.impl.newapi.Cursors;
+import org.neo4j.kernel.impl.newapi.DefaultCursors;
 import org.neo4j.kernel.impl.newapi.KernelToken;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.impl.transaction.TransactionHeaderInformationFactory;
@@ -78,7 +79,7 @@ public class KernelTransactionFactory
     {
     }
 
-    static Instances kernelTransactionWithInternals( SecurityContext securityContext )
+    static Instances kernelTransactionWithInternals( LoginContext loginContext )
     {
         TransactionHeaderInformation headerInformation = new TransactionHeaderInformation( -1, -1, new byte[0] );
         TransactionHeaderInformationFactory headerInformationFactory = mock( TransactionHeaderInformationFactory.class );
@@ -101,18 +102,18 @@ public class KernelTransactionFactory
                 Clocks.systemClock(), new AtomicReference<>( CpuClock.NOT_AVAILABLE ), new AtomicReference<>( HeapAllocation.NOT_AVAILABLE ), NULL,
                 LockTracer.NONE,
                 PageCursorTracerSupplier.NULL,
-                storageEngine, new CanWrite(), new KernelToken( storeReadLayer ), new Cursors(), AutoIndexing.UNSUPPORTED, mock(
+                storageEngine, new CanWrite(), new KernelToken( storeReadLayer ), new DefaultCursors(), AutoIndexing.UNSUPPORTED, mock(
                 ExplicitIndexStore.class) );
 
         StatementLocks statementLocks = new SimpleStatementLocks( new NoOpClient() );
 
-        transaction.initialize( 0, 0, statementLocks, KernelTransaction.Type.implicit, securityContext, 0L, 1L );
+        transaction.initialize( 0, 0, statementLocks, KernelTransaction.Type.implicit, loginContext.authorize( mock( Token.class ) ), 0L, 1L );
 
         return new Instances( transaction, storageEngine, storeReadLayer, storageStatement );
     }
 
-    static KernelTransaction kernelTransaction( SecurityContext securityContext )
+    static KernelTransaction kernelTransaction( LoginContext loginContext )
     {
-        return kernelTransactionWithInternals( securityContext ).transaction;
+        return kernelTransactionWithInternals( loginContext ).transaction;
     }
 }

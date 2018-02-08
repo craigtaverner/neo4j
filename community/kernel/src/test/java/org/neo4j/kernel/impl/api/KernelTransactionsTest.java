@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import org.neo4j.graphdb.DatabaseShutdownException;
 import org.neo4j.graphdb.security.AuthorizationExpiredException;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.AvailabilityGuard;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -51,7 +51,7 @@ import org.neo4j.kernel.impl.index.IndexConfigStore;
 import org.neo4j.kernel.impl.locking.Locks;
 import org.neo4j.kernel.impl.locking.SimpleStatementLocksFactory;
 import org.neo4j.kernel.impl.locking.StatementLocksFactory;
-import org.neo4j.kernel.impl.newapi.Cursors;
+import org.neo4j.kernel.impl.newapi.DefaultCursors;
 import org.neo4j.kernel.impl.newapi.KernelToken;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.impl.store.TransactionId;
@@ -103,7 +103,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.helpers.collection.Iterators.asSet;
 import static org.neo4j.internal.kernel.api.Transaction.Type.explicit;
-import static org.neo4j.internal.kernel.api.security.SecurityContext.AUTH_DISABLED;
+import static org.neo4j.internal.kernel.api.security.LoginContext.AUTH_DISABLED;
 import static org.neo4j.kernel.impl.transaction.TransactionHeaderInformationFactory.DEFAULT;
 import static org.neo4j.test.assertion.Assert.assertException;
 
@@ -408,10 +408,10 @@ public class KernelTransactionsTest
     public void shouldNotLeakTransactionOnSecurityContextFreezeFailure() throws Throwable
     {
         KernelTransactions kernelTransactions = newKernelTransactions();
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when( securityContext.freeze() ).thenThrow( new AuthorizationExpiredException( "Freeze failed." ) );
+        LoginContext loginContext = mock( LoginContext.class );
+        when( loginContext.authorize( any() ) ).thenThrow( new AuthorizationExpiredException( "Freeze failed." ) );
 
-        assertException(() -> kernelTransactions.newInstance(KernelTransaction.Type.explicit, securityContext, 0L),
+        assertException(() -> kernelTransactions.newInstance(KernelTransaction.Type.explicit, loginContext, 0L),
                 AuthorizationExpiredException.class, "Freeze failed.");
 
         assertThat("We should not have any transaction", kernelTransactions.activeTransactions(), is(empty()));
@@ -421,19 +421,17 @@ public class KernelTransactionsTest
     public void exceptionWhenStartingNewTransactionOnShutdownInstance() throws Throwable
     {
         KernelTransactions kernelTransactions = newKernelTransactions();
-        SecurityContext securityContext = mock( SecurityContext.class );
 
         availabilityGuard.shutdown();
 
         expectedException.expect( DatabaseShutdownException.class );
-        kernelTransactions.newInstance( KernelTransaction.Type.explicit, securityContext, 0L );
+        kernelTransactions.newInstance( KernelTransaction.Type.explicit, AUTH_DISABLED, 0L );
     }
 
     @Test
     public void exceptionWhenStartingNewTransactionOnStoppedKernelTransactions() throws Throwable
     {
         KernelTransactions kernelTransactions = newKernelTransactions();
-        SecurityContext securityContext = mock( SecurityContext.class );
 
         t2.execute( (OtherThreadExecutor.WorkerCommand<Void,Void>) state ->
         {
@@ -442,19 +440,18 @@ public class KernelTransactionsTest
         } ).get();
 
         expectedException.expect( IllegalStateException.class );
-        kernelTransactions.newInstance( KernelTransaction.Type.explicit, securityContext, 0L );
+        kernelTransactions.newInstance( KernelTransaction.Type.explicit, AUTH_DISABLED, 0L );
     }
 
     @Test
     public void startNewTransactionOnRestartedKErnelTransactions() throws Throwable
     {
         KernelTransactions kernelTransactions = newKernelTransactions();
-        SecurityContext securityContext = mock( SecurityContext.class );
 
         kernelTransactions.stop();
         kernelTransactions.start();
         assertNotNull( "New transaction created by restarted kernel transactions component.",
-                kernelTransactions.newInstance( KernelTransaction.Type.explicit, securityContext, 0L ) );
+                kernelTransactions.newInstance( KernelTransaction.Type.explicit, AUTH_DISABLED, 0L ) );
     }
 
     @Test
@@ -589,7 +586,7 @@ public class KernelTransactionsTest
         return new KernelTransactions( statementLocksFactory, null, statementOperations, null, DEFAULT, commitProcess, null, null, new TransactionHooks(),
                 mock( TransactionMonitor.class ), availabilityGuard, tracers, storageEngine, new Procedures(), transactionIdStore, clock,
                 new AtomicReference<>( CpuClock.NOT_AVAILABLE ), new AtomicReference<>( HeapAllocation.NOT_AVAILABLE ), new CanWrite(),
-                new KernelToken( storageEngine.storeReadLayer() ), new Cursors(), AutoIndexing.UNSUPPORTED, mock( ExplicitIndexStore.class ) );
+                new KernelToken( storageEngine.storeReadLayer() ), new DefaultCursors(), AutoIndexing.UNSUPPORTED, mock( ExplicitIndexStore.class ) );
     }
 
     private static TestKernelTransactions createTestTransactions( StorageEngine storageEngine,
@@ -601,7 +598,7 @@ public class KernelTransactionsTest
                 null, DEFAULT,
                 commitProcess, null, null, new TransactionHooks(), mock( TransactionMonitor.class ),
                 availabilityGuard, tracers, storageEngine, new Procedures(), transactionIdStore, clock,
-                new CanWrite(), new KernelToken( storageEngine.storeReadLayer() ), new Cursors(), AutoIndexing.UNSUPPORTED );
+                new CanWrite(), new KernelToken( storageEngine.storeReadLayer() ), new DefaultCursors(), AutoIndexing.UNSUPPORTED );
     }
 
     private static TransactionCommitProcess newRememberingCommitProcess( final TransactionRepresentation[] slot )
@@ -650,7 +647,7 @@ public class KernelTransactionsTest
                 ExplicitIndexProviderLookup explicitIndexProviderLookup, TransactionHooks hooks,
                 TransactionMonitor transactionMonitor, AvailabilityGuard availabilityGuard, Tracers tracers,
                 StorageEngine storageEngine, Procedures procedures, TransactionIdStore transactionIdStore, SystemNanoClock clock,
-                AccessCapability accessCapability, KernelToken token, Cursors cursors, AutoIndexing autoIndexing )
+                AccessCapability accessCapability, KernelToken token, DefaultCursors cursors, AutoIndexing autoIndexing )
         {
             super( statementLocksFactory, constraintIndexCreator, statementOperations, schemaWriteGuard, txHeaderFactory, transactionCommitProcess,
                     indexConfigStore, explicitIndexProviderLookup, hooks, transactionMonitor, availabilityGuard, tracers, storageEngine, procedures,

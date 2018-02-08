@@ -69,7 +69,7 @@ public class MockStore extends Read implements TestRule
         }
     };
 
-    MockStore( Cursors cursors )
+    MockStore( DefaultCursors cursors )
     {
         super( cursors, mock( KernelTransactionImplementation.class ) );
     }
@@ -191,6 +191,12 @@ public class MockStore extends Read implements TestRule
 
     @Override
     public boolean nodeExists( long id )
+    {
+        throw new UnsupportedOperationException( "not implemented" );
+    }
+
+    @Override
+    public boolean relationshipExists( long reference )
     {
         throw new UnsupportedOperationException( "not implemented" );
     }
@@ -324,6 +330,12 @@ public class MockStore extends Read implements TestRule
     }
 
     @Override
+    void relationshipFull( RelationshipRecord record, long reference, PageCursor pageCursor )
+    {
+        throw new UnsupportedOperationException( "not implemented" );
+    }
+
+    @Override
     void property( PropertyRecord record, long reference, PageCursor pageCursor )
     {
         initialize( record, reference, properties );
@@ -348,13 +360,13 @@ public class MockStore extends Read implements TestRule
     }
 
     @Override
-    TextValue string( PropertyCursor cursor, long reference, PageCursor page )
+    TextValue string( DefaultPropertyCursor cursor, long reference, PageCursor page )
     {
         throw new UnsupportedOperationException( "not implemented" );
     }
 
     @Override
-    ArrayValue array( PropertyCursor cursor, long reference, PageCursor page )
+    ArrayValue array( DefaultPropertyCursor cursor, long reference, PageCursor page )
     {
         throw new UnsupportedOperationException( "not implemented" );
     }

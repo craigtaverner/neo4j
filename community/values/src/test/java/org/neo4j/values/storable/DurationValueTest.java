@@ -55,6 +55,8 @@ import static org.neo4j.values.storable.LocalTimeValue.localTime;
 import static org.neo4j.values.storable.TimeValue.time;
 import static org.neo4j.values.storable.Values.doubleValue;
 import static org.neo4j.values.storable.Values.longValue;
+import static org.neo4j.values.utils.AnyValueTestUtil.assertEqual;
+import static org.neo4j.values.utils.AnyValueTestUtil.assertNotEqual;
 
 public class DurationValueTest
 {
@@ -347,7 +349,7 @@ public class DurationValueTest
                 duration( 0, 0, 0, 500_000_000 ),
                 duration( 0, 0, 1, 0 ).mul( doubleValue( 0.5 ) ) );
         assertEquals( duration( 0, 0, 43200, 0 ), duration( 0, 1, 0, 0 ).mul( doubleValue( 0.5 ) ) );
-        assertEquals( duration( 0, 15, 18900, 0 ), duration( 1, 0, 0, 0 ).mul( doubleValue( 0.5 ) ) );
+        assertEquals( duration( 0, 15, 18873, 0 ), duration( 1, 0, 0, 0 ).mul( doubleValue( 0.5 ) ) );
     }
 
     @Test
@@ -357,7 +359,7 @@ public class DurationValueTest
                 duration( 0, 0, 0, 500_000_000 ),
                 duration( 0, 0, 1, 0 ).div( longValue( 2 ) ) );
         assertEquals( duration( 0, 0, 43200, 0 ), duration( 0, 1, 0, 0 ).div( longValue( 2 ) ) );
-        assertEquals( duration( 0, 15, 18900, 0 ), duration( 1, 0, 0, 0 ).div( longValue( 2 ) ) );
+        assertEquals( duration( 0, 15, 18873, 0 ), duration( 1, 0, 0, 0 ).div( longValue( 2 ) ) );
     }
 
     @Test
@@ -484,5 +486,27 @@ public class DurationValueTest
             assertEquals( diffABs.prettyPrint(), b, a.plus( diffABs ) );
             assertEquals( diffBAs.prettyPrint(), a, b.plus( diffBAs ) );
         }
+    }
+
+    @Test
+    public void shouldEqualItself()
+    {
+        assertEqual( duration( 40, 3, 13, 37 ), duration( 40, 3, 13, 37 ) );
+        assertEqual( duration( 40, 3, 14, 37 ), duration( 40, 3, 13, 1_000_000_037 ) );
+    }
+
+    @Test
+    public void shouldNotEqualOther()
+    {
+        assertNotEqual( duration( 40, 3, 13, 37 ), duration( 40, 3, 14, 37 ) );
+
+        // average nbr of seconds on a month doesn't imply equality
+        assertNotEqual( duration( 1, 0, 0, 0 ), duration( 0, 0, 2_629_800, 0 ) );
+
+        // not the same due to leap seconds
+        assertNotEqual( duration( 0, 1, 0, 0 ), duration( 0, 0, 60 * 60 * 24, 0 ) );
+
+        // average nbr of days in 400 years doesn't imply equality
+        assertNotEqual( duration( 400 * 12, 0, 0, 0 ), duration( 0, 146_097, 0, 0 ) );
     }
 }

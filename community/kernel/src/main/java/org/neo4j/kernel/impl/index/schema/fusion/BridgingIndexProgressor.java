@@ -67,6 +67,12 @@ public class BridgingIndexProgressor implements IndexProgressor.NodeValueClient,
     }
 
     @Override
+    public boolean needsValues()
+    {
+        return client.needsValues();
+    }
+
+    @Override
     public void close()
     {
         progressors.forEach( IndexProgressor::close );

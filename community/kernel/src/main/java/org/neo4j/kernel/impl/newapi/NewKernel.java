@@ -22,7 +22,7 @@ package org.neo4j.kernel.impl.newapi;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Kernel;
 import org.neo4j.internal.kernel.api.Modes;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.InwardKernel;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageStatement;
@@ -38,7 +38,7 @@ public class NewKernel implements Kernel, Modes
     private final InwardKernel kernel;
 
     private StorageStatement statement;
-    private Cursors cursors;
+    private DefaultCursors cursors;
 
     private volatile boolean isRunning;
 
@@ -58,10 +58,10 @@ public class NewKernel implements Kernel, Modes
     }
 
     @Override
-    public KernelSession beginSession( SecurityContext securityContext )
+    public KernelSession beginSession( LoginContext loginContext )
     {
         assert isRunning : "kernel is not running, so it is not possible to use it";
-        return new KernelSession( token, kernel, securityContext );
+        return new KernelSession( token, kernel, loginContext );
     }
 
     @Override
@@ -73,7 +73,7 @@ public class NewKernel implements Kernel, Modes
     public void start()
     {
         statement = engine.storeReadLayer().newStatement();
-        this.cursors = new Cursors();
+        this.cursors = new DefaultCursors();
         isRunning = true;
     }
 

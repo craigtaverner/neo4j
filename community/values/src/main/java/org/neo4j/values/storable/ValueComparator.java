@@ -71,6 +71,24 @@ public class ValueComparator implements Comparator<Value>
                 // Currently only Point
                 return ((PointValue) v1).compareTo( (PointValue) v2 );
 
+            case ZONED_DATE_TIME:
+                return ((DateTimeValue) v1).compareTo( (DateTimeValue) v2 );
+
+            case LOCAL_DATE_TIME:
+                return ((LocalDateTimeValue) v1).compareTo( (LocalDateTimeValue) v2 );
+
+            case DATE:
+                return ((DateValue) v1).compareTo( (DateValue) v2 );
+
+            case ZONED_TIME:
+                return ((TimeValue) v1).compareTo( (TimeValue) v2 );
+
+            case LOCAL_TIME:
+                return ((LocalTimeValue) v1).compareTo( (LocalTimeValue) v2 );
+
+            case DURATION:
+                return ((DurationValue) v1).compareTo( (DurationValue) v2 );
+
             case TEXT:
                 return ((TextValue) v1).compareTo( (TextValue) v2 );
 
@@ -100,6 +118,24 @@ public class ValueComparator implements Comparator<Value>
             case GEOMETRY_ARRAY:
                 // Currently just Points
                 return ((PointArray) v1).compareTo( (PointArray) v2);
+
+            case ZONED_DATE_TIME_ARRAY:
+                return ((DateTimeArray) v1).compareTo( (DateTimeArray) v2);
+
+            case LOCAL_DATE_TIME_ARRAY:
+                return ((LocalDateTimeArray) v1).compareTo( (LocalDateTimeArray) v2);
+
+            case LOCAL_TIME_ARRAY:
+                return ((LocalTimeArray) v1).compareTo( (LocalTimeArray) v2);
+
+            case ZONED_TIME_ARRAY:
+                return ((TimeArray) v1).compareTo( (TimeArray) v2);
+
+            case DATE_ARRAY:
+                return ((DateArray) v1).compareTo( (DateArray) v2);
+
+            case DURATION_ARRAY:
+                return ((DurationArray) v1).compareTo( (DurationArray) v2);
 
             default:
                 throw new UnsupportedOperationException( format(

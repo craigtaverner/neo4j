@@ -28,6 +28,7 @@ import org.neo4j.function.Suppliers.Lazy;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.internal.kernel.api.CapableIndexReference;
 import org.neo4j.internal.kernel.api.IndexCapability;
+import org.neo4j.internal.kernel.api.IndexReference;
 import org.neo4j.internal.kernel.api.InternalIndexState;
 import org.neo4j.internal.kernel.api.exceptions.explicitindex.ExplicitIndexNotFoundKernelException;
 import org.neo4j.internal.kernel.api.schema.SchemaDescriptor;
@@ -79,7 +80,7 @@ public class AllStoreHolder extends Read
     public AllStoreHolder( StorageEngine engine,
             StorageStatement statement,
             KernelTransactionImplementation ktx,
-            Cursors cursors,
+            DefaultCursors cursors,
             ExplicitIndexStore explicitIndexStore )
     {
         super( cursors, ktx );
@@ -115,13 +116,33 @@ public class AllStoreHolder extends Read
     }
 
     @Override
+    public boolean relationshipExists( long reference )
+    {
+        ktx.assertOpen();
+
+        if ( hasTxStateWithChanges() )
+        {
+            TransactionState txState = txState();
+            if ( txState.relationshipIsDeletedInThisTx( reference ) )
+            {
+                return false;
+            }
+            else if ( txState.relationshipIsAddedInThisTx( reference ) )
+            {
+                return true;
+            }
+        }
+        return storeReadLayer.relationshipExists( reference );
+    }
+
+    @Override
     long graphPropertiesReference()
     {
         throw new UnsupportedOperationException( "not implemented" );
     }
 
     @Override
-    IndexReader indexReader( org.neo4j.internal.kernel.api.IndexReference index ) throws IndexNotFoundKernelException
+    IndexReader indexReader( IndexReference index ) throws IndexNotFoundKernelException
     {
         IndexDescriptor indexDescriptor = index.isUnique() ?
                                           IndexDescriptorFactory.uniqueForLabel( index.label(), index.properties() ) :
@@ -316,21 +337,37 @@ public class AllStoreHolder extends Read
     @Override
     void relationship( RelationshipRecord record, long reference, PageCursor pageCursor )
     {
+        // When scanning, we inspect RelationshipRecord.inUse(), so using RecordLoad.CHECK is fine
         relationships.getRecordByCursor( reference, record, RecordLoad.CHECK, pageCursor );
+    }
+
+    @Override
+    void relationshipFull( RelationshipRecord record, long reference, PageCursor pageCursor )
+    {
+        // We need to load forcefully for relationship chain traversal since otherwise we cannot
+        // traverse over relationship records which have been concurrently deleted
+        // (flagged as inUse = false).
+        // see
+        //      org.neo4j.kernel.impl.store.RelationshipChainPointerChasingTest
+        //      org.neo4j.kernel.impl.locking.RelationshipCreateDeleteIT
+        relationships.getRecordByCursor( reference, record, RecordLoad.FORCE, pageCursor );
     }
 
     @Override
     void property( PropertyRecord record, long reference, PageCursor pageCursor )
     {
-        //We need to load forcefully here since otherwise we can have inconsistent reads
-        //for properties across blocks, see org.neo4j.graphdb.ConsistentPropertyReadsIT
+        // We need to load forcefully here since otherwise we can have inconsistent reads
+        // for properties across blocks, see org.neo4j.graphdb.ConsistentPropertyReadsIT
         properties.getRecordByCursor( reference, record, RecordLoad.FORCE, pageCursor );
     }
 
     @Override
     void group( RelationshipGroupRecord record, long reference, PageCursor page )
     {
-        groups.getRecordByCursor( reference, record, RecordLoad.NORMAL, page );
+        // We need to load forcefully here since otherwise we cannot traverse over groups
+        // records which have been concurrently deleted (flagged as inUse = false).
+        // @see #org.neo4j.kernel.impl.store.RelationshipChainPointerChasingTest
+        groups.getRecordByCursor( reference, record, RecordLoad.FORCE, page );
     }
 
     @Override
@@ -346,7 +383,7 @@ public class AllStoreHolder extends Read
     }
 
     @Override
-    TextValue string( PropertyCursor cursor, long reference, PageCursor page )
+    TextValue string( DefaultPropertyCursor cursor, long reference, PageCursor page )
     {
         ByteBuffer buffer = cursor.buffer = properties.loadString( reference, cursor.buffer, page );
         buffer.flip();
@@ -354,7 +391,7 @@ public class AllStoreHolder extends Read
     }
 
     @Override
-    ArrayValue array( PropertyCursor cursor, long reference, PageCursor page )
+    ArrayValue array( DefaultPropertyCursor cursor, long reference, PageCursor page )
     {
         ByteBuffer buffer = cursor.buffer = properties.loadArray( reference, cursor.buffer, page );
         buffer.flip();

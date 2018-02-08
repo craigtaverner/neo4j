@@ -127,6 +127,12 @@ public abstract class NumberSchemaIndexAccessorTest<KEY extends NumberSchemaKey,
                 }
                 return filter.acceptsValue( values[0] ) && iter.acceptNode( reference, values );
             }
+
+            @Override
+            public boolean needsValues()
+            {
+                return true;
+            }
         };
     }
 }

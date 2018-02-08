@@ -109,7 +109,7 @@ import static org.junit.Assert.fail;
 import static org.neo4j.function.Predicates.ALWAYS_TRUE_INT;
 import static org.neo4j.graphdb.factory.GraphDatabaseSettings.counts_store_rotation_timeout;
 import static org.neo4j.helpers.collection.MapUtil.stringMap;
-import static org.neo4j.internal.kernel.api.security.SecurityContext.AUTH_DISABLED;
+import static org.neo4j.internal.kernel.api.security.LoginContext.AUTH_DISABLED;
 import static org.neo4j.kernel.api.AssertOpen.ALWAYS_OPEN;
 import static org.neo4j.kernel.impl.locking.LockService.NO_LOCK;
 import static org.neo4j.kernel.impl.store.RecordStore.getRecord;
@@ -192,19 +192,14 @@ public class NeoStoresTest
         Config config = Config.defaults();
         StoreFactory sf = new StoreFactory( storeDir, config, new DefaultIdGeneratorFactory( fs.get() ), pageCache,
                 fs.get(), NullLogProvider.getInstance() );
-        NeoStores neoStores = sf.openNeoStores( true, StoreType.NODE_LABEL );
 
         exception.expect( IllegalStateException.class );
         exception.expectMessage(
                 "Specified store was not initialized. Please specify " + StoreType.META_DATA.name() +
                 " as one of the stores types that should be open to be able to use it." );
-        try
+        try ( NeoStores neoStores = sf.openNeoStores( true, StoreType.NODE_LABEL ) )
         {
             neoStores.getMetaDataStore();
-        }
-        finally
-        {
-            neoStores.close();
         }
     }
 

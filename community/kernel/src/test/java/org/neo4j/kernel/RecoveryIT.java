@@ -599,7 +599,7 @@ public class RecoveryIT
                         }
                         else if ( operation < 0.9 )
                         {   // delete relationship
-                            onRandomRelationship( nodes, relationship -> relationship.delete() );
+                            onRandomRelationship( nodes, Relationship::delete );
                         }
                         else
                         {   // delete node

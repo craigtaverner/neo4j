@@ -38,16 +38,17 @@ class SpatialIndexAcceptanceTest extends CypherFunSuite with GraphDatabaseTestSu
 
   override protected def initTest() {
     FileUtils.deleteRecursively(dbDir)
-    graph = createGraphDatabase()
+    startGraphDatabase(dbDir)
   }
 
-  override protected def createGraphDatabase(config: Map[Setting[_], String] = databaseConfig()): GraphDatabaseCypherService = {
-    new GraphDatabaseCypherService(new GraphDatabaseFactory().newEmbeddedDatabase(dbDir))
+  override protected def startGraphDatabase(storeDir: File): Unit = {
+    graphOps = new GraphDatabaseFactory().newEmbeddedDatabase(storeDir)
+    graph = new GraphDatabaseCypherService(graphOps)
   }
 
   protected def restartGraphDatabase(): Unit = {
     graph.shutdown()
-    graph = createGraphDatabase()
+    startGraphDatabase(dbDir)
   }
 
   override protected def stopTest() {

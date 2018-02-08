@@ -31,6 +31,7 @@ import org.neo4j.collection.pool.MarshlandPool;
 import org.neo4j.function.Factory;
 import org.neo4j.graphdb.DatabaseShutdownException;
 import org.neo4j.graphdb.TransactionFailureException;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.AvailabilityGuard;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -45,7 +46,7 @@ import org.neo4j.kernel.impl.index.ExplicitIndexStore;
 import org.neo4j.kernel.impl.index.IndexConfigStore;
 import org.neo4j.kernel.impl.locking.StatementLocks;
 import org.neo4j.kernel.impl.locking.StatementLocksFactory;
-import org.neo4j.kernel.impl.newapi.Cursors;
+import org.neo4j.kernel.impl.newapi.DefaultCursors;
 import org.neo4j.kernel.impl.newapi.KernelToken;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.impl.store.TransactionId;
@@ -93,7 +94,7 @@ public class KernelTransactions extends LifecycleAdapter implements Supplier<Ker
     private final SystemNanoClock clock;
     private final ReentrantReadWriteLock newTransactionsLock = new ReentrantReadWriteLock();
     private final MonotonicCounter userTransactionIdCounter = MonotonicCounter.newAtomicMonotonicCounter();
-    private final Cursors cursors;
+    private final DefaultCursors cursors;
     private final KernelToken token;
     private final AutoIndexing autoIndexing;
     private final ExplicitIndexStore explicitIndexStore;
@@ -135,7 +136,7 @@ public class KernelTransactions extends LifecycleAdapter implements Supplier<Ker
             StorageEngine storageEngine, Procedures procedures, TransactionIdStore transactionIdStore,
             SystemNanoClock clock,
             AtomicReference<CpuClock> cpuClockRef, AtomicReference<HeapAllocation> heapAllocationRef, AccessCapability accessCapability,
-            KernelToken token, Cursors cursors,
+            KernelToken token, DefaultCursors cursors,
             AutoIndexing autoIndexing,
             ExplicitIndexStore explicitIndexStore )
     {
@@ -171,10 +172,10 @@ public class KernelTransactions extends LifecycleAdapter implements Supplier<Ker
         return explicitIndexTxStateSupplier;
     }
 
-    public KernelTransaction newInstance( KernelTransaction.Type type, SecurityContext securityContext, long timeout )
+    public KernelTransaction newInstance( KernelTransaction.Type type, LoginContext loginContext, long timeout )
     {
         assertCurrentThreadIsNotBlockingNewTransactions();
-        SecurityContext frozenSecurityContext = securityContext.freeze();
+        SecurityContext securityContext = loginContext.authorize( token );
         try
         {
             while ( !newTransactionsLock.readLock().tryLock( 1, TimeUnit.SECONDS ) )
@@ -188,7 +189,7 @@ public class KernelTransactions extends LifecycleAdapter implements Supplier<Ker
                 KernelTransactionImplementation tx = localTxPool.acquire();
                 StatementLocks statementLocks = statementLocksFactory.newInstance();
                 tx.initialize( lastCommittedTransaction.transactionId(), lastCommittedTransaction.commitTimestamp(),
-                        statementLocks, type, frozenSecurityContext, timeout, userTransactionIdCounter.incrementAndGet() );
+                        statementLocks, type, securityContext, timeout, userTransactionIdCounter.incrementAndGet() );
                 return tx;
             }
             finally
