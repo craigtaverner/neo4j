@@ -118,7 +118,6 @@ public class CoordinateReferenceSystem implements CRS
     private final String href;
     private final int dimension;
     private final boolean geographic;
-    private final Pair<double[],double[]> indexEnvelope;
     private final CRSCalculator calculator;
 
     private CoordinateReferenceSystem( String name, CRSTable table, int code, int dimension, boolean geographic )
@@ -129,7 +128,6 @@ public class CoordinateReferenceSystem implements CRS
         this.href = table.href( code );
         this.dimension = dimension;
         this.geographic = geographic;
-        this.indexEnvelope = envelopeFromCRS( dimension, geographic, -1000000, 1000000 );
         if ( geographic )
         {
             this.calculator = new CRSCalculator.GeographicCalculator( dimension );
@@ -212,31 +210,4 @@ public class CoordinateReferenceSystem implements CRS
         return href.hashCode();
     }
 
-    public Pair<double[],double[]> getIndexEnvelope()
-    {
-        return indexEnvelope;
-    }
-
-    private static Pair<double[],double[]> envelopeFromCRS( int dimension, boolean geographic, double minCartesian, double maxCartesian )
-    {
-        assert dimension >= 2;
-        double[] min = new double[dimension];
-        double[] max = new double[dimension];
-        int cartesianStartIndex = 0;
-        if ( geographic )
-        {
-            // Geographic CRS default to extent of the earth in degrees
-            min[0] = -180.0;
-            max[0] = 180.0;
-            min[1] = -90.0;
-            max[1] = 90.0;
-            cartesianStartIndex = 2;    // if geographic index has higher than 2D, then other dimensions are cartesian
-        }
-        for ( int i = cartesianStartIndex; i < dimension; i++ )
-        {
-            min[i] = minCartesian;
-            max[i] = maxCartesian;
-        }
-        return Pair.of( min, max );
-    }
 }

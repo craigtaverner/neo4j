@@ -37,7 +37,10 @@ import org.neo4j.kernel.api.index.IndexUpdater;
 import org.neo4j.kernel.api.index.SchemaIndexProvider;
 import org.neo4j.kernel.api.schema.index.IndexDescriptor;
 import org.neo4j.kernel.api.schema.index.IndexDescriptorFactory;
+import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.api.index.sampling.IndexSamplingConfig;
+import org.neo4j.kernel.impl.index.schema.config.SpaceFillingCurveSettings;
+import org.neo4j.kernel.impl.index.schema.config.SpaceFillingCurveSettingsFactory;
 import org.neo4j.test.rule.PageCacheRule;
 import org.neo4j.test.rule.RandomRule;
 import org.neo4j.test.rule.TestDirectory;
@@ -80,12 +83,13 @@ public class SpatialKnownIndexTest
         fs.mkdir( storeDir );
 
         CoordinateReferenceSystem crs = CoordinateReferenceSystem.WGS84;
+        SpaceFillingCurveSettings settings = new SpaceFillingCurveSettingsFactory( Config.defaults() ).settingsFor( crs );
         String crsDir = String.format("%s-%s", crs.getTable().getTableId(), crs.getCode() );
         indexDir = new File( new File( new File( new File( new File( storeDir, "schema" ), "index" ), "spatial-1.0" ), "1" ), crsDir );
         IndexDirectoryStructure dirStructure = IndexDirectoryStructure.directoriesByProvider( storeDir ).forProvider( SPATIAL_PROVIDER_DESCRIPTOR );
         descriptor = IndexDescriptorFactory.forLabel( 42, 1337 );
         index = new SpatialCRSSchemaIndex( descriptor, dirStructure, crs, 1L, pageCacheRule.getPageCache( fs ), fs,
-                SchemaIndexProvider.Monitor.EMPTY, RecoveryCleanupWorkCollector.IMMEDIATE, new StandardConfiguration(), 60 );
+                SchemaIndexProvider.Monitor.EMPTY, RecoveryCleanupWorkCollector.IMMEDIATE, new StandardConfiguration(), settings );
         samplingConfig = mock( IndexSamplingConfig.class );
     }
 

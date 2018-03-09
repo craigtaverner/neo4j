@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.neo4j.gis.spatial.index.curves.PartialOverlapConfiguration;
 import org.neo4j.gis.spatial.index.curves.SpaceFillingCurveConfiguration;
 import org.neo4j.gis.spatial.index.curves.StandardConfiguration;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.index.internal.gbptree.GBPTree;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.kernel.api.IndexCapability;
@@ -44,6 +43,8 @@ import org.neo4j.kernel.api.schema.index.IndexDescriptor;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.api.index.sampling.IndexSamplingConfig;
 import org.neo4j.kernel.impl.index.schema.SpatialCRSSchemaIndex;
+import org.neo4j.kernel.impl.index.schema.config.SpaceFillingCurveSettingsFactory;
+import org.neo4j.kernel.impl.index.schema.config.SpatialIndexSettings;
 import org.neo4j.kernel.impl.storemigration.StoreMigrationParticipant;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
 
@@ -61,8 +62,8 @@ public class SpatialFusionSchemaIndexProvider extends SchemaIndexProvider implem
     private final Monitor monitor;
     private final RecoveryCleanupWorkCollector recoveryCleanupWorkCollector;
     private final boolean readOnly;
+    private final SpaceFillingCurveSettingsFactory settingsFactory;
     private final SpaceFillingCurveConfiguration configuration;
-    private final int maxBits;
 
     private Map<Long,Map<CoordinateReferenceSystem,SpatialCRSSchemaIndex>> indexes = new HashMap<>();
 
@@ -77,14 +78,19 @@ public class SpatialFusionSchemaIndexProvider extends SchemaIndexProvider implem
         this.recoveryCleanupWorkCollector = recoveryCleanupWorkCollector;
         this.readOnly = readOnly;
         this.configuration = getConfiguredSpaceFillingCurveConfiguration( config );
-        this.maxBits = config.get( GraphDatabaseSettings.space_filling_curve_max_bits );
+        this.settingsFactory = getConfiguredSpaceFillingCurveSettings( config );
+    }
+
+    private SpaceFillingCurveSettingsFactory getConfiguredSpaceFillingCurveSettings( Config config )
+    {
+        return new SpaceFillingCurveSettingsFactory( config );
     }
 
     private static SpaceFillingCurveConfiguration getConfiguredSpaceFillingCurveConfiguration( Config config )
     {
-        int extraLevels = config.get( GraphDatabaseSettings.space_filling_curve_extra_levels );
-        double topThreshold = config.get( GraphDatabaseSettings.space_filling_curve_top_threshold );
-        double bottomThreshold = config.get( GraphDatabaseSettings.space_filling_curve_bottom_threshold );
+        int extraLevels = config.get( SpatialIndexSettings.space_filling_curve_extra_levels );
+        double topThreshold = config.get( SpatialIndexSettings.space_filling_curve_top_threshold );
+        double bottomThreshold = config.get( SpatialIndexSettings.space_filling_curve_bottom_threshold );
 
         if ( topThreshold == 0.0 || bottomThreshold == 0.0 )
         {
@@ -192,8 +198,8 @@ public class SpatialFusionSchemaIndexProvider extends SchemaIndexProvider implem
             Map<CoordinateReferenceSystem,SpatialCRSSchemaIndex> indexMap, long indexId, CoordinateReferenceSystem crs )
     {
         return indexMap.computeIfAbsent( crs,
-                crsKey -> new SpatialCRSSchemaIndex( descriptor, directoryStructure(), crsKey, indexId, pageCache, fs, monitor,
-                        recoveryCleanupWorkCollector, configuration, maxBits ) );
+                crsKey -> new SpatialCRSSchemaIndex( descriptor, directoryStructure(), crsKey, indexId, pageCache, fs, monitor, recoveryCleanupWorkCollector,
+                        configuration, settingsFactory.settingsFor( crsKey ) ) );
     }
 
     /**

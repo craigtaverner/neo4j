@@ -50,6 +50,7 @@ import org.neo4j.kernel.api.schema.index.IndexDescriptor;
 import org.neo4j.kernel.impl.api.index.sampling.IndexSamplingConfig;
 import org.neo4j.kernel.impl.index.schema.NativeSchemaIndexPopulator.IndexUpdateApply;
 import org.neo4j.kernel.impl.index.schema.NativeSchemaIndexPopulator.IndexUpdateWork;
+import org.neo4j.kernel.impl.index.schema.config.SpaceFillingCurveSettings;
 import org.neo4j.storageengine.api.schema.IndexReader;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
 
@@ -67,12 +68,14 @@ import static org.neo4j.kernel.impl.index.schema.NativeSchemaIndexPopulator.BYTE
 public class SpatialCRSSchemaIndex
 {
     private final File indexFile;
+    private final File settingsFile;
     private final PageCache pageCache;
     private final CoordinateReferenceSystem crs;
     private final FileSystemAbstraction fs;
     private final RecoveryCleanupWorkCollector recoveryCleanupWorkCollector;
     private final SpaceFillingCurveConfiguration configuration;
-    private final SpaceFillingCurve curve;
+    private final SpaceFillingCurveSettings settings;
+    private SpaceFillingCurve curve;
 
     private State state;
     private boolean dropped;
@@ -94,13 +97,14 @@ public class SpatialCRSSchemaIndex
             SchemaIndexProvider.Monitor monitor,
             RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
             SpaceFillingCurveConfiguration configuration,
-            int maxBits )
+            SpaceFillingCurveSettings settings )
     {
         this.crs = crs;
         this.pageCache = pageCache;
         this.fs = fs;
         this.recoveryCleanupWorkCollector = recoveryCleanupWorkCollector;
         this.configuration = configuration;
+        this.settings = settings;
 
         // Depends on crs
         SchemaIndexProvider.Descriptor crsDescriptor =
@@ -108,18 +112,19 @@ public class SpatialCRSSchemaIndex
         IndexDirectoryStructure indexDir =
                 IndexDirectoryStructure.directoriesBySubProvider( directoryStructure ).forProvider( crsDescriptor );
         indexFile = new File( indexDir.directoryForIndex( indexId ), "index-" + indexId );
-        if ( crs.getDimension() == 2 )
+        settingsFile = new File( indexDir.directoryForIndex( indexId ), "settings-" + indexId );
+        if ( settingsFile.exists() )
         {
-            curve = new HilbertSpaceFillingCurve2D( envelopeFromCRS( crs ), Math.min( 30, maxBits / 2 ) );
+            try
+            {
+                settings.read( settingsFile );
+            }
+            catch ( IOException e )
+            {
+                e.printStackTrace();
+            }
         }
-        else if ( crs.getDimension() == 3 )
-        {
-            curve = new HilbertSpaceFillingCurve3D( envelopeFromCRS( crs ), Math.min( 20, maxBits / 3 ) );
-        }
-        else
-        {
-            throw new IllegalArgumentException( "Cannot create spatial index with other than 2D or 3D coordinate reference system: " + crs );
-        }
+        curve = settings.curve();
         state = State.INIT;
 
         layout = layout( descriptor );
@@ -206,12 +211,12 @@ public class SpatialCRSSchemaIndex
     public IndexReader newReader( IndexSamplingConfig samplingConfig, IndexDescriptor descriptor )
     {
         schemaIndex.assertOpen();
-        return new SpatialSchemaIndexReader<>( schemaIndex.tree, layout, samplingConfig, descriptor, configuration );
+        return new SpatialSchemaIndexReader<>( schemaIndex.tree, layout, samplingConfig, descriptor, configuration, settings );
     }
 
     public ResourceIterator<File> snapshotFiles()
     {
-        return asResourceIterator( iterator( indexFile ) );
+        return asResourceIterator( iterator( indexFile, settingsFile ) );
     }
 
     public void force( IOLimiter ioLimiter ) throws IOException
@@ -306,6 +311,7 @@ public class SpatialCRSSchemaIndex
         {
             schemaIndex.closeTree();
             schemaIndex.gbpTreeFileUtil.deleteFileIfPresent( indexFile );
+            schemaIndex.gbpTreeFileUtil.deleteFileIfPresent( settingsFile );
         }
         finally
         {
@@ -339,7 +345,9 @@ public class SpatialCRSSchemaIndex
     {
         assert state == State.INIT;
         schemaIndex.gbpTreeFileUtil.deleteFileIfPresent( indexFile );
+        schemaIndex.gbpTreeFileUtil.deleteFileIfPresent( settingsFile );
         schemaIndex.instantiateTree( RecoveryCleanupWorkCollector.IMMEDIATE, new NativeSchemaIndexHeaderWriter( BYTE_POPULATING ) );
+        settings.write( settingsFile );
         additionsWorkSync = new WorkSync<>( new IndexUpdateApply<>( schemaIndex.tree, treeKey, treeValue,
                 new ConflictDetectingValueMerger<>( schemaIndex.descriptor.type() == GENERAL ) ) );
         updatesWorkSync = new WorkSync<>( new IndexUpdateApply<>( schemaIndex.tree, treeKey, treeValue, new ConflictDetectingValueMerger<>( true ) ) );
@@ -437,11 +445,5 @@ public class SpatialCRSSchemaIndex
         SpatialCRSSchemaIndex get( IndexDescriptor descriptor,
                 Map<CoordinateReferenceSystem,SpatialCRSSchemaIndex> indexMap, long indexId,
                 CoordinateReferenceSystem crs );
-    }
-
-    static Envelope envelopeFromCRS( CoordinateReferenceSystem crs )
-    {
-        Pair<double[],double[]> indexEnvelope = crs.getIndexEnvelope();
-        return new Envelope( indexEnvelope.first(), indexEnvelope.other() );
     }
 }
