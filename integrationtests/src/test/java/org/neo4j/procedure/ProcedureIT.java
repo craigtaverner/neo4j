@@ -1468,6 +1468,22 @@ public class ProcedureIT
     }
 
     @Test
+    public void shouldNotAllowNonIntegerValuesInIntArrayUserDefinedFunction() throws Throwable
+    {
+        //Expect
+        exception.expect( QueryExecutionException.class );
+        exception.expectMessage( "Cannot convert X to byte for input to procedure" );
+
+        // When
+        try ( Transaction ignore = db.beginTx() )
+        {
+            //Make sure argument here is not auto parameterized away as that will drop all type information on the floor
+            Result result = db.execute( "RETURN org.neo4j.procedure.decrIntegersWithDefault([1,2,3.4]) AS bytes" );
+            result.next();
+        }
+    }
+
+    @Test
     public void shouldCallAggregationFunctionWithByteArrays() throws Throwable
     {
         // Given
@@ -2058,6 +2074,16 @@ public class ProcedureIT
                 bytes[i] -= 1;
             }
             return bytes;
+        }
+
+        @UserFunction
+        public List<Long> decrIntegersWithDefault( @Name( value = "values", defaultValue = "[3, 2, 1]" ) List<Long> values )
+        {
+            for ( int i = 0; i < values.size(); i++ )
+            {
+                values.set( i, values.get( i ) - 1 );
+            }
+            return values;
         }
 
         @UserAggregationFunction
